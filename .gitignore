@@ -1,0 +1,13 @@
+# Raw field data lives outside git; see sample-data/AGENTS.md.
+# Only the AGENTS.md guides under sample-data/ are tracked.
+sample-data/**
+!sample-data/**/
+!sample-data/**/AGENTS.md
+
+# Build products
+code/cpp/build/
+code/rust/target/
+code/typescript/dist/
+code/typescript/node_modules/
+__pycache__/
+*.pyc
