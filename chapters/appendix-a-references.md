@@ -43,7 +43,7 @@ give a free alternative description where one exists.
 | **[AISSource.ini]** | USCG, *AISSource.ini INI validation description* (2009). |
 | **[Encoding Guide]** | USCG Navigation Center, *U.S. AIS encoding guide: operational guidance for encoding shipborne AIS parameters* (2019) — what mariners are supposed to type into each static/voyage field. <https://www.navcen.uscg.gov/sites/default/files/pdf/AIS/USCG_Encoding_Guide.pdf> |
 | **[Inspection]** | USCG, *AIS inspection checklist* (2019). |
-| **[Safety Alerts]** | USCG, *Compilation of safety alerts and MSIBs regarding AIS* (2024) — includes the alerts about wrong MMSIs and fishing-gear AIS devices. |
+| **[Safety Alerts]** | USCG, *Compilation of safety alerts and MSIBs regarding AIS* (2024) — Safety Alerts 1-05, 5-05, 10-08, 05-10, 7-10, 13-18 and 01-24 on wrong MMSIs, inaccurate static data and civil penalties. (The separate USCG MSIBs on non-type-approved fishing-gear AIS devices are not part of this compilation.) |
 | **[EAIS IDD]** | USCG, *Encrypted AIS (EAIS) interface design description* (2016) — the DAC 366 FI 56/57 encrypted position/static messages seen in `sample-data/tide3`. Not publicly available; we describe only what is observable. |
 | **[33 CFR 164.46]** | US carriage requirement for AIS. <https://www.ecfr.gov/current/title-33/chapter-I/subchapter-P/part-164/section-164.46> |
 
@@ -52,6 +52,7 @@ give a free alternative description where one exists.
 | Key | Document |
 |---|---|
 | **[MSC.74(69)]** | IMO Resolution MSC.74(69) Annex 3 (1998), *Performance standards for a universal shipborne AIS* — reporting intervals, information content. |
+| **[A.1117(30)]** | IMO Resolution A.1117(30) (2017), *IMO ship identification number scheme* — the seven-digit IMO number and its check digit (weights 7…2, sum modulo 10). |
 | **[A.1106(29)]** | IMO Resolution A.1106(29) (2015), *Revised guidelines for the onboard operational use of shipborne AIS*. |
 | **[MSC.140(76)]** | IMO Resolution MSC.140(76) (2002), *Protection of the AIS VHF data link*. |
 | **[SN/Circ.227]** | IMO SN/Circ.227 (2003), *Guidelines for the installation of a shipborne AIS* (antenna/dimension reference points A, B, C, D). |
