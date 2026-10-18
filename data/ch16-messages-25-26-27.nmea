@@ -1,0 +1,27 @@
+# Chapter 16 — messages 25, 26 and 27.
+# Part 1: the only structurally valid message 25 in the recordings.
+# sample-data/tide3/ais/ais-2011-05-26 lines 1648 and 1650 (same payload, ~6 min apart)
+!AIVDM,1,1,,A,I?wwwwhHS>0fgGQ0UImCTdkfB=>R,0*16,rnhcml,1306441349.52
+!AIVDM,1,1,,A,I?wwwwhHS>0fgGQ0UImCTdkfB=>R,0*16,rnhcml,1306441705.84
+# Part 2: SYNTHETIC sentences built by hand in chapter 16 §16.3 (not recorded).
+# message 25, addressed + structured, DAC 0 FI 1, 24 data bits (112 bits, 2 fill bits)
+!AIVDM,1,1,,A,I52MJh=GBVL0004B=5H,2*21
+# message 26, broadcast + structured, DAC 0 FI 2, 88 data bits + 4 spare, SOTDMA (168 bits)
+!AIVDM,1,1,,A,J52MJh400P4SAFN9btogaJFU0<0I,0*24
+# message 26, addressed + unstructured, 64 data bits + 4 spare, ITDMA (160 bits, 2 fill bits)
+!AIVDM,1,1,,A,JE2MJh9GBVL0obnvstcvt0l<AU<,2*5B
+# message 27, 12 kn / 095 deg off Boston (96 bits)
+!AIVDM,1,1,,A,Km2MJh8=JR36Q65t,0*63
+# message 27, every field at its not-available default (96 bits)
+!AIVDM,1,1,,A,Km2MJh3n`>6bTOwv,0*10
+# Part 3: what garbage looks like — CRC-passing noise reported as 25/26/27.
+# sample-data/RightwhaleAisProject/20081013.log line 363709 (27, 120 bits, -129 dBm)
+!AIVDM,1,1,,B,KsU3QwRCN6fjAwL7KOap,0*60,s21800,d-129,T12.87898084,x31018,r003669946,1223976253
+# sample-data/RightwhaleAisProject/20081013.log line 411757 (26, 88 bits, -127 dBm)
+!AIVDM,1,1,,A,JNu2<;>wlUg=NuT,2*25,s22340,d-127,T05.70534869,x47386,r003669946,1223985006
+# sample-data/RightwhaleAisProject/20081013.log line 435587 (27, 48 bits)
+!AIVDM,1,1,,B,Kq`jfHko,0*3F,s23255,d-123,T03.15894466,x82834,r003669945,1223989021
+# sample-data/tide1/ais/ais-2008-11-05 line 746 (25, 32 bits)
+!AIVDM,1,1,,A,ILPo0h,4*40,rnhjel,1225914868.52
+# sample-data/tide1/ais/ais-2008-08-14 line 66 (27, 168 bits — a full slot)
+!AIVDM,1,1,,B,K60@87sh00R@48iPEQR100C003hL,0*38,rnhjel,1218688676.95
