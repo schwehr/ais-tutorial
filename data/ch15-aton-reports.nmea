@@ -1,0 +1,54 @@
+# Chapter 15 — message 21, aids-to-navigation report.
+# All real lines are from sample-data/2010-11-l3-aton/ (L-3 AtoN bench test
+# at CCOM/UNH, Durham NH; see that directory's AGENTS.md). CR stripped.
+#
+# 1. Received by the SR162G monitor receiver, September 2010. The log is
+#    grep output, so each line carries a "file-name:" prefix that the parser
+#    must skip. Source: ccom-sr162g-2010-09.aivdm lines 1, 2 and 4.
+ccom-sr162g-2010-09-15:!AIVDM,1,1,,B,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Lp<Em<000000V@20,4*4B,rccom-office,1284576313.39
+ccom-sr162g-2010-09-15:!AIVDM,1,1,,A,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Ln<Em<P00000V@20,4*36,rccom-office,1284576493.39
+ccom-sr162g-2010-09-15:!AIVDM,1,1,,A,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Le<Em>000000V@20,4*5F,rccom-office,1284576853.42
+#
+# 2. The AtoN's own !ANVDO echo, 4 September 2010, before the USCG had
+#    assigned an MMSI: the unit transmits its serial number (631850) as its
+#    identity and the factory name "L3_ATON", type 3. Channel codes X and Y
+#    are not in any standard. Source: ccom-l3-3-2010-09-04 lines 9, 11, 24, 344.
+!ANVDO,1,1,,Y,E00VT:QVIgPb7W0000000000000=M`MS<Em=h00000U@00,4*63,rccom-office-l3-3,1283558572.32
+!ANVDO,1,1,,B,E00VT:QVIgPb7W0000000000000=M`MR<Em<h00000Vh00,4*53,rccom-office-l3-3,1283558575.1
+!ANVDO,1,1,,X,E00VT:QVIgPb7W0000000000000=M`M4<EmBh00000jh60,4*6B,rccom-office-l3-3,1283558779.32
+!ANVDO,1,1,,Y,E00VT:QVIgPb7W00000000000006NAc0J2@`000000wP00,4*1C,rccom-office-l3-3,1283568652.11
+#
+# 3. 2 November 2010, MMSI 003669739 and name "NOAA WHALE NOTICES". The first
+#    line is the unit just after power-up: no GPS fix yet (time stamp 63,
+#    position 181/91, status bit 1 set). Then the UTC-lost alarm clears, the
+#    fix arrives and the message is sent on A/B. Source: ccom-l3-4-2010-11-02
+#    lines 7, 918, 919, 922, 926, 1030, 1031.
+!ANVDO,1,1,,X,E03Ovrh77PPh;T0V2h77b4QRaP06NAc0J2@`000000wP40,4*25,rccom-office-l3-4,1288708137.39
+$ANALR,000000.00,007,A,V,AIS: UTC Lost*75,rccom-office-l3-4,1288710417.81
+$ANADS,L3 AIS ID,,A,4,I,N*02,rccom-office-l3-4,1288710417.82
+!ANVDO,1,1,,X,E03Ovrh77PPh;T0V2h77b4QRaP0MM`MD<Em?`00000bh60,4*2A,rccom-office-l3-4,1288710426.57
+!ANVDO,1,1,,Y,E03Ovrh77PPh;T0V2h77b4QRaP0MM`MF<EmAP00000g@20,4*4E,rccom-office-l3-4,1288710435.57
+!ANVDO,1,1,,Y,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Nd<Em5p00000eh20,4*11,rccom-office-l3-4,1288710552.59
+!ANVDO,1,1,,B,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Nd<Em6000000f@20,4*62,rccom-office-l3-4,1288710553.33
+#
+# 4. The same transmission as heard by the SR162G 60 ms later (identical
+#    payload, different checksum because the talker differs), preceded by the
+#    receiver's own stale !AIVDO. Source: ccom-sr162g-2010-11-02 lines 1182, 1183, 1544.
+!AIVDO,1,1,,,13tfD@?P008:9vD<qJ@@0?vj0000,0*03,rccom-office,1288710553.09
+!AIVDM,1,1,,B,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Nd<Em6000000f@20,4*67,rccom-office,1288710553.39
+!AIVDM,1,1,,A,E03Ovrh77PPh;T0V2h77b4QRaP0MM`MA<Em=800000eh20,4*6A,rccom-office,1288710733.39
+#
+# 5. SYNTHETIC — not recorded. No virtual AtoN, name extension or IALA
+#    status page occurs in the recordings, so these two sentences were built
+#    bit by bit from Table 73 (chapter 15 §15.5 says exactly how):
+#    a) a virtual emergency wreck marking buoy, MMSI 99 367 6001, EPFD
+#       "surveyed", name "STELLWAGEN WRECK MAR" + extension "K ALFA"
+#       (312 bits = 272 + 36 + 4 spare);
+#    b) a physical special mark, off position, status page 7 = RACON
+#       operational, light failed, health alarm.
+!AIVDM,1,1,,A,E>ka:pB9b2V6;PSRW@;a2QUh6PaMOD1D<2IUP00003v012p0C1P@,0*0D
+!AIVDM,1,1,,A,E>k`oFg:2ab@1:Wdh9VhI000000MM`LD<Em;P30HHH`wN0,4*7C
+#
+# 6. SYNTHETIC — line 1 of this file cut to 42 characters (252 bits) with a
+#    recomputed checksum, to show the too-short error.
+!AIVDM,1,1,,B,E03Ovrh77PPh;T0V2h77b4QRaP0MM`Lp<Em<000000,0*5B
