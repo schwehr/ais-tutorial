@@ -1,0 +1,38 @@
+# Chapter 14 - Class B: messages 18, 19 and 24. Excerpts from sample-data/ (see chapter for line numbers).
+# --- A: programming an SRT Class B CS unit for R/V Cocheco, AISmisc/200905-Cocheco-classb-config/transceiver2009-05-01
+!AIVDO,1,1,,,B0000003wk?8mP=18D3Q3wv5kP06,0*1A,rkurt-office2,1241183405.06
+$AITXT,01,01,61,MMSI not programmed - TX disabled*31,rkurt-office2,1241183406.93
+$AISSD,@@@@@@@,@@@@@@@@@@@@@@@@@@@@,000,000,00,00,1,AI*35,rkurt-office2,1241183442.46
+$AIVSD,037,00.0,0000,@@@@@@@@@@@@@@@@@@@@,000000,00,00,00,00*4F,rkurt-office2,1241183442.48
+$AISSD,NONE@@@,R/V COCHECO@@@@@@@@@,007,004,03,01,1,AI*3B,rkurt-office2,1241183716.12
+$AIVSD,056,00.0,0000,@@@@@@@@@@@@@@@@@@@@,000000,00,00,00,00*48,rkurt-office2,1241183716.15
+!AIVDO,1,1,,,B5Pm;j03wk?8mP=18D3Q3wv5sP06,0*6B,rkurt-office2,1241183716.18
+# --- B: SRT Class B CS unit at sea, AISmisc/Sealand2007-06-27-001414.nmea
+!AIVDO,1,1,,,B52GAJP0CFjOq@UkkAGFswkUsP06,0*17
+!AIVDO,1,1,,B,H52GAJQHU<Ttq>0tJ0`tP4pp400,2*43
+!AIVDO,1,1,,B,H52GAJTU0000000G42oqok204410,0*4D
+# --- C: Class B traffic at the UNH pier, tide3/ais/ais-2011-05-24
+!AIVDM,1,1,,B,H5MiOp1:uJ0MDhJ0<P4hhDpLE80,2*33,rnhcml,1306195231.61
+!AIVDM,1,1,,B,H5MiOp4VG5CD=1BG45nknj108220,0*54,rnhcml,1306195232.47
+!AIVDM,1,1,,B,B5MiOp0006g4ulV:ET803wjUoP06,0*32,rnhcml,1306195238.23
+!AIVDM,1,1,,A,H4rgKGA:uJ0<t5=@4j1=E9HETu8,2*0F,rnhcml,1306242307.75
+!AIVDM,1,1,,A,H4rgKGDp3?=1B00>?>50001@3130,0*7F,rnhcml,1306242308.33
+!AIVDM,1,1,,A,B5N6=MP0L6g3idV:FdDjSws5kP06,0*25,rnhcml,1306246794.71
+!AIVDM,1,1,,A,H5N6=MP4mV10PTh98T<d0000000,2*5E,rnhcml,1306246808.33
+!AIVDM,1,1,,A,H5N6=MTNC9=B140G3Glipq1@D520,0*4C,rnhcml,1306246809.46
+!AIVDM,1,1,,B,B5Pm;j0006g4rwV:ELUFGwr5kP06,0*52,rnhcml,1306256812.5
+!AIVDM,1,1,,B,H5Pm;j1:uJ0<t<PD<t000000000,2*2A,rnhcml,1306256816.44
+!AIVDM,1,1,,B,H5Pm;j4p0000000>?>50000p4310,0*3C,rnhcml,1306256817.43
+# --- D: deviations. 8-digit MMSI with a Furuno vendor string (tide3/ais/ais-2009-06-17)
+!AIVDM,1,1,,A,H0Rwc6PDhU`48E@R0:222222220,2*04,rnhcml,1245238047.18
+!AIVDM,1,1,,A,H0Rwc6TU653hhhiG42ooqh0h8220,0*16,rnhcml,1245238058.44
+# 176-bit part A and 152-bit message 18 (tide3/ais/ais-2009-06-20, ais-2009-06-28)
+!AIVDM,1,1,,A,H186Ta04H080083pv00@0h000000th,4*2D,rnhcml,1245536138.9
+!AIVDM,1,1,,A,B@80P@`420100P30R27095hq@h,4*56,rnhcml,1246152199.13
+# --- E: message 19 candidates: 312 bits but implausible content (AISmisc/classb.uscg.19.nmea), and 120 bits (tide3/ais/ais-2010-09-30)
+!AIVDM,2,1,6,A,CWjqao;wMoB<<grwIguOUrBls;5s7quwNOKgoCLsPSR,0*64,s22983,r993689982,1196666940
+!AIVDM,2,2,6,A,LumqliqdL,0*69,s22983,r993689982,1196666940
+!AIVDM,1,1,,A,Cg810000000000000000,0*0B,rnhcml,1285876369.21
+# --- F: SYNTHETIC message 19, not recorded: built in chapter 14 from the R/V Cocheco message 18 and 24 fields
+!AIVDM,2,1,1,A,C5Pm;j0006g4rwV:ELUFGwr0UNe06N6@:6N0,0*68
+!AIVDM,2,2,1,A,00000000L0L21PRP,0*76
