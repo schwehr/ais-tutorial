@@ -59,6 +59,7 @@ give a free alternative description where one exists.
 | **[IALA G1082]** | IALA Guideline G1082 ed. 2 (2016), *An overview of AIS*. <https://www.navcen.uscg.gov/sites/default/files/pdf/IALA_Guideline_1082_An_Overview_of_AIS.pdf> |
 | **[IALA G1062]** | IALA Guideline G1062 (2008), *On the establishment of AIS as an aid to navigation*. |
 | **[IALA R0126]** | IALA Recommendation R0126 (A-126) ed. 2 (2019), *The use of AIS in marine aids to navigation services*. |
+| **[IALA G1098]** | IALA Guideline G1098 ed. 1 (2013), *The application of AIS-AtoN on buoys* — §3.5.2 on status-bit monitoring (battery, light, RACON). |
 | **[IALA R0143]** | IALA Recommendation R0143 (O-143) ed. 1.2 (2013), *On the provision of virtual aids to navigation*. |
 | **[IEC 61993-2]** | IEC 61993-2:2018, Class A shipborne AIS equipment. |
 | **[IEC 62287-1/-2]** | IEC 62287-1:2017 (Class B CS) and 62287-2:2017 (Class B SO). |
