@@ -14,7 +14,7 @@ give a free alternative description where one exists.
 
 | Key | Document |
 |---|---|
-| **[M.1371-5]** | ITU-R Recommendation M.1371-5 (02/2014), *Technical characteristics for an automatic identification system using time division multiple access in the VHF maritime mobile frequency band*. Annex 2 = link layer (TDMA, communication states), Annex 5 = application-specific messages, Annex 8 = message formats (Tables 46–80). <https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1371-5-201402-S!!PDF-E.pdf>. Earlier editions: M.1371-0 (1998), -1 (2001), -2 (2006), -3 (2007), -4 (2010); the message tables changed between editions and this tutorial notes where. |
+| **[M.1371-5]** | ITU-R Recommendation M.1371-5 (02/2014), *Technical characteristics for an automatic identification system using time division multiple access in the VHF maritime mobile frequency band*. Annex 2 = link layer (TDMA, communication states), Annex 5 = application-specific messages, Annex 8 = message formats (Tables 46–84). <https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.1371-5-201402-S!!PDF-E.pdf>. Earlier editions: M.1371-0 (1998), -1 (2001), -2 (2006), -3 (2007), -4 (2010); the message tables changed between editions and this tutorial notes where. |
 | **[M.585-9]** | ITU-R Recommendation M.585-9 (05/2022), *Assignment and use of identities in the maritime mobile service* — the MMSI format rules (ship, coast station, group, SAR aircraft, AtoN, AIS-SART/MOB/EPIRB). <https://www.itu.int/dms_pubrec/itu-r/rec/m/R-REC-M.585-9-202205-S!!PDF-E.pdf> |
 | **[IEC 61162-1]** | IEC 61162-1:2024 (ed. 6), *Maritime navigation and radiocommunication equipment and systems — Digital interfaces — Part 1: Single talker and multiple listeners*. The international version of NMEA 0183: sentence structure (§7), checksum (§7.2.3), six-bit field conversion (§7.3.3), TAG blocks (§7.1.2 in ed. 4+), and the sentence formatters GGA, GSA, GSV, RMC, VDM, VDO, ABM, BBM, ABK, ALR, TXT, VSD, SSD (§8). <https://webstore.iec.ch/en/publication/81251> |
 | **[NMEA 0183]** | NMEA 0183 *Standard for interfacing marine electronic devices*, v4.11 (2018) / v4.30 (2023). TAG blocks were introduced in v4.00 (2008) and revised in v4.10 (2012). <https://www.nmea.org/nmea-0183.html> |
@@ -64,6 +64,7 @@ give a free alternative description where one exists.
 | **[IEC 62287-1/-2]** | IEC 62287-1:2017 (Class B CS) and 62287-2:2017 (Class B SO). |
 | **[IEC 62320-1/-2/-3]** | IEC 62320-1:2015 (base stations), -2:2016 (AtoN stations), -3:2015 (repeaters). |
 | **[M.2092]** | ITU-R M.2092-0 (2015), VDES — where AIS is heading. |
+| **[M.2169]** | ITU-R Report M.2169 (2009), *Improved satellite detection of AIS*. <https://www.itu.int/pub/R-REP-M.2169> |
 
 ## Data provenance
 
