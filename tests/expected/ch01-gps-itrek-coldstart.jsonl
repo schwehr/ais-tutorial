@@ -1,0 +1,13 @@
+{"address":"PMTK010","line":1,"skipped":"no parser","uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895978.65}}
+{"error":"no checksum","line":2,"raw":"$POLYN,TIME,RESTART_OCCURRED,rkurt_itrek,1197895978.77"}
+{"error":"no checksum","line":3,"raw":"$POLYN,EPH,7,0D441080,rkurt_itrek,1197895978.77"}
+{"error":"no checksum","line":4,"raw":"$POLYN,ALM,31,EFFFFFFF,rkurt_itrek,1197895978.77"}
+{"error":"no checksum","line":5,"raw":"$POLYN,ION,rkurt_itrek,1197895978.78"}
+{"error":"no checksum","line":6,"raw":"$POLYN,UTC,rkurt_itrek,1197895978.78"}
+{"altitude_m":35.1,"dgps_age_s":null,"dgps_station":null,"fix_quality":0,"fix_quality_text":"invalid","geoid_separation_m":-25.7,"hdop":null,"lat":37.389055,"line":7,"lon":-122.108722,"satellites_used":0,"sentence":"GGA","time_utc":"12:52:58.827","uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895978.87}}
+{"fix_mode":1,"fix_mode_text":"no fix","hdop":null,"line":8,"pdop":null,"satellites_used":[],"selection_mode":"A","sentence":"GSA","uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895978.88},"vdop":null}
+{"line":9,"satellites":[],"satellites_in_view":0,"sentence":"GSV","sentence_number":1,"total_sentences":1,"uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895978.88}}
+{"cog_deg":0.00,"date":"2007-12-17","lat":37.389055,"line":10,"lon":-122.108722,"magnetic_variation_deg":null,"mode":"N","mode_text":"not valid","sentence":"RMC","sog_knots":0.00,"status":"V","time_utc":"12:52:58.827","uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895978.89},"valid":false}
+{"altitude_m":35.7,"dgps_age_s":null,"dgps_station":null,"fix_quality":0,"fix_quality_text":"invalid","geoid_separation_m":-25.7,"hdop":null,"lat":37.389580,"line":11,"lon":-122.105712,"satellites_used":3,"sentence":"GGA","time_utc":"12:52:59.826","uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895979.93}}
+{"fix_mode":1,"fix_mode_text":"no fix","hdop":null,"line":12,"pdop":null,"satellites_used":[],"selection_mode":"A","sentence":"GSA","uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895979.93},"vdop":null}
+{"line":13,"satellites":[{"azimuth_deg":11,"elevation_deg":67,"prn":27,"snr_db":null},{"azimuth_deg":57,"elevation_deg":59,"prn":25,"snr_db":35},{"azimuth_deg":313,"elevation_deg":54,"prn":8,"snr_db":35},{"azimuth_deg":143,"elevation_deg":51,"prn":13,"snr_db":null}],"satellites_in_view":7,"sentence":"GSV","sentence_number":1,"total_sentences":2,"uscg":{"station":"kurt_itrek","station_kind":"receiver","time":1197895979.94}}
