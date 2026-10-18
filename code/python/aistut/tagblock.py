@@ -2,7 +2,7 @@
 
 A TAG block is metadata that *precedes* a sentence on the same line:
 
-    \\s:r003669945,c:1224006993*2B\\!AIVDM,1,1,,A,15N4cJ`005Jrek0H@9n`DW5608EP,0*13
+    \\s:r003669945,c:1224006993*7C\\!AIVDM,1,1,,A,15N4cJ`005Jrek0H@9n`DW5608EP,0*13
     ^                            ^ ^
     backslash  parameter list   checksum of the text between the backslashes
 

@@ -1,0 +1,21 @@
+[package]
+name = "ais_tutorial"
+version = "0.1.0"
+edition = "2021"
+description = "AIS/NMEA tutorial decoder (Rust version) - standard library only"
+publish = false
+
+# The library holds every module; the binary is a thin wrapper around
+# `ais_tutorial::decode::main`. Splitting them lets `cargo test` exercise the
+# modules without going through the command line.
+[lib]
+name = "ais_tutorial"
+path = "src/lib.rs"
+
+[[bin]]
+name = "decode"
+path = "src/main.rs"
+
+# No third-party crates, on purpose: the tutorial wants readers to see every
+# line of code that touches the data.
+[dependencies]
