@@ -26,7 +26,7 @@ small excerpts live in this repository ([`data/`](data/)); the raw logs
 | 3 | [Position reports: messages 1, 2 and 3](chapters/03-position-reports-1-2-3.md) | Every field in depth, ROT coding, MMSI formats, SOTDMA/ITDMA communication state |
 | 4 | [NMEA TAG blocks](chapters/04-tag-blocks.md) | NMEA 4.10 `\…\` metadata, grouping, converting legacy metadata |
 | 5 | [USCG N-AIS metadata](chapters/05-uscg-metadata.md) | The `s`, `d`, `T`, `x`, `r`, time fields after the checksum |
-| 6 | [Messages 4 and 11: base station report, UTC response](chapters/06-messages-4-11-base-station.md) | |
+| 6 | [Messages 4 and 11: base station report, UTC response](chapters/06-messages-4-11-base-station.md) | UTC fields, base-station sync, clock-offset auditing, rogue base stations, message 10/11 pairs |
 | 7 | [Message 5: static and voyage data](chapters/07-message-5-static-voyage.md) | |
 | 8 | [Messages 6 and 8: binary messages and application identifiers](chapters/08-messages-6-8-binary.md) | DAC/FI, `BBM`/`ABM`/`ABK` sentences |
 | 9 | [Application-specific messages in the wild](chapters/09-application-specific-messages.md) | Right-whale notices (366/34), met/hydro (1/11, 1/31), encrypted AIS (366/56–57) |
