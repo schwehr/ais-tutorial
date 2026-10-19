@@ -1,0 +1,43 @@
+# Chapter 11 — messages 10 (UTC/date inquiry), 15 (interrogation) and 16 (assignment mode command).
+# Part A: message 10 and the message 11 answers. sample-data/tide3/ais/ais-2010-03-09 lines 131-132,
+# 393-394 and 524; sample-data/tide3/ais/ais-2010-03-08 line 5089.
+!AIVDM,1,1,,A,:5BCc21GTjPp,0*11,rnhcml,1268093390.4
+!AIVDM,1,1,,A,;5NC:3Qu`lP9kJtF7JHa0LA00000,0*27,rnhcml,1268093390.82
+!AIVDM,1,1,,B,:5BCc21GTGd0,0*4B,rnhcml,1268094600.43
+!AIVDM,1,1,,B,;5NANh1u`lPN0Jt;l`HaRV100000,0*41,rnhcml,1268094600.68
+!AIVDM,1,1,,B,:5BCc20sVeM0,0*77,rnhcml,1268095689.44
+!AIVDM,1,1,,A,:5BCc21GTTLp,0*33,rnhcml,1268045776.02
+# Part B: recorded message 15. A USCG base station polling (twice, 0.7 s apart, on both channels):
+# sample-data/2007hydro/va-portsmouth-sr162-2007-05-15 lines 403 and 407.
+!AIVDM,1,1,,B,?03OviRGavS<000,2*16,1179195496.93
+!AIVDM,1,1,,A,?03OviRGavS<000,2*15,1179195497.6
+# A Class A transponder asking a ship for its message 5:
+# sample-data/2007hydro/sr162-noaa-norfolk-telcom2007-05-14 line 879.
+!AIVDM,1,1,,A,?52HH<iGMIWpD00,2*69,1179173361.13
+# The same transponder's own interrogations seen on its own port (!AIVDO):
+# sample-data/2007hydro/protec-util12007-05-14 lines 496 and 497.
+!AIVDO,1,1,,A,?52HH<hjNM1PD00,2*06,1179172712.85
+!AIVDO,1,1,,A,?52HH<hs@Nh0D00,2*2B,1179172712.91
+# A 144-bit "message 15" — not a legal length: sample-data/2007hydro/va-portsmouth-sr162-2007-05-17 line 13367.
+!AIVDM,1,1,,B,?D>30=CooUTmC2ccvvw9011p,0*0E,1179376821.61
+# Part C: SYNTHETIC message 15 in the other three legal shapes (built in §11.3; not recorded).
+# one station, two messages: 110 bits as printed in Table 66 ...
+!AIVDM,1,1,,A,?03OviQGMIWp<005000,4*42
+# ... and the same request padded to 112 bits (byte boundary); only the fill count differs
+!AIVDM,1,1,,A,?03OviQGMIWp<005000,2*44
+# two stations, one message each (160 bits; message id 1.2 and slot offset 1.2 are zero)
+!AIVDM,1,1,,B,?03OviQGMIWpD7P0005N6kFQ@e0,2*49
+# station 1 two messages, station 2 one message (160 bits)
+!AIVDM,1,1,,B,?03OviQGMIWp<3h51p5N6kFV0e0,2*3E
+# Part D: SYNTHETIC message 16 (no valid message 16 exists in sample-data/; see §11.6).
+# reporting-rate assignment: increment 0, offset 60 = 60 reports per 10 min
+!AIVDM,1,1,,A,@03OviQGMIWp3h00,0*5B
+# slot assignment: first slot 20 slots from now, increment code 2 = every 375 slots
+!AIVDM,1,1,,B,@03OviQGMIWp1@0P,0*12
+# two stations in one message (144 bits): A slot assignment, B reporting rate 120 per 10 min
+!AIVDM,1,1,,A,@03OviQGMIWp1@0UN6kFPN00,0*5F
+# increment 7 = undefined: the mobile must disregard this assignment
+!AIVDM,1,1,,B,@03OviQGMIWp0`1h,0*0A
+# What the recordings contain instead: a 96-bit line from the nhjel receiver whose "source" is not a
+# base station. sample-data/tide1/ais/ais-2007-11-24 line 265.
+!AIVDM,1,1,,A,@d3pd2h0N2JU<000,0*20,rnhjel,1195939800.96

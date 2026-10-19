@@ -1,0 +1,19 @@
+# Chapter 10 — message 9, standard SAR aircraft position report.
+# Part 1: SYNTHETIC sentences built bit by bit in chapter 10 §10.3 (not recorded —
+# no structurally valid message 9 exists in sample-data/; see §10.6).
+# 9a: fixed-wing SAR aircraft 111366101, 457 m, 150 kn, SOTDMA comm state
+!AIVDM,1,1,,A,91b=?mAjBFrv4v@HAF98kl@00<2F,0*4B
+# 9b: same aircraft ten seconds later, barometric altitude, ITDMA comm state, RAIM on
+!AIVDM,1,1,,B,91b=?mAk2Hrv61hHAIK8lVp061Mi,0*71
+# 9c: helicopter 111366501 with every field at its not-available default
+!AIVDM,1,1,,A,91b=AIOwww<tSF0l4Q@>4?020000,0*52
+# 9d: "at or above" sentinels (altitude 4094, SOG 1022), assigned mode, base-station sync
+!AIVDM,1,1,,B,91b=?mgwgvJwjmPGgi`3Q?@0=D07,0*31
+# Part 2: what the recordings actually contain — bit-corrupted "message 9" lines from
+# the marginal nhjel receiver. The checksums are fine; the payloads are not 168 bits.
+# sample-data/tide1/ais/ais-2008-11-27 line 127 (120 bits)
+!AIVDM,1,1,,A,9P=t4>pBN4:04Ak8010p,0*29,rnhjel,1227764144.4
+# sample-data/tide1/ais/ais-2008-10-09 line 113 (160 bits)
+!AIVDM,1,1,,A,9P00U0;40@00P@400000:0000<P,2*15,rnhjel,1223528933.48
+# sample-data/tide1/ais/ais-2008-11-27 line 398 (328 bits — a message 9 "header" glued to other bits)
+!AIVDM,1,1,,A,9129ER7cTDPraB@DHA2I070l1l`P85@@qbeS210@2>P2=0@C0H@QG84,2*2C,rnhjel,1227814945.56
