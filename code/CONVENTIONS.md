@@ -28,6 +28,7 @@ The module names are identical in all four:
 | `common` | `DecodeError`, EPFD and ship-type tables | — |
 | `jsonout` | deterministic JSON writer | — |
 | `msg_4_11`, `msg_5`, `msg_6`, `msg_7_13`, `msg_8`, `msg_9`, `msg_10`, `msg_12`, `msg_14`, `msg_15`, `msg_16`, `msg_17`, `msg_18`, `msg_19`, `msg_20`, `msg_21`, `msg_22`, `msg_23`, `msg_24`, `msg_25`, `msg_26`, `msg_27` | one per message (family) | 6+ |
+| `asm` | application-specific payload decoders keyed by (DAC, FI); used by `msg_6`/`msg_8` | 8–9 |
 | `decode` | CLI: lines in → JSON lines out | all |
 
 Every message module exposes **one** function, `decode(bits) -> object`,
@@ -86,6 +87,10 @@ Rules that make byte-identical output possible:
 * Binary payloads that are not decoded are output as `"data":"0101…"`
   (a string of bits) plus `"data_bits":N`.
 * Spare/reserved fields are output (`"spare":0`) — readers should see them.
+* Exception for ASM sub-objects (`application` in messages 6/8, chapter 9):
+  sensor fields with a not-available sentinel print `null` instead of a
+  per-field `_available` boolean, because met/hydro payloads have dozens of
+  optional readings; enumerations keep their `_text` companions.
 
 ## 4. Adding a message (checklist for chapter authors)
 
