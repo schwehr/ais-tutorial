@@ -1,0 +1,42 @@
+# Chapter 13 — base-station control messages: 17 (DGNSS corrections),
+# 20 (data link management), 22 (channel management), 23 (group assignment).
+# Real lines are copied verbatim from sample-data/ (source file and line in
+# the chapter). Lines marked SYNTHETIC were constructed for this chapter
+# because no valid message 17 or 23, no multi-block message 20 and no
+# addressed or regional message 22 occurs in the recordings; see §13.5.
+#
+# sample-data/2007hydro/norfolk-log.ais line 1: $AIACA channel-assignment status from the transponder
+$AIACA,0,,,,,,,,,5,2087,0,2088,0,0,0,I,1,000000*15,1179170462.74
+# norfolk-log.ais lines 22, 51, 79, 98: USCG base station 003669702 sends message 20 every 10 s, alternating channels
+!AIVDM,1,1,,B,D03OviQsIN9H,0*66,1179170471.01
+!AIVDM,1,1,,A,D03OviQUQN9H,0*5B,1179170481.02
+!AIVDM,1,1,,B,D03OviQ<QN9H,0*31,1179170491.01
+!AIVDM,1,1,,A,D03OviPnaN9H,0*51,1179170501.01
+# kurts_log_BGsRoomOvernightsheraton_norfolk.ais line 16: the same station two days later
+!AIVDM,1,1,,B,D03OviPMaN9H,0*71,1179352455.53
+# norfolk-log.ais lines 113 and 115: the ProTec bench unit (MMSI 338040883) reporting its own message 20 and 22 (VDO)
+!AIVDO,1,1,,B,D52HH<h00000,0*00,1179170521.6
+!AIVDO,1,1,,B,F52HH<j2N2P3D73EB6`>6bT20000,0*00,1179170522.69
+# sr162-noaa-norfolk-telcom2007-05-14 lines 402 and 507: the same two messages heard over the air by a receiver
+!AIVDM,1,1,,B,F52HH<j2N2P3D73EB6`>6bT20000,0*02,1179172741.59
+!AIVDM,1,1,,B,D52HH<h00000,0*02,1179172887.15
+# protec-util12007-05-14 line 1817: an 80-bit message 20 — one block plus 10 bits
+!AIVDM,1,1,,B,D03OviPBi3ai;0,4*7D,1179173523.94
+# protec-util12007-05-14 line 3656: one armour character corrupted ('3' became '0'), checksum still matches
+!AIVDM,1,1,,B,D000viQ<QN9H,0*4D,1179174089.94
+# tide1/ais/ais-2009-03-11 line 210: a "message 17" that is really a garbled line from the nhjel receiver
+!AIVDM,1,1,,A,A34PBT6JT4i8hRB9kU2kV4Vf2`Bg,0*68,rnhjel,1236764222.54
+# RightwhaleAisProject/20081013.log line 393089: a 48-bit "message 23" — too short to be one
+!AIVDM,1,1,,A,Gob<Mwf<,0*30,s23124,d-122,T48.27649627,x62331,r003669945,1223981806
+# SYNTHETIC message 17: base station 003669702, reference station 36°58.5'N 076°20.0'W, RTCM type 1, station 100, Z count 1234, sequence 5, N = 2, health 0, words 0xAAAAAA 0x555555
+!AIVDM,1,1,,A,A03OviSCAPcE80AT9aD@bbbbEEEE,0*52
+# SYNTHETIC message 20: two reservation blocks (24/5/7 min/150 and 1149/2/3 min/1125), 4 spare bits
+!AIVDM,1,1,,B,D03OviP1QN9I7lW6D0,4*76
+# SYNTHETIC message 22 (broadcast): region NE 37°00.0'N 076°00.0'W, SW 36°40.0'N 076°30.0'W, channels 2087/2088, TxA only, low power, zone 3 NM
+!AIVDM,1,1,,A,F03OviR2N2PNVt1Ff=<e2cp10000,0*76
+# SYNTHETIC message 22 (addressed): MMSIs 366999001 and 366999002 to channels 2027/2028
+!AIVDM,1,1,,B,F03OviQvevh2fwrs85MwmnPB0000,0*68
+# SYNTHETIC message 23: same region, all Class B stations, reporting interval code 1 (10 min)
+!AIVDM,1,1,,A,G03OviSCN0cG6VFQEt200000100,2*0F
+# SYNTHETIC message 23: same region, ship type 37 (pleasure craft), Tx on A only, quiet time 3 min
+!AIVDM,1,1,,B,G03OviSCN0cG6VFQEt09@000@<0,2*0A
