@@ -2,7 +2,7 @@
 //!
 //! Spec: ITU-R M.1371-5 Annex 8 §3.13, Table 66 (88-160 bits) and Table 65
 //! (which station class may ask which other class for which messages).
-//! Annex 2 §3.3.2.3 ("polled" mode) and §4.3.3.3.3 describe the response:
+//! Annex 2 §3.3.2.3 ("polled" mode) and Annex 7 §4.3.3.3.3 describe the response:
 //! automatic, on the channel where the interrogation was received.
 //!
 //! Bit layout (zero-based offsets; lengths from Table 66):
