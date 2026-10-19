@@ -22,7 +22,7 @@ $AIACA,0,,,,,,,,,5,2087,0,2088,0,0,0,I,1,000000*15,1179170462.74
 !AIVDM,1,1,,B,D52HH<h00000,0*02,1179172887.15
 # protec-util12007-05-14 line 1817: an 80-bit message 20 — one block plus 10 bits
 !AIVDM,1,1,,B,D03OviPBi3ai;0,4*7D,1179173523.94
-# protec-util12007-05-14 line 3656: one armour character corrupted ('3' became '0'), checksum still matches
+# protec-util12007-05-14 line 3656: the same payload as data line 13 (offset 1224), but the MMSI characters '3O' arrived as '00' (MMSI 16070); the NMEA checksum is valid, so the damage happened before the sentence was built
 !AIVDM,1,1,,B,D000viQ<QN9H,0*4D,1179174089.94
 # tide1/ais/ais-2009-03-11 line 210: a "message 17" that is really a garbled line from the nhjel receiver
 !AIVDM,1,1,,A,A34PBT6JT4i8hRB9kU2kV4Vf2`Bg,0*68,rnhjel,1236764222.54
