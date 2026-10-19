@@ -18,7 +18,7 @@ base-station **4** reports, plus many binary **8** messages with DAC 55/366.
 
 | File | Size | Format | Contents |
 |---|---|---|---|
-| `norfolk-log.ais` | 21 KB (302 lines) | `sentence,<epoch>` | Short SR162 sample on 14 May. First line is a rare `$AIACA` (channel assignment) sentence. Good small file for message 1/3/4/5/20. |
+| `norfolk-log.ais` | 21 KB (302 lines) | `sentence,<epoch>` | Short sample on 14 May from the ProTec's presentation port (it contains `!AIVDO` own-ship lines as well as received `!AIVDM`). First line is a rare `$AIACA` (channel assignment) sentence. Good small file for message 1/3/4/5/20. |
 | `kurts_log_BGsRoomOvernightsheraton_norfolk.ais` | 3.2 MB (52 015 lines) | `sentence,<epoch>`, `\r\r\n` | Overnight SR162 capture from a hotel room, 16–17 May. ~2 165 message 5 and ~2 445 message 20. |
 | `va-2007-05-15` | 2.2 MB | `sentence,<epoch>` | SR162 in Portsmouth VA, 15 May, header-less. |
 | `va-portsmouth-sr162-2007-05-15` | 3.5 MB | logger | Same receiver with logger banners; ~54 900 `!AIVDM`, 520 `$AITXT`. Contains **205 message 15** interrogations and **6 677 message 8 DAC 55 FI 58** binaries (undocumented, probably encrypted). |

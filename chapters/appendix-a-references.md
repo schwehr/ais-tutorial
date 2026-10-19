@@ -66,6 +66,8 @@ give a free alternative description where one exists.
 | **[IEC 61993-2]** | IEC 61993-2:2018, Class A shipborne AIS equipment. |
 | **[IEC 62287-1/-2]** | IEC 62287-1:2017 (Class B CS) and 62287-2:2017 (Class B SO). |
 | **[IEC 62320-1/-2/-3]** | IEC 62320-1:2015 (base stations), -2:2016 (AtoN stations), -3:2015 (repeaters). |
+| **[M.1084]** | ITU-R Recommendation M.1084-5 (03/2012), *Interim solutions for improved efficiency in the use of the band 156–174 MHz by stations in the maritime mobile service* — Annex 4: channel numbering including the four-digit simplex-use-of-duplex numbers (2087/2088). <https://www.itu.int/rec/R-REC-M.1084> |
+| **[M.823]** | ITU-R Recommendation M.823-3 (03/2006), *Technical characteristics of differential transmissions for GNSS from maritime radio beacons* — the RTCM SC-104 v2 message/health format referenced by M.1371-5 for message 17. <https://www.itu.int/rec/R-REC-M.823> |
 | **[M.2092]** | ITU-R M.2092-0 (2015), VDES — where AIS is heading. |
 | **[M.2169]** | ITU-R Report M.2169 (2009), *Improved satellite detection of AIS*. <https://www.itu.int/pub/R-REP-M.2169> |
 
