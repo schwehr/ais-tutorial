@@ -19,6 +19,7 @@ give a free alternative description where one exists.
 | **[IEC 61162-1]** | IEC 61162-1:2024 (ed. 6), *Maritime navigation and radiocommunication equipment and systems — Digital interfaces — Part 1: Single talker and multiple listeners*. The international version of NMEA 0183: sentence structure (§7), checksum (§7.2.3), six-bit field conversion (§7.3.3), TAG blocks (§7.1.2 in ed. 4+), and the sentence formatters GGA, GSA, GSV, RMC, VDM, VDO, ABM, BBM, ABK, ALR, TXT, VSD, SSD (§8). <https://webstore.iec.ch/en/publication/81251> |
 | **[NMEA 0183]** | NMEA 0183 *Standard for interfacing marine electronic devices*, v4.11 (2018) / v4.30 (2023). TAG blocks were introduced in v4.00 (2008) and revised in v4.10 (2012). <https://www.nmea.org/nmea-0183.html> |
 | **[AIVDM]** | Eric S. Raymond (with Kurt Schwehr et al.), *AIVDM/AIVDO protocol decoding*, GPSD project, rev. 1.58 (2023). The best free description of the sentence layer, armouring, every message type and many ASMs. <https://gitlab.com/gpsd/gpsd/-/blob/master/www/AIVDM.adoc> |
+| **[NMEA Revealed]** | Eric S. Raymond, *NMEA Revealed*, GPSD project (2022) — a free description of the common GPS sentences (GGA, GSA, GSV, RMC, …). <https://gpsd.gitlab.io/gpsd/NMEA.html> |
 | **[Toils]** | Eric S. Raymond and Kurt Schwehr, *The Toils of AIS: Why standardizing AIS takes more than simply writing down ITU, IMO, and IEC documents*, v0.2 (2011). Catalogue of protocol ambiguities. <https://zenodo.org/records/17328241> |
 
 ## Application-specific (binary) messages
