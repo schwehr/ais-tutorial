@@ -1,21 +1,25 @@
 // msg_10.hpp — message 10: UTC and date inquiry.
 //
-// Spec: ITU-R M.1371-5 Annex 8 §3.8, Table 60.
+// Spec: ITU-R M.1371-5 Annex 8 §3.8, Table 60 (72 bits). The answer is a
+// message 11 (same layout as message 4, chapter 6), which "is only
+// transmitted as a result of a UTC request message (Message 10)" and goes
+// out "on the channel where the UTC request message was received"
+// [Annex 8 §3.2].
 //
-// STUB: this decoder has not been written yet. The chapter that covers this
-// message replaces this file. Keep the signature
-// `Json decode_msg_10(const Bits&)`.
+// Bit layout (zero-based offsets; lengths from Table 60):
+//
+//      0- 5   6  message id (10)
+//      6- 7   2  repeat indicator
+//      8-37  30  source id (MMSI of the station that wants to know the time)
+//     38-39   2  spare
+//     40-69  30  destination id (MMSI of the station being asked)
+//     70-71   2  spare
 //
 // C++ notes for readers new to the language
 // -----------------------------------------
-// * The parameter is deliberately unnamed (`const Bits&` with no identifier):
-//   that is how C++ says "this argument exists but I do not use it" without
-//   triggering an unused-parameter warning under -Wextra.
-// * `throw NotImplemented(...)` plays the role of Python's
-//   NotImplementedError; decode.cpp catches it and prints
-//   {"msg_type":N,"not_implemented":true}.
-// * `[[noreturn]]` is not used because the function will have a real return
-//   value once implemented.
+// * Nothing new: the whole decoder is one braced-init-list that builds a
+//   `Json::Object`. The function is `inline` because it lives in a header
+//   that several translation units may include.
 
 #pragma once
 
@@ -25,8 +29,18 @@
 
 namespace aistut {
 
-inline Json decode_msg_10(const Bits&) {
-    throw NotImplemented("message 10 decoder not written yet");
+// Decode a message 10. Throws DecodeError if shorter than 72 bits.
+inline Json decode_msg_10(const Bits& bits) {
+    int msg_type = static_cast<int>(bits.uint(0, 6));
+    require_bits(msg_type, bits.size(), 72);
+    return Json::Object{
+        {"msg_type", msg_type},
+        {"repeat_indicator", bits.uint(6, 2)},
+        {"mmsi", bits.uint(8, 30)},
+        {"spare", bits.uint(38, 2)},
+        {"dest_mmsi", bits.uint(40, 30)},
+        {"spare2", bits.uint(70, 2)},
+    };
 }
 
 }  // namespace aistut
