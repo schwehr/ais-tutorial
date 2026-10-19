@@ -2,7 +2,7 @@
  * msg_19.ts — message 19: extended Class B equipment position report (chapter 14).
  *
  * Spec: ITU-R M.1371-5 Annex 8 §3.17, Table 71 (312 bits, two slots; Table
- * 69 in M.1371-4). Dimension/reference-point field: §3.3.3 Fig. 41. Ship
+ * 68 in M.1371-4). Dimension/reference-point field: §3.3.3 Fig. 41. Ship
  * type: §3.3.2 Table 53. EPFD: Table 51. DTE: §3.3.1.
  *
  * M.1371-5 says this message "is not needed and should not be used" by new
@@ -53,7 +53,8 @@ export const DTE = ["data terminal available", "data terminal not available"];
  * B = to the stern, C = to the port side, D = to the starboard side, all in
  * metres. A and B saturate at 511, C and D at 63. All four zero means
  * "nothing available"; A = C = 0 with B and D non-zero means "dimensions
- * known but reference point not".
+ * known but reference point not". Keys and availability rules are exactly
+ * those of message 5 (msg_5.ts); message 21 reuses this helper as well.
  */
 export function decodeDimensions(bits: Bits, start: number): JsonObject {
   const a = bits.uint(start, 9);
@@ -61,12 +62,16 @@ export function decodeDimensions(bits: Bits, start: number): JsonObject {
   const c = bits.uint(start + 18, 6);
   const d = bits.uint(start + 24, 6);
   return {
-    dim_to_bow_m: a,
-    dim_to_stern_m: b,
-    dim_to_port_m: c,
-    dim_to_starboard_m: d,
+    dim_bow_m: a,
+    dim_stern_m: b,
+    dim_port_m: c,
+    dim_starboard_m: d,
+    // Figure 41: all four zero = neither reference point nor dimensions;
+    // A = C = 0 with B, D non-zero = dimensions but no reference point.
     dimensions_available: !(a === 0 && b === 0 && c === 0 && d === 0),
-    reference_point_available: !(a === 0 && c === 0 && b !== 0 && d !== 0),
+    reference_point_available: !(a === 0 && c === 0),
+    length_m: a + b,
+    beam_m: c + d,
   };
 }
 

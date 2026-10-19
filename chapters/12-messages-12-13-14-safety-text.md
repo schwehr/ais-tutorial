@@ -275,6 +275,14 @@ constexpr std::size_t GROUP_BITS = 32;    // destination id (30) + sequence numb
 constexpr std::size_t MAX_GROUPS = 4;
 }  // namespace msg_7_13
 
+// One acknowledgement group: destination MMSI (30 bits) + sequence number (2 bits).
+inline Json decode_ack(const Bits& bits, std::size_t pos) {
+    return Json::Object{
+        {"mmsi", bits.uint(pos, 30)},
+        {"sequence_number", bits.uint(pos + 30, 2)},
+    };
+}
+
 inline Json decode_msg_7_13(const Bits& bits) {
     using namespace msg_7_13;
     int msg_type = static_cast<int>(bits.uint(0, 6));
@@ -283,10 +291,7 @@ inline Json decode_msg_7_13(const Bits& bits) {
     Json::Array acks;
     std::size_t pos = HEADER_BITS;
     while (acks.size() < MAX_GROUPS && bits.has(pos, GROUP_BITS)) {
-        acks.push_back(Json::Object{
-            {"mmsi", bits.uint(pos, 30)},
-            {"sequence_number", bits.uint(pos + 30, 2)},
-        });
+        acks.push_back(decode_ack(bits, pos));
         pos += GROUP_BITS;
     }
 

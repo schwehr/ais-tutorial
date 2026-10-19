@@ -10,6 +10,17 @@ publishers' sites given here. IEC and NMEA standards are paywalled; we cite
 them by clause so you can look them up if you have access, and we always
 give a free alternative description where one exists.
 
+Two shorthands are used inside the message chapters. Once a chapter has
+named its M.1371-5 table in full (e.g. "168 bits [M.1371-5 Annex 8 §3.7
+Table 59]"), the rows of its field tables and the prose that follows cite
+the same document by table, annex, section or figure only — **[Table 59]**,
+**[Annex 2 §3.3.7.2.2 Tables 18/19]**, **[§3.14]**, **[Figure 41]** — and
+every such bare reference means M.1371-5. A citation of an *earlier*
+edition, such as **[M.1371-4 Annex 8 Table 76]** or **[M.1371-2 Annex 7
+Table 61]**, refers to the edition history listed under the [M.1371-5]
+entry below. Several keys separated by semicolons, **[Circ.236; Circ.289]**,
+cite each document in turn.
+
 ## Primary protocol specifications
 
 | Key | Document |

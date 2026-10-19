@@ -21,6 +21,7 @@ Bit layout (zero-based offsets; lengths from Table 73):
    228-236   9  dimension B (to "stern"), m
    237-242   6  dimension C (to port), m
    243-248   6  dimension D (to starboard), m
+                (decoded by msg_19.decode_dimensions, same keys as message 5)
    249-252   4  type of EPFD (Table 51); 7 = surveyed is normal for fixed/virtual aids
    253-258   6  UTC second; 60 = n/a, 61 manual, 62 dead reckoning, 63 inoperative
    259       1  off-position indicator (floating AtoN only; valid only if second <= 59)
@@ -45,6 +46,7 @@ from __future__ import annotations
 from .bits import Bits
 from .common import epfd_text, require_bits
 from .jsonout import Fixed
+from .msg_19 import decode_dimensions
 
 # Table 74. Codes 5–19 are listed under "Fixed AtoN", 20–31 under "Floating
 # AtoN"; 1–4 are general. Code 4 was "spare" in M.1371-4 and became
@@ -170,10 +172,6 @@ def decode(bits: Bits) -> dict:
         "lon": Fixed(lon_raw / 600000.0, 6),
         "lat": Fixed(lat_raw / 600000.0, 6),
         "position_available": lon_raw != 0x6791AC0 and lat_raw != 0x3412140,
-        "dim_a_m": bits.uint(219, 9),
-        "dim_b_m": bits.uint(228, 9),
-        "dim_c_m": bits.uint(237, 6),
-        "dim_d_m": bits.uint(243, 6),
         "epfd": epfd,
         "epfd_text": epfd_text(epfd),
         "timestamp": timestamp,
@@ -188,5 +186,8 @@ def decode(bits: Bits) -> dict:
         "assigned_mode": bits.flag(270),
         "spare": bits.uint(271, 1),
     }
+    # Bits 219-248: the same 30-bit A/B/C/D block as messages 5, 19 and 24B,
+    # with the same keys (dim_bow_m … beam_m) — one definition in msg_19.py.
+    out.update(decode_dimensions(bits, 219))
     out.update(decode_status(status))
     return out

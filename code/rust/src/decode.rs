@@ -329,8 +329,15 @@ mod tests {
             run("$GPGSV,1,1,00"),
             r#"{"error":"no checksum","line":1,"raw":"$GPGSV,1,1,00"}"#
         );
-        let stub = run("!AIVDM,1,1,,A,5,0*13");
-        assert!(stub.contains(r#""ais":{"msg_type":5,"not_implemented":true}"#), "{stub}");
+        // A one-character payload reaches the message 5 decoder and fails its
+        // length check; the error object keeps the AIS envelope fields.
+        let short = run("!AIVDM,1,1,,A,5,0*13");
+        assert!(
+            short.contains(r#""error":"message 5 too short: 6 bits < 424""#),
+            "{short}"
+        );
+        assert!(short.contains(r#""msg_type":5"#), "{short}");
+        assert!(short.contains(r#""payload_bits":6"#), "{short}");
     }
 
     #[test]

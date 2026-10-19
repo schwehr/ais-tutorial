@@ -53,6 +53,15 @@ constexpr std::size_t GROUP_BITS = 32;    // destination id (30) + sequence numb
 constexpr std::size_t MAX_GROUPS = 4;
 }  // namespace msg_7_13
 
+// One acknowledgement group: destination MMSI (30 bits) + sequence number
+// (2 bits). A separate function, as in msg_20.hpp, keeps the loop body short.
+inline Json decode_ack(const Bits& bits, std::size_t pos) {
+    return Json::Object{
+        {"mmsi", bits.uint(pos, 30)},
+        {"sequence_number", bits.uint(pos + 30, 2)},
+    };
+}
+
 // Decode a message 7 or 13. Throws DecodeError below 72 bits.
 inline Json decode_msg_7_13(const Bits& bits) {
     using namespace msg_7_13;
@@ -64,10 +73,7 @@ inline Json decode_msg_7_13(const Bits& bits) {
     // Loop over the repeated groups. `bits.has` is the guard that stops us
     // at the end of a 72-, 104-, 136- or 168-bit message.
     while (acks.size() < MAX_GROUPS && bits.has(pos, GROUP_BITS)) {
-        acks.push_back(Json::Object{
-            {"mmsi", bits.uint(pos, 30)},
-            {"sequence_number", bits.uint(pos + 30, 2)},
-        });
+        acks.push_back(decode_ack(bits, pos));
         pos += GROUP_BITS;
     }
 

@@ -223,7 +223,7 @@ the code and the tests cannot silently drift apart.
 The JSON is deliberately plain: keys sorted, no whitespace, integers as
 integers, missing values as `null`, and every non-integer printed with a
 fixed number of decimals so that the four languages agree to the last
-character [CONVENTIONS §2]. Chapter 1 §1.5 shows the first objects.
+character ([`code/CONVENTIONS.md`](../code/CONVENTIONS.md) §2). Chapter 1 §1.5 shows the first objects.
 
 ## 0.6 Where the data came from
 

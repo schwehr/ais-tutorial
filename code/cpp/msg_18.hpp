@@ -1,7 +1,7 @@
 // msg_18.hpp — message 18: standard Class B equipment position report (chapter 14).
 //
-// Spec: ITU-R M.1371-5 Annex 8 §3.16, Table 70 (168 bits; Table 68 in
-// M.1371-4). Communication states: Annex 2 §3.3.7.2.2 Table 18/19 (SOTDMA)
+// Spec: ITU-R M.1371-5 Annex 8 §3.16, Table 70 (168 bits; Table 67 in
+// M.1371-3 and -4). Communication states: Annex 2 §3.3.7.2.2 Table 18/19 (SOTDMA)
 // and §3.3.7.3.2 Table 20 (ITDMA). Class B "CS" behaviour: Annex 7.
 //
 // Bit layout (zero-based offsets; lengths from Table 70):

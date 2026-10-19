@@ -1,7 +1,7 @@
 //! `msg_19.rs` — message 19: extended Class B equipment position report (chapter 14).
 //!
 //! Spec: ITU-R M.1371-5 Annex 8 §3.17, Table 71 (312 bits, two slots; Table
-//! 69 in M.1371-4). Dimension/reference-point field: §3.3.3 Fig. 41. Ship
+//! 68 in M.1371-4). Dimension/reference-point field: §3.3.3 Fig. 41. Ship
 //! type: §3.3.2 Table 53. EPFD: Table 51. DTE: §3.3.1.
 //!
 //! M.1371-5 says this message "is not needed and should not be used" by new
@@ -58,27 +58,28 @@ pub fn dte_text(code: u64) -> &'static str {
 /// B = to the stern, C = to the port side, D = to the starboard side, all in
 /// metres. A and B saturate at 511, C and D at 63. All four zero means
 /// "nothing available"; A = C = 0 with B and D non-zero means "dimensions
-/// known but reference point not".
+/// known but reference point not". Keys and availability rules are exactly
+/// those of message 5 (`msg_5.rs`); message 21 reuses this helper as well.
 pub fn decode_dimensions(bits: &Bits, start: usize) -> Obj {
     let a = bits.uint(start, 9);
     let b = bits.uint(start + 9, 9);
     let c = bits.uint(start + 18, 6);
     let d = bits.uint(start + 24, 6);
     let mut out = Obj::new();
-    put(&mut out, "dim_to_bow_m", a);
-    put(&mut out, "dim_to_stern_m", b);
-    put(&mut out, "dim_to_port_m", c);
-    put(&mut out, "dim_to_starboard_m", d);
+    put(&mut out, "dim_bow_m", a);
+    put(&mut out, "dim_stern_m", b);
+    put(&mut out, "dim_port_m", c);
+    put(&mut out, "dim_starboard_m", d);
+    // Figure 41: all four zero = neither reference point nor dimensions;
+    // A = C = 0 with B, D non-zero = dimensions but no reference point.
     put(
         &mut out,
         "dimensions_available",
         !(a == 0 && b == 0 && c == 0 && d == 0),
     );
-    put(
-        &mut out,
-        "reference_point_available",
-        !(a == 0 && c == 0 && b != 0 && d != 0),
-    );
+    put(&mut out, "reference_point_available", !(a == 0 && c == 0));
+    put(&mut out, "length_m", a + b);
+    put(&mut out, "beam_m", c + d);
     out
 }
 
@@ -133,7 +134,19 @@ mod tests {
         assert_eq!(bits.len(), 312);
         let out = as_obj(decode(&bits).unwrap());
         assert_eq!(out["name"], Json::from("R/V COCHECO"));
-        assert_eq!(out["dim_to_bow_m"], Json::from(7u64));
+        assert_eq!(out["dim_bow_m"], Json::from(7u64));
+        assert_eq!(out["length_m"], Json::from(11u64));
+        assert_eq!(out["reference_point_available"], Json::from(true));
         assert_eq!(out["epfd_text"], Json::from("GPS"));
+    }
+
+    #[test]
+    fn all_zero_dimensions_have_no_reference_point() {
+        // Figure 41: A = B = C = D = 0 means neither dimensions nor
+        // reference point are available.
+        let bits = Bits::from_payload("000000", 0).unwrap();
+        let out = decode_dimensions(&bits, 0);
+        assert_eq!(out["dimensions_available"], Json::from(false));
+        assert_eq!(out["reference_point_available"], Json::from(false));
     }
 }

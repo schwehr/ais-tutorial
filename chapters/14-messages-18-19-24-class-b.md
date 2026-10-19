@@ -238,7 +238,8 @@ the message set in this chapter is what a machine will see from them.
    A USV or a ship's tender carries Class B so that other traffic sees it.
    ITU gives such craft their own MMSI format, `98MIDxxxx` ("craft
    associated with a parent ship": lifeboats, rescue boats, tenders)
-   [M.585-9 Annex 1 §5], and until M.1371-4 message 24B let them put the
+   [M.585-9 Annex 1 §5], and from M.1371-2 until M.1371-4 message 24B let
+   them put the
    **mother ship's MMSI** in the 30 bits that otherwise hold the
    dimensions [M.1371-4 Annex 8 Table 76]; the call sign is `A` followed by
    the last six digits of the parent's MMSI [M.1371-5 Annex 8 Table 79]. A
@@ -423,8 +424,9 @@ width in `spare_bits`.
 | 66–69 | 4 | — Unit model code | uint | | "the first model of the manufacturer uses 1 … reverts to 1 after reaching 15. The 0 is not used" [Table 79A] |
 | 70–89 | 20 | — Unit serial number | uint | | binary if the serial number is numeric; otherwise manufacturer-defined [Table 79A] |
 | 90–131 | 42 | Call sign | 7 × six-bit ASCII | `@@@@@@@` | craft associated with a parent vessel: `A` + last six digits of the parent's MMSI [Table 79] |
-| 132–161 | 30 | Dimension / reference point **or** mother-ship MMSI | A 9, B 9, C 6, D 6 **or** uint | 0 | dimensions as Fig. 41 [Table 79]; "for an unregistered daughter vessel, use the MMSI of the associated mother ship in this data field" [M.1371-4 Annex 8 Table 76] |
-| 162–167 | 6 | Spare (M.1371-2 to -4) | — | 0 | [M.1371-4 Table 76]; **M.1371-5 redefines these as a 4-bit type of EPFD (162–165) plus 2 spare bits (166–167)** [M.1371-5 Table 79] |
+| 132–161 | 30 | Dimension / reference point **or** mother-ship MMSI | A 9, B 9, C 6, D 6 **or** uint | 0 | dimensions as Fig. 41 [Table 79]; "for an unregistered daughter vessel, use the MMSI of the associated mother ship in this data field" [M.1371-2 Annex 7 Table 61], [M.1371-4 Annex 8 Table 76] — dropped in -5 |
+| 162–165 | 4 | Type of EPFD | enum, Table 51 | 0 | 1 GPS … 15 internal GNSS [Table 79]; these four bits were spare in M.1371-2 to -4 [M.1371-4 Table 76] |
+| 166–167 | 2 | Spare | — | 0 | [Table 79] |
 
 **The vendor ID, three ways.** In M.1371-2 and -3 the 42 bits were one
 seven-character six-bit string, "the name of the AIS equipment vendor"
@@ -449,20 +451,23 @@ the string's tail is unprintable, the split is right.
 30 bits at 132–161 are. The only key is the MMSI at 8–37: an identity of
 the form `98MIDxxxx` belongs to a "craft associated with a parent ship"
 [M.585-9 Annex 1 §5], and for such a craft the field holds the parent's
-MMSI [M.1371-4 Annex 8 Table 76], [AIVDM "Type 24"]. Our decoder tests
-`980 000 000 ≤ mmsi < 990 000 000` and outputs either the four `dim_*`
-fields or `mothership_mmsi`, plus `auxiliary_craft` to say which it did.
-M.1371-5 quietly dropped the mother-ship sentence from Table 79; a -5 unit
-with a `98` MMSI presumably sends dimensions, and a decoder cannot tell.
-Neither case occurs in our recordings.
+MMSI [M.1371-2 Annex 7 Table 61], [M.1371-4 Annex 8 Table 76],
+[AIVDM "Type 24"]. Our decoder tests `980 000 000 ≤ mmsi < 990 000 000`
+and outputs either the dimension block or `mothership_mmsi`, plus
+`auxiliary_craft` to say which it did. M.1371-5 quietly dropped the
+mother-ship sentence from Table 79; a -5 unit with a `98` MMSI presumably
+sends dimensions, and a decoder cannot tell. Neither case occurs in our
+recordings.
 
-**The last six bits.** Our decoder, like GPSD, follows the M.1371-4 table
-and prints bits 162–167 as a 6-bit `spare`. M.1371-5 puts a type-of-EPFD
-field there [M.1371-5 Table 79], so on a unit built to -5 you should expect
-`spare` to read 4 (GPS = 1 shifted left by the 2 real spare bits), 60
-(internal GNSS = 15) and so on. Every part B in our data has `spare: 0`,
-which is consistent with either reading. Adding an `epfd` key for -5 units
-is exercise 4.
+**The last six bits.** M.1371-2 to -4 left bits 162–167 spare
+[M.1371-4 Annex 8 Table 76]; M.1371-5 puts a 4-bit type of EPFD at 162–165
+and leaves 166–167 spare [M.1371-5 Table 79]. Our decoder follows the
+current edition and outputs `epfd`, `epfd_text` and a 2-bit `spare`. On a
+unit built to an older edition all six bits are zero, so it reads `epfd: 0`
+— "undefined", the very value a -5 unit sends when it does not know its
+fix type. `epfd: 0` therefore says nothing about which edition the unit
+follows; a non-zero `epfd` can only come from a -5 unit (or a bit error).
+Every part B in our 2009–2011 data reads `epfd: 0`, `spare: 0`.
 
 ### How static data gets into the unit: `$AISSD` and `$AIVSD`
 
@@ -638,13 +643,15 @@ Three modules, one per message, with two helpers shared between them:
 * `decode_common_position(bits, 46)` reads SOG through time stamp for
   messages 18 and 19 (same layout, same offset);
 * `decode_dimensions(bits, start)` reads the 30-bit A/B/C/D block for
-  message 19 (offset 271) and message 24 part B (offset 132).
+  message 19 (offset 271) and message 24 part B (offset 132), producing
+  the same eight keys as the message 5 decoder of chapter 7; chapter 15
+  reuses it for message 21 (offset 219).
 
 Message 18 also imports `decode_sotdma` and `decode_itdma` from the
 message 1–3 module of chapter 3 rather than copying them: the 19-bit
 communication state is the same in every message that carries one. The
 module dependency order is therefore `msg_1_2_3 → msg_18 → msg_19 →
-msg_24`, in all four languages.
+msg_24` (and later `msg_19 → msg_21`), in all four languages.
 
 ### Python
 
@@ -757,12 +764,17 @@ def decode_dimensions(bits: Bits, start: int) -> dict:
     c = bits.uint(start + 18, 6)
     d = bits.uint(start + 24, 6)
     return {
-        "dim_to_bow_m": a,
-        "dim_to_stern_m": b,
-        "dim_to_port_m": c,
-        "dim_to_starboard_m": d,
+        "dim_bow_m": a,
+        "dim_stern_m": b,
+        "dim_port_m": c,
+        "dim_starboard_m": d,
+        # Figure 41: all four zero = neither reference point nor dimensions;
+        # A = C = 0 with B, D non-zero = dimensions but no reference point.
+        # Either way A = C = 0 means the reference point is unknown.
         "dimensions_available": not (a == 0 and b == 0 and c == 0 and d == 0),
-        "reference_point_available": not (a == 0 and c == 0 and b != 0 and d != 0),
+        "reference_point_available": not (a == 0 and c == 0),
+        "length_m": a + b,
+        "beam_m": c + d,
     }
 
 
@@ -802,25 +814,25 @@ def decode(bits: Bits) -> dict:
     return out
 ```
 
-Two things to note about `decode_dimensions`. First, the key names:
-`dim_to_bow_m`, `dim_to_stern_m`, `dim_to_port_m`, `dim_to_starboard_m`.
-The message 5 decoder of chapter 7 calls the same four distances
-`dim_bow_m`, `dim_stern_m`, `dim_port_m`, `dim_starboard_m` and also
-derives `length_m` and `beam_m`; the Class B modules do not. A program
-that joins Class A and Class B static data has to map one set onto the
-other (exercise 5 does). Second, `reference_point_available` is computed
-as "not the A = C = 0, B ≠ 0, D ≠ 0 pattern", which is literally the
-second special case of Figure 41 — but for the *first* special case, all
-four zero, it comes out `true`, while chapter 7's `not (a == 0 and c == 0)`
-comes out `false` for the same bits. Figure 41 says all-zero means
-"neither reference point nor dimensions available", so chapter 7 has it
-right; the Class B version is wrong only when `dimensions_available` is
-already `false`, which never happens in this chapter's data. Exercise 4
-asks you to reconcile the two.
+Two things to note about `decode_dimensions`. First, the key names and the
+derived values are *exactly* those of the message 5 decoder in chapter 7 —
+`dim_bow_m`, `dim_stern_m`, `dim_port_m`, `dim_starboard_m`,
+`dimensions_available`, `reference_point_available`, `length_m`, `beam_m`
+— so that a program joining Class A and Class B static data never has to
+rename a field (exercise 5 relies on this), and chapter 15 reuses the same
+helper for message 21. Second, `reference_point_available` is simply
+`not (a == 0 and c == 0)`: Figure 41 defines two special patterns — all
+four zero means "neither reference point nor dimensions", and A = C = 0
+with B, D ≠ 0 means "dimensions but no reference point" — and in *both* of
+them A and C are zero [M.1371-5 Annex 8 §3.3.3 Fig. 41]. Testing only the
+second pattern would report a reference point for an all-zero block, which
+is wrong; the shorter test covers both. `dimensions_available` is false
+only for the all-zero block.
 
 `code/python/aistut/msg_24.py` — one function, two layouts:
 
 ```python
+from .common import epfd_text, require_bits, ship_type_text
 from .msg_19 import decode_dimensions
 
 PART_TEXT = {0: "part A", 1: "part B", 2: "reserved", 3: "reserved"}
@@ -854,6 +866,7 @@ def decode(bits: Bits) -> dict:
     elif part == 1:
         require_bits(msg_type, len(bits), 168)
         ship_type = bits.uint(40, 8)
+        epfd = bits.uint(162, 4)
         out.update({
             "ship_type": ship_type,
             "ship_type_text": ship_type_text(ship_type),
@@ -863,7 +876,9 @@ def decode(bits: Bits) -> dict:
             "unit_serial_number": bits.uint(70, 20),
             "call_sign": bits.text(90, 42),
             "auxiliary_craft": is_auxiliary_craft(mmsi),
-            "spare": bits.uint(162, 6),
+            "epfd": epfd,
+            "epfd_text": epfd_text(epfd),
+            "spare": bits.uint(166, 2),
         })
         if is_auxiliary_craft(mmsi):
             out["mothership_mmsi"] = bits.uint(132, 30)
@@ -879,10 +894,12 @@ The length check happens in two stages: 40 bits to read the part number,
 then 160 or 168 depending on it. The error text follows the shared
 convention (`message 24 too short: H bits < M`) with whichever minimum
 applied. `vendor_id` and `manufacturer_id` both start at bit 48 — the two
-readings of the same field discussed in 14.2. For part A, `spare` holds at
-most 8 bits even when more are present (line 30 of the data has 16), so
-that the value stays small and comparable across units; `spare_bits` tells
-you how many there really were.
+readings of the same field discussed in 14.2. `epfd` is the M.1371-5
+reading of bits 162–165 (14.2, "The last six bits"); `epfd_text` comes
+from the same table shared with messages 4, 5 and 19. For part A, `spare`
+holds at most 8 bits even when more are present (line 30 of the data has
+16), so that the value stays small and comparable across units;
+`spare_bits` tells you how many there really were.
 
 > **Language notes (Python).** `980_000_000` — underscores inside a
 > numeric literal are ignored and group the digits. `a <= x < b` is a
@@ -1168,19 +1185,23 @@ out as:
 {"ais":{"mmsi":369970120,"msg_type":24,"name":"R/V COCHECO","part_number":0,"part_text":"part A",
 "repeat_indicator":0,"spare":0,"spare_bits":0},"channel":"B","fragments":1,"line":24,"own_ship":false,
 "payload_bits":160,"talker":"AI","uscg":{"station":"nhcml","station_kind":"receiver","time":1306256816.44}}
-{"ais":{"auxiliary_craft":false,"call_sign":"NONE","dim_to_bow_m":7,"dim_to_port_m":3,"dim_to_starboard_m":1,
-"dim_to_stern_m":4,"dimensions_available":true,"manufacturer_id":"","mmsi":369970120,"msg_type":24,
-"part_number":1,"part_text":"part B","reference_point_available":true,"repeat_indicator":0,"ship_type":56,
-"ship_type_text":"spare - local vessel","spare":0,"unit_model_code":0,"unit_serial_number":0,"vendor_id":""},
+{"ais":{"auxiliary_craft":false,"beam_m":4,"call_sign":"NONE","dim_bow_m":7,"dim_port_m":3,"dim_starboard_m":1,
+"dim_stern_m":4,"dimensions_available":true,"epfd":0,"epfd_text":"undefined","length_m":11,"manufacturer_id":"",
+"mmsi":369970120,"msg_type":24,"part_number":1,"part_text":"part B","reference_point_available":true,
+"repeat_indicator":0,"ship_type":56,"ship_type_text":"spare - local vessel","spare":0,"unit_model_code":0,
+"unit_serial_number":0,"vendor_id":""},
 "channel":"B","fragments":1,"line":25,"own_ship":false,"payload_bits":168,"talker":"AI",
 "uscg":{"station":"nhcml","station_kind":"receiver","time":1306256817.43}}
 ```
 
-Call sign `NONE`, name `R/V COCHECO`, 7/4/3/1, type 56: the `$AISSD` and
-`$AIVSD` of 1 May 2009, bit for bit, two years and 20 km later. The vendor
-ID is all `@` — the SRT firmware leaves the optional field empty, so
-`vendor_id` and `manufacturer_id` are empty strings and the model and
-serial read 0.
+Call sign `NONE`, name `R/V COCHECO`, 7/4/3/1 (an 11 m × 4 m boat:
+`length_m`, `beam_m`), type 56: the `$AISSD` and `$AIVSD` of 1 May 2009,
+bit for bit, two years and 20 km later. The vendor ID is all `@` — the SRT
+firmware leaves the optional field empty, so `vendor_id` and
+`manufacturer_id` are empty strings and the model and serial read 0. The
+last six bits are zero too: `epfd: 0` ("undefined") and `spare: 0`, as on
+every part B in this chapter — a 2009 unit has no EPFD field to fill
+(14.2).
 
 ### Section A: programming the unit (lines 3–9)
 
@@ -1217,7 +1238,7 @@ a network receiver's.
 |---|---|---|
 | 11 | 18 | `mmsi: 338022762`, `sog_knots: 7.7`, `cog_deg: 343.8`, `lat: 40.610595`, `lon: -67.721972`, `timestamp: 39`, `true_heading: 511`, `raim: false`, `position_accuracy: 0`, `assigned_mode: 1`, `channel: ""`, `own_ship: true` |
 | 12 | 24A | `name: "VISIONS OF JOHANNA"`, `payload_bits: 160`, `spare_bits: 0` |
-| 13 | 24B | `ship_type: 37` `pleasure craft`, `call_sign: "WDB7973"`, `dim_to_bow_m: 16`, `dim_to_stern_m: 4`, `dim_to_port_m: 4`, `dim_to_starboard_m: 1`, `vendor_id: ""`, `auxiliary_craft: false` |
+| 13 | 24B | `ship_type: 37` `pleasure craft`, `call_sign: "WDB7973"`, `dim_bow_m: 16`, `dim_stern_m: 4`, `dim_port_m: 4`, `dim_starboard_m: 1` (`length_m: 20`, `beam_m: 5`), `vendor_id: ""`, `auxiliary_craft: false`, `epfd: 0` |
 
 A 20 m sailing yacht (MID 338, United States), about 200 nautical miles
 south-east of the UNH pier, making 7.7 knots north-north-west, with an
@@ -1306,8 +1327,8 @@ Line 34 completes the two-fragment N-AIS message 19:
 ```json
 "mmsi":523135452,"repeat_indicator":2,"spare":191,"sog_knots":88.7,"lat":-35.017815,"lon":-40.028855,
 "cog_deg":152.9,"true_heading":244,"timestamp":37,"spare2":10,"name":"]%\"=#<>?/O-7;).]0Q1N",
-"ship_type":123,"ship_type_text":"reserved for regional use","dim_to_bow_m":350,"dim_to_stern_m":233,
-"dim_to_port_m":35,"dim_to_starboard_m":51,"epfd":6,"epfd_text":"integrated navigation system",
+"ship_type":123,"ship_type_text":"reserved for regional use","dim_bow_m":350,"dim_stern_m":233,
+"dim_port_m":35,"dim_starboard_m":51,"length_m":583,"beam_m":86,"epfd":6,"epfd_text":"integrated navigation system",
 "dte":0,"assigned_mode":1,"spare3":12
 ```
 
@@ -1328,8 +1349,8 @@ Line 35, `Cg810000000000000000`, is 120 bits and fails cleanly:
 ### Section F: the synthetic message 19 (lines 37–38)
 
 ```json
-"mmsi":369970120,"msg_type":19,"name":"R/V COCHECO","ship_type":56,"dim_to_bow_m":7,"dim_to_stern_m":4,
-"dim_to_port_m":3,"dim_to_starboard_m":1,"epfd":1,"epfd_text":"GPS","raim":false,"dte":1,
+"mmsi":369970120,"msg_type":19,"name":"R/V COCHECO","ship_type":56,"dim_bow_m":7,"dim_stern_m":4,
+"dim_port_m":3,"dim_starboard_m":1,"length_m":11,"beam_m":4,"epfd":1,"epfd_text":"GPS","raim":false,"dte":1,
 "dte_text":"data terminal not available","assigned_mode":0,"sog_knots":0.0,"cog_deg":138.1,
 "lat":43.071908,"lon":-70.711682,"timestamp":52,"spare":0,"spare2":0,"spare3":0
 ```
@@ -1358,8 +1379,12 @@ point of the message, and the reason it is no longer needed.
   after the first three letters.
 * **Part B's last six bits.** M.1371-2 to -4: six spare bits. M.1371-5:
   four bits of EPFD type and two spare [M.1371-5 Table 79]. Our decoder
-  prints the six bits as `spare`; a -5 unit will show `spare: 4` (GPS) or
-  `60` (internal GNSS) rather than 0, and that is not an error. Exercise 4.
+  reads them the -5 way; on an older unit the six zero bits come out as
+  `epfd: 0` ("undefined") and `spare: 0`, which is also what a -5 unit
+  without a known fix type sends. Do not use `epfd` to date a unit — only
+  a non-zero value tells you anything, and then only that the unit follows
+  -5. GPSD still prints the six bits as one spare field [AIVDM "Type 24"],
+  so its output and ours differ here by design.
 * **Mother-ship MMSI.** Only the MMSI range tells a decoder to read bits
   132–161 as an MMSI, the rule was dropped from the -5 table, and a unit
   with a `98MIDxxxx` identity that was programmed with ordinary dimensions
@@ -1409,14 +1434,18 @@ point of the message, and the reason it is no longer needed.
   identities are on the air. Validate the MID (chapters 3 and 7) before
   keying a database on the number.
 * **Table numbers drift.** Message 18 is Table 31 (M.1371-1), 59 (Annex 7
-  of M.1371-2), 67 (-3, -4) and 70 (-5); the code comments in our modules
-  say "Table 68 in M.1371-4" for message 18 and "Table 69" for message 19,
-  which is off by one — it is 67 and 68. When a document cites "Table 68"
-  without an edition, check which message it means.
-* **Field-name drift inside this tutorial.** `dim_to_bow_m` here versus
-  `dim_bow_m` in message 5; `reference_point_available` computed two
-  different ways. Chapter 7's naming and logic are the ones to converge
-  on (exercise 4).
+  of M.1371-2), 67 (-3, -4) and 70 (-5); message 19 is Table 32 (Annex 2
+  of -1 and -2), 68 (-3, -4) and 71 (-5). Message 24 part B is Table 61 in
+  -2, 76 in -3 and -4, 79 in -5. When a
+  document cites "Table 68" without an edition, check which message it
+  means — in -4 it is message 19, in -5 it is message 17. Our module
+  docstrings give both the -5 number and the -4 number for this reason.
+* **One dimension block, one set of names.** Messages 5, 19, 21 and 24B
+  all carry the same 30-bit A/B/C/D field, and our four decoders output it
+  with the same eight keys (`dim_bow_m` … `beam_m`) from one helper per
+  language (`decode_dimensions`, chapter 14, reused by chapter 15). If you
+  write your own, resist naming the field differently per message — the
+  join in exercise 5 is trivial only because the names agree.
 
 ## 14.7 Exercises
 
@@ -1444,15 +1473,18 @@ point of the message, and the reason it is no longer needed.
    languages match, regenerate `tests/expected/` with the Python version
    and review the diff: only line 30 should change, gaining
    `"spare_raw":"0000000011110011"`.
-4. *(Rust)* Two reconciliations with chapter 7. (a) Make
-   `decode_dimensions` compute `reference_point_available` as
-   `!(a == 0 && c == 0)`, as message 5 does, and add `length_m` and
-   `beam_m`; show with a unit test that an all-zero block now reports
-   `reference_point_available: false`. (b) Add an `epfd` / `epfd_text`
-   pair to part B from bits 162–165 and shrink `spare` to bits 166–167,
-   per M.1371-5 Table 79. Decide — and write down in the module docstring —
-   what a reader should conclude when `epfd` is 0 on a unit whose vendor
-   string says it was built before 2014.
+4. *(Rust)* Two edition questions. (a) `decode_dimensions` reports
+   `reference_point_available: false` for an all-zero block *and* for
+   A = C = 0 with B, D ≠ 0. Write a unit test for each of the two Figure 41
+   patterns and a third for a block with A ≠ 0, then change the rule to the
+   naive "not the A = C = 0, B ≠ 0, D ≠ 0 pattern" and watch which test
+   fails — that is the bug the shorter test avoids. (b) Our part B decoder
+   reads bits 162–165 as the M.1371-5 EPFD. Add an `edition_hint` string
+   to part B that says `"M.1371-5"` when `epfd` is non-zero and
+   `"unknown"` otherwise, and explain in the module docstring why no
+   stronger statement is possible (14.2, "The last six bits"). Then find
+   the only other field in part B whose *value* can betray the edition the
+   unit was built to (hint: 14.2, "The vendor ID, three ways").
 5. *(TypeScript)* Write a stateful pairer: read the JSON lines of
    `tests/expected/ch14-class-b.jsonl`, keep for each MMSI the latest part
    A, the latest part B and the latest message 18, and print one line per
@@ -1461,9 +1493,11 @@ point of the message, and the reason it is no longer needed.
    (`uscg.time` where present). Treat a part B that arrives before its
    part A as valid. For 367103350 the answer is `AMY PHILBRICK WCW4189
    fishing 30 m × 7 m 43.074035 -70.727318 1.13 s`; for 338022762 there
-   are no `uscg.time` values, so print the gap as unknown. Then map the
-   Class B field names onto the message 5 names so that the same table
-   could include the ships of chapter 7.
+   are no `uscg.time` values, so print the gap as unknown. Then extend the
+   table to the message 5 ships of chapter 7: because the dimension keys
+   (`dim_bow_m` … `beam_m`) are the same in both decoders, the only
+   differences you should have to handle are the name's origin (message 5
+   versus part A) and the fields a Class B does not send.
 6. *(any language, harder)* Using the whole
    `sample-data/tide3/ais/ais-2011-05-24` file (if you have it), measure
    the reporting interval of each Class B unit from consecutive message
@@ -1498,11 +1532,11 @@ point of the message, and the reason it is no longer needed.
   Fig. 41 (dimensions), Table 47 (six-bit ASCII), Table 50 (position
   accuracy), Table 51 (EPFD).
 * [M.1371-5] earlier editions, cited for the history: M.1371-1 Annex 2
-  Table 31 (message 18 with regional bits); M.1371-2 Annex 7 Tables 59–61
-  (CS message 18, message 24 introduced with the mother-ship rule);
-  M.1371-3 Annex 8 Tables 67, 68, 75, 76 (seven-character vendor ID);
-  M.1371-4 Annex 8 Tables 67, 68, 75, 76, 76A (vendor-ID split, mother-ship
-  rule, six spare bits).
+  Tables 31–32 (messages 18 and 19 with regional bits); M.1371-2 Annex 2
+  Tables 31–32 and Annex 7 Tables 59–61 (CS message 18, message 24
+  introduced with the mother-ship rule); M.1371-3 Annex 8 Tables 67, 68,
+  75, 76 (seven-character vendor ID); M.1371-4 Annex 8 Tables 67, 68, 75,
+  76, 76A (vendor-ID split; mother-ship rule and six spare bits retained).
 * [M.585-9] Annex 1 §1 (ship identities and MIDs), §5 (craft associated
   with a parent ship, `98MIDxxxx`); Annex 2 §2 (AIS-SART `970`, MOB
   `972`, EPIRB-AIS `974`).

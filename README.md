@@ -27,16 +27,16 @@ small excerpts live in this repository ([`data/`](data/)); the raw logs
 | 4 | [NMEA TAG blocks](chapters/04-tag-blocks.md) | NMEA 4.10 `\…\` metadata, grouping, converting legacy metadata |
 | 5 | [USCG N-AIS metadata](chapters/05-uscg-metadata.md) | The `s`, `d`, `T`, `x`, `r`, time fields after the checksum |
 | 6 | [Messages 4 and 11: base station report, UTC response](chapters/06-messages-4-11-base-station.md) | UTC fields, base-station sync, clock-offset auditing, rogue base stations, message 10/11 pairs |
-| 7 | [Message 5: static and voyage data](chapters/07-message-5-static-voyage.md) | |
-| 8 | [Messages 6 and 8: binary messages and application identifiers](chapters/08-messages-6-8-binary.md) | DAC/FI, `BBM`/`ABM`/`ABK` sentences |
+| 7 | [Message 5: static and voyage data](chapters/07-message-5-static-voyage.md) | The 424-bit static/voyage report: ship dimensions and reference point, ETA sub-fields, IMO check digit, `@`-padded text, what real units get wrong |
+| 8 | [Messages 6 and 8: binary messages and application identifiers](chapters/08-messages-6-8-binary.md) | Addressed and broadcast binary containers, DAC/FI application identifiers, slot limits and padding, the `BBM`/`ABM`/`ABK` sending side |
 | 9 | [Application-specific messages in the wild](chapters/09-application-specific-messages.md) | Right-whale notices (366/34), met/hydro (1/11, 1/31), encrypted AIS (366/56–57) |
-| 10 | [Message 9: SAR aircraft](chapters/10-message-9-sar-aircraft.md) | |
-| 11 | [Messages 10, 15 and 16: inquiry, interrogation, assignment](chapters/11-messages-10-15-16-interrogation-assignment.md) | |
-| 12 | [Messages 7, 12, 13 and 14: safety text and acknowledgements](chapters/12-messages-12-13-14-safety-text.md) | |
+| 10 | [Message 9: SAR aircraft](chapters/10-message-9-sar-aircraft.md) | The 168-bit aircraft position report: altitude, whole-knot speed, `111MIDxxx` MMSIs, shared communication-state decoding, building a labelled synthetic example |
+| 11 | [Messages 10, 15 and 16: inquiry, interrogation, assignment](chapters/11-messages-10-15-16-interrogation-assignment.md) | UTC inquiry, the 88–160-bit interrogation shapes, assignment by report rate or slot increment, what ships and base stations actually ask each other |
+| 12 | [Messages 7, 12, 13 and 14: safety text and acknowledgements](chapters/12-messages-12-13-14-safety-text.md) | Addressed and broadcast six-bit text, byte-alignment padding, acknowledgement sequence numbers and retries, the fixed AIS-SART/MOB/EPIRB texts |
 | 13 | [Messages 17, 20, 22 and 23: base-station control](chapters/13-messages-17-20-22-23-base-station-control.md) | DGNSS corrections, slot reservation, channel and group management |
-| 14 | [Messages 18, 19 and 24: Class B](chapters/14-messages-18-19-24-class-b.md) | |
+| 14 | [Messages 18, 19 and 24: Class B](chapters/14-messages-18-19-24-class-b.md) | Class B "CS" versus "SO", the fixed communication state, the two-part static data report, the vendor-ID field across editions, `$AISSD`/`$AIVSD` configuration, pairing part A with part B |
 | 15 | [Message 21: aids to navigation](chapters/15-message-21-aton.md) | Physical and virtual AtoN, off-position, AtoN status bits |
-| 16 | [Messages 25, 26 and 27: slot binaries and long range](chapters/16-messages-25-26-27.md) | |
+| 16 | [Messages 25, 26 and 27: slot binaries and long range](chapters/16-messages-25-26-27.md) | Single- and multi-slot binaries with flag-dependent layouts, a communication state at the *end* of the payload, the 96-bit satellite position report, noise versus rare messages |
 | A | [References](chapters/appendix-a-references.md) | Citation keys |
 | B | [Six-bit tables](chapters/appendix-b-six-bit-tables.md) | Armouring and six-bit ASCII tables |
 
@@ -75,6 +75,22 @@ sample-data/   AGENTS.md guides to the raw recordings (the recordings themselves
 
 ## Status
 
-Work in progress. Chapters 0–5 and the core of the four decoders are written;
-the message chapters are being added one at a time, each with decoders in all
-four languages and test data.
+All seventeen chapters (0–16) and the two appendices are written, and every
+AIS message type 1–27 is decoded by all four implementations. The decoders
+print byte-identical JSON for every file in `data/`; `tests/run_tests.sh`
+checks all four languages against `tests/expected/` and passes.
+
+## Contributing
+
+Before changing anything read [`AGENTS.md`](AGENTS.md) (repository rules),
+[`chapters/AUTHORING.md`](chapters/AUTHORING.md) (chapter skeleton, voice and
+citation style) and [`code/CONVENTIONS.md`](code/CONVENTIONS.md) (the output
+contract the four decoders must honour). A change that touches `code/`,
+`data/` or `tests/` must leave `tests/run_tests.sh` green in all four
+languages.
+
+## License
+
+No license file is included yet; the author will choose one. Until then the
+usual default applies — all rights reserved — and the specifications cited in
+Appendix A remain the property of their publishers.

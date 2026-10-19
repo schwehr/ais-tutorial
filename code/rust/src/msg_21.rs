@@ -22,6 +22,7 @@
 //!    228-236   9  dimension B (to "stern"), m
 //!    237-242   6  dimension C (to port), m
 //!    243-248   6  dimension D (to starboard), m
+//!                 (decoded by msg_19::decode_dimensions, same keys as message 5)
 //!    249-252   4  type of EPFD (Table 51); 7 = surveyed is normal for fixed/virtual aids
 //!    253-258   6  UTC second; 60 = n/a, 61 manual, 62 dead reckoning, 63 inoperative
 //!    259       1  off-position indicator (floating AtoN only; valid only if second <= 59)
@@ -54,6 +55,7 @@
 use crate::bits::Bits;
 use crate::common::{epfd_text, require_bits, DecodeError};
 use crate::jsonout::{put, Json, Obj};
+use crate::msg_19::decode_dimensions;
 
 /// Table 73: the fixed part (two slots).
 pub const MIN_BITS: usize = 272;
@@ -188,10 +190,9 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
         "position_available",
         lon_raw != 0x6791AC0 && lat_raw != 0x3412140,
     );
-    put(&mut out, "dim_a_m", bits.uint(219, 9));
-    put(&mut out, "dim_b_m", bits.uint(228, 9));
-    put(&mut out, "dim_c_m", bits.uint(237, 6));
-    put(&mut out, "dim_d_m", bits.uint(243, 6));
+    // Bits 219-248: the same 30-bit A/B/C/D block as messages 5, 19 and 24B,
+    // with the same keys (dim_bow_m … beam_m) — one definition in msg_19.rs.
+    out.extend(decode_dimensions(bits, 219));
     put(&mut out, "epfd", epfd);
     put(&mut out, "epfd_text", epfd_text(epfd));
     put(&mut out, "timestamp", timestamp);

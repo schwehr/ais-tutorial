@@ -1,11 +1,14 @@
 """msg_24.py — message 24: static data report, parts A and B (chapter 14).
 
 Spec: ITU-R M.1371-5 Annex 8 §3.22, Table 78 (part A, 160 bits) and
-Table 79 (part B, 168 bits), Table 79A (vendor ID sub-fields). These were
-Tables 75, 76 and 76A in M.1371-4, which introduced the vendor-ID split
-and the mother-ship MMSI rule. Dimensions: §3.3.3 Fig. 41. Ship type:
-Table 53. EPFD: Table 51. Auxiliary-craft MMSI format 98MIDxxxx: ITU-R
-M.585 Annex 1.
+Table 79 (part B, 168 bits), Table 79A (vendor ID sub-fields). Message 24
+was introduced in M.1371-2 (Annex 7 Tables 60–61), together with the rule
+that an unregistered daughter vessel puts the mother ship's MMSI in the
+dimension field; M.1371-4 (Tables 75, 76, 76A) added the vendor-ID split;
+M.1371-5 dropped the mother-ship sentence and redefined the last six bits
+of part B as a 4-bit type of EPFD plus 2 spare bits. Dimensions: §3.3.3
+Fig. 41. Ship type: Table 53. EPFD: Table 51. Auxiliary-craft MMSI format
+98MIDxxxx: ITU-R M.585 Annex 1.
 
 Bit layout (zero-based offsets):
 
@@ -23,8 +26,15 @@ Bit layout (zero-based offsets):
           90-131 42  call sign, 7 six-bit characters; all '@' = n/a
          132-161 30  dimensions / reference point (A 9, B 9, C 6, D 6), or
                      for an auxiliary craft (MMSI 98MIDxxxx) the MMSI of the
-                     mother ship
-         162-167  6  spare
+                     mother ship (M.1371-2 to -4 rule)
+         162-165  4  type of EPFD (Table 79; spare in M.1371-2 to -4)
+         166-167  2  spare
+
+EPFD on old units: a unit built to M.1371-2/-3/-4 sends six spare bits,
+which are zero, so it decodes as `epfd: 0` = "undefined" — the same value
+a -5 unit sends when it does not know its fix type. `epfd: 0` therefore
+says nothing about the edition the unit was built to; a non-zero `epfd`
+is only possible on a -5 unit (or a bit error).
 
 Length rule: part A needs 160 bits; anything beyond 160 (eight spare bits
 on units built to the pre-M.1371-4 table, or two left-over bits on units
@@ -44,7 +54,7 @@ Python notes for readers new to the language
 from __future__ import annotations
 
 from .bits import Bits
-from .common import require_bits, ship_type_text
+from .common import epfd_text, require_bits, ship_type_text
 from .msg_19 import decode_dimensions
 
 PART_TEXT = {0: "part A", 1: "part B", 2: "reserved", 3: "reserved"}
@@ -78,6 +88,7 @@ def decode(bits: Bits) -> dict:
     elif part == 1:
         require_bits(msg_type, len(bits), 168)
         ship_type = bits.uint(40, 8)
+        epfd = bits.uint(162, 4)
         out.update({
             "ship_type": ship_type,
             "ship_type_text": ship_type_text(ship_type),
@@ -87,7 +98,9 @@ def decode(bits: Bits) -> dict:
             "unit_serial_number": bits.uint(70, 20),
             "call_sign": bits.text(90, 42),
             "auxiliary_craft": is_auxiliary_craft(mmsi),
-            "spare": bits.uint(162, 6),
+            "epfd": epfd,
+            "epfd_text": epfd_text(epfd),
+            "spare": bits.uint(166, 2),
         })
         if is_auxiliary_craft(mmsi):
             out["mothership_mmsi"] = bits.uint(132, 30)

@@ -1,7 +1,7 @@
 """msg_19.py — message 19: extended Class B equipment position report (chapter 14).
 
 Spec: ITU-R M.1371-5 Annex 8 §3.17, Table 71 (312 bits, two slots; this
-was Table 69 in M.1371-4). Dimension/reference-point field: §3.3.3 Fig. 41.
+was Table 68 in M.1371-4). Dimension/reference-point field: §3.3.3 Fig. 41.
 Ship type: §3.3.2 Table 53. EPFD: Table 51. DTE: §3.3.1.
 
 M.1371-5 says this message "is not needed and should not be used" by new
@@ -56,19 +56,27 @@ def decode_dimensions(bits: Bits, start: int) -> dict:
     B = to the stern, C = to the port side, D = to the starboard side, all
     in metres. A and B saturate at 511, C and D at 63. All four zero means
     "nothing available"; A = C = 0 with B and D non-zero means "dimensions
-    known but reference point not".
+    known but reference point not". The keys and the two availability
+    rules are exactly those of message 5 (msg_5.py), so that Class A and
+    Class B static data can be joined without renaming; message 21 reuses
+    this helper as well.
     """
     a = bits.uint(start, 9)
     b = bits.uint(start + 9, 9)
     c = bits.uint(start + 18, 6)
     d = bits.uint(start + 24, 6)
     return {
-        "dim_to_bow_m": a,
-        "dim_to_stern_m": b,
-        "dim_to_port_m": c,
-        "dim_to_starboard_m": d,
+        "dim_bow_m": a,
+        "dim_stern_m": b,
+        "dim_port_m": c,
+        "dim_starboard_m": d,
+        # Figure 41: all four zero = neither reference point nor dimensions;
+        # A = C = 0 with B, D non-zero = dimensions but no reference point.
+        # Either way A = C = 0 means the reference point is unknown.
         "dimensions_available": not (a == 0 and b == 0 and c == 0 and d == 0),
-        "reference_point_available": not (a == 0 and c == 0 and b != 0 and d != 0),
+        "reference_point_available": not (a == 0 and c == 0),
+        "length_m": a + b,
+        "beam_m": c + d,
     }
 
 

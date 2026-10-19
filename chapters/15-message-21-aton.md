@@ -255,7 +255,11 @@ reports a circle, A = B = C = D ≠ 0 (its orientation is unknown); an object
 of 2 m × 2 m or less reports A = B = C = D = 1; a virtual aid or a
 "reference point" reports all zeros [M.1371-5 Table 73 notes 1–2],
 [IALA R0126 §4.8.3]. These are the dimensions of the aid *itself*, not of
-the guard zone or danger area around it [IALA R0126 §4.8.3].
+the guard zone or danger area around it [IALA R0126 §4.8.3]. Our decoder
+outputs the block with the keys of chapter 7 — `dim_bow_m`, `dim_stern_m`,
+`dim_port_m`, `dim_starboard_m`, `length_m`, `beam_m`,
+`dimensions_available`, `reference_point_available` — where "bow" is to be
+read as "true north" for a fixed or virtual aid.
 
 **Time stamp and EPFD.** As in message 1: the UTC second when the position
 was generated, 60 if unavailable, 61/62/63 for manual, dead-reckoning and
@@ -373,7 +377,10 @@ All four decoders share the shape of the message-1 decoders from chapter 3.
 The new elements are (a) a 32-entry type table, (b) the variable-length
 tail, (c) a second small function, `decode_status`, that adds keys only
 when the IALA page is 7, and (d) two booleans derived from other fields
-(`off_position_valid`, `position_available`).
+(`off_position_valid`, `position_available`). The dimension block is the
+one part that is *not* new: it is decoded by the `decode_dimensions` helper
+of chapter 14, so that message 21 prints the same eight dimension keys as
+messages 5, 19 and 24B.
 
 ### Python
 
@@ -438,10 +445,6 @@ def decode(bits: Bits) -> dict:
         "lon": Fixed(lon_raw / 600000.0, 6),
         "lat": Fixed(lat_raw / 600000.0, 6),
         "position_available": lon_raw != 0x6791AC0 and lat_raw != 0x3412140,
-        "dim_a_m": bits.uint(219, 9),
-        "dim_b_m": bits.uint(228, 9),
-        "dim_c_m": bits.uint(237, 6),
-        "dim_d_m": bits.uint(243, 6),
         "epfd": epfd,
         "epfd_text": epfd_text(epfd),
         "timestamp": timestamp,
@@ -456,16 +459,27 @@ def decode(bits: Bits) -> dict:
         "assigned_mode": bits.flag(270),
         "spare": bits.uint(271, 1),
     }
+    # Bits 219-248: the same 30-bit A/B/C/D block as messages 5, 19 and 24B,
+    # with the same keys (dim_bow_m … beam_m) — one definition in msg_19.py.
+    out.update(decode_dimensions(bits, 219))
     out.update(decode_status(status))
     return out
 ```
 
-Two things to notice. `bits.text(start, 0)` is legal and returns `""`, so
-the no-extension case needs no special branch. And `Bits.text` already
+Three things to notice. `bits.text(start, 0)` is legal and returns `""`, so
+the no-extension case needs no special branch. `Bits.text` already
 tolerates a length that is not a multiple of six (it only reads whole
 characters), but we compute the whole-character count ourselves so that the
 C++, Rust and TypeScript versions do not have to rely on the same
-tolerance.
+tolerance. And the dimension block is not decoded here at all: the module
+imports `decode_dimensions` from the message 19 module of chapter 14 (`from
+.msg_19 import decode_dimensions`), which outputs `dim_bow_m`,
+`dim_stern_m`, `dim_port_m`, `dim_starboard_m`, `dimensions_available`,
+`reference_point_available`, `length_m` and `beam_m` exactly as messages 5,
+19 and 24B do. For an AtoN "bow" means true north (15.2), `length_m` is the
+north–south extent and `beam_m` the east–west one, and
+`reference_point_available` is false for the all-zero block a virtual aid or
+reference point sends.
 
 > **Language notes (Python).** `a // b` is floor division; `min(a, b)`
 > works on any comparable values. `out.update(other)` merges dictionaries
@@ -527,10 +541,6 @@ inline Json decode_msg_21(const Bits& bits) {
         {"lon", Json::fixed(static_cast<double>(lon_raw) / 600000.0, 6)},
         {"lat", Json::fixed(static_cast<double>(lat_raw) / 600000.0, 6)},
         {"position_available", lon_raw != 0x6791AC0 && lat_raw != 0x3412140},
-        {"dim_a_m", bits.uint(219, 9)},
-        {"dim_b_m", bits.uint(228, 9)},
-        {"dim_c_m", bits.uint(237, 6)},
-        {"dim_d_m", bits.uint(243, 6)},
         {"epfd", epfd},
         {"epfd_text", epfd_text(static_cast<int>(epfd))},
         {"timestamp", timestamp},
@@ -543,12 +553,16 @@ inline Json decode_msg_21(const Bits& bits) {
         {"assigned_mode", bits.flag(270)},
         {"spare", bits.uint(271, 1)},
     };
+    out.update(decode_dimensions(bits, 219));   // from msg_19.hpp
     out.update(decode_aton_status(status));
     return out;
 }
 ```
 
 > **Language notes (C++).**
+> * `#include "msg_19.hpp"` brings in `decode_dimensions`. The header is
+>   also included by `msg_24.hpp` and by the driver; `#pragma once` and
+>   `inline` make that harmless (chapter 14).
 > * `std::min(a, b)` is a template that deduces *one* type for both
 >   arguments. `bits.size()` is a `std::size_t`, so the constant must be a
 >   `std::size_t` as well — `std::min(extension_bits / 6, 14)` would fail to
@@ -620,10 +634,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
     put(&mut out, "lon", Json::fixed(lon_raw as f64 / 600000.0, 6));
     put(&mut out, "lat", Json::fixed(lat_raw as f64 / 600000.0, 6));
     put(&mut out, "position_available", lon_raw != 0x6791AC0 && lat_raw != 0x3412140);
-    put(&mut out, "dim_a_m", bits.uint(219, 9));
-    put(&mut out, "dim_b_m", bits.uint(228, 9));
-    put(&mut out, "dim_c_m", bits.uint(237, 6));
-    put(&mut out, "dim_d_m", bits.uint(243, 6));
+    out.extend(decode_dimensions(bits, 219));   // use crate::msg_19::decode_dimensions
     put(&mut out, "epfd", epfd);
     put(&mut out, "epfd_text", epfd_text(epfd));
     put(&mut out, "timestamp", timestamp);
@@ -713,10 +724,6 @@ export function decode(bits: Bits): JsonObject {
     lon: new Fixed(lonRaw / 600000.0, 6),
     lat: new Fixed(latRaw / 600000.0, 6),
     position_available: lonRaw !== 0x6791ac0 && latRaw !== 0x3412140,
-    dim_a_m: bits.uint(219, 9),
-    dim_b_m: bits.uint(228, 9),
-    dim_c_m: bits.uint(237, 6),
-    dim_d_m: bits.uint(243, 6),
     epfd,
     epfd_text: epfdText(epfd),
     timestamp,
@@ -729,6 +736,7 @@ export function decode(bits: Bits): JsonObject {
     assigned_mode: bits.flag(270),
     spare: bits.uint(271, 1),
   };
+  Object.assign(out, decodeDimensions(bits, 219));   // import from "./msg_19"
   Object.assign(out, decodeStatus(status));
   return out;
 }
@@ -796,7 +804,7 @@ The output (identical for all four, see
 sentence, line 8, comes out as:
 
 ```json
-{"ais":{"assigned_mode":false,"aton_status":0,"aton_status_bits":"00000000","aton_status_page":0,"aton_type":0,"aton_type_text":"not specified (default)","dim_a_m":0,"dim_b_m":0,"dim_c_m":0,"dim_d_m":0,"epfd":1,"epfd_text":"GPS","full_name":"NOAA WHALE NOTICES","lat":43.135307,"lon":-70.939640,"mmsi":3669739,"msg_type":21,"name":"NOAA WHALE NOTICES","name_extension":"","name_extension_bits":0,"off_position":true,"off_position_valid":false,"position_accuracy":1,"position_available":true,"raim":true,"repeat_indicator":0,"spare":0,"timestamp":12,"virtual_aton":false},"channel":"B","fragments":1,"line":8,"own_ship":false,"payload_bits":272,"talker":"AI","uscg":{"station":"ccom-office","station_kind":"receiver","time":1284576313.39}}
+{"ais":{"assigned_mode":false,"aton_status":0,"aton_status_bits":"00000000","aton_status_page":0,"aton_type":0,"aton_type_text":"not specified (default)","beam_m":0,"dim_bow_m":0,"dim_port_m":0,"dim_starboard_m":0,"dim_stern_m":0,"dimensions_available":false,"epfd":1,"epfd_text":"GPS","full_name":"NOAA WHALE NOTICES","lat":43.135307,"length_m":0,"lon":-70.939640,"mmsi":3669739,"msg_type":21,"name":"NOAA WHALE NOTICES","name_extension":"","name_extension_bits":0,"off_position":true,"off_position_valid":false,"position_accuracy":1,"position_available":true,"raim":true,"reference_point_available":false,"repeat_indicator":0,"spare":0,"timestamp":12,"virtual_aton":false},"channel":"B","fragments":1,"line":8,"own_ship":false,"payload_bits":272,"talker":"AI","uscg":{"station":"ccom-office","station_kind":"receiver","time":1284576313.39}}
 ```
 
 ### A serial number as MMSI (lines 16–19)

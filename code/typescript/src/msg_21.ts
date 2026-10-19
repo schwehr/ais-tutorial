@@ -22,6 +22,7 @@
  *    228-236   9  dimension B (to "stern"), m
  *    237-242   6  dimension C (to port), m
  *    243-248   6  dimension D (to starboard), m
+ *                 (decoded by decodeDimensions from msg_19.ts, same keys as message 5)
  *    249-252   4  type of EPFD (Table 51); 7 = surveyed is normal for fixed/virtual aids
  *    253-258   6  UTC second; 60 = n/a, 61 manual, 62 dead reckoning, 63 inoperative
  *    259       1  off-position indicator (floating AtoN only; valid only if second <= 59)
@@ -52,6 +53,7 @@
 import { Bits } from "./bits";
 import { epfdText, requireBits } from "./common";
 import { Fixed, JsonObject } from "./jsonout";
+import { decodeDimensions } from "./msg_19";
 
 /** Table 73: the fixed part (two slots). */
 export const MIN_BITS = 272;
@@ -182,10 +184,6 @@ export function decode(bits: Bits): JsonObject {
     lon: new Fixed(lonRaw / 600000.0, 6),
     lat: new Fixed(latRaw / 600000.0, 6),
     position_available: lonRaw !== 0x6791ac0 && latRaw !== 0x3412140,
-    dim_a_m: bits.uint(219, 9),
-    dim_b_m: bits.uint(228, 9),
-    dim_c_m: bits.uint(237, 6),
-    dim_d_m: bits.uint(243, 6),
     epfd,
     epfd_text: epfdText(epfd),
     timestamp,
@@ -200,6 +198,9 @@ export function decode(bits: Bits): JsonObject {
     assigned_mode: bits.flag(270),
     spare: bits.uint(271, 1),
   };
+  // Bits 219-248: the same 30-bit A/B/C/D block as messages 5, 19 and 24B,
+  // with the same keys (dim_bow_m … beam_m) — one definition in msg_19.ts.
+  Object.assign(out, decodeDimensions(bits, 219));
   Object.assign(out, decodeStatus(status));
   return out;
 }
