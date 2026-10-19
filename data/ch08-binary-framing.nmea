@@ -1,0 +1,50 @@
+# Chapter 8 — messages 6 and 8: the binary containers and their framing.
+# All lines are real recordings except where a comment says otherwise.
+# Sources (file: line) are given per group; see chapter 8 §8.5.
+#
+# 1. Message 8, DAC 366 FI 34 (right-whale zone notice), one 112-bit record.
+#    Boston (Mystic River) transponder, CCOM whale_update script, 168 bits.
+#    RightwhaleAisProject/20081015-boston-pog/log.2008-10-15 lines 2447, 2453
+!AIVDM,1,1,,A,803OvqQK`PP7fb0Fg7GI63do4T;0,0*51,1224081725.44
+!AIVDM,1,1,,A,803OvqQK`QPGUOT6gGiCV3T`hT;0,0*7D,1224081727.26
+#
+# 2. The same notice type from the Provincetown transponder driven by the
+#    Cornell ARI software: 176 bits, i.e. eight extra zero bits (§8.6).
+#    N-AIS feed, RightwhaleAisProject/20081013.log lines 2357, 2359
+!AIVDM,1,1,,A,803OvriK`PP6dj0Fg7GI63do4T;000,4*65,s30644,d-091,T15.76379902,x78753,r003669946,1223902216
+!AIVDM,1,1,,B,803OvriK`Q0FDjT6g?TIV3`j0T;000,4*3D,s30590,d-091,T16.19045496,x78755,r003669946,1223902217
+#
+# 3. Message 6, DAC 1 FI 0 (IFM 0 text telegram, empty text) from two USCG
+#    base stations to MMSI 923156; the second station sets the retransmit
+#    flag on its retries (bit 70: '@' -> 'B'), the first never does.
+#    RightwhaleAisProject/20081013.log lines 232157, 232165, 232187
+!AIVDM,1,1,,B,603Ovl@0>5Q@04000000,0*2B,s26803,d-107,T39.92316035,x150977,r003669946,1223948560
+!AIVDM,1,1,,A,603Owlh0>5Q@04000000,0*01,s30036,d-093,T40.16380142,x150980,r003669946,1223948560
+!AIVDM,1,1,,B,603Owlh0>5QB04000000,0*00,s29900,d-094,T46.37714692,x150990,r003669946,1223948566
+#
+# 4. Message 6 with DAC 0 (test) and an impossible source MMSI (2^23).
+#    tide3/ais/ais-2010-12-27 line 460
+!AIVDM,1,1,,A,608000000000000000000000J209NIpQ0<hhQh,4*4E,rnhcml,1293463956.65
+#
+# 5. Multi-fragment message 8: USCG encrypted AIS, DAC 366 FI 56 (one
+#    fragment, 312 bits) and FI 57 (two fragments, 568 bits).
+#    misc/rv-auk-boston-harbor-log.2008-08-20 lines 57386-57388
+!AIVDM,1,1,,B,85MwpTiKf7HmP<R0v`H:DM:FvRGD1bMcUvSsLELn9sWcw=3>A9=o,0*1E,rauk,1219251262.32
+!AIVDM,2,1,6,B,85MwpTiKfITwQn5hi7CaeKin;Pnn9qCTpnDfMJv2CEn6=0cKLUcegCgk,0*1D,rauk,1219251262.43
+!AIVDM,2,2,6,B,kB?<4K1DB3tK38BETPn18;?fs45VgBf588pnpAp,2*7F,rauk,1219251262.45
+#
+# 6. A three-fragment message 8 (FI 57 again) with the full USCG metadata.
+#    RightwhaleAisProject/20081013.log lines 198-200
+!AIVDM,3,1,1,B,85PH4I1KfB6IOIpSs3?jBCmjuiSpgv6a:f85VTH1s?6,0*40,s26613,d-108,T44.76366877,x101246,r003669945,1223902000
+!AIVDM,3,2,1,B,2ktAd0o@GU`vAv80<BpEuK;hrj:<RDL8FUstIask2ei,0*79,s26613,d-108,T44.76366877,x101247,r003669945,1223902000
+!AIVDM,3,3,1,B,gW6J<fTk0,2*0F,s26613,d-108,T44.76366877,x101248,r003669945,1223902000
+#
+# 7. A ship's own message 8 (!AIVDO) with an unregistered DAC 117 — the
+#    decoder keeps the 48 data bits raw. 2007hydro/protec-util12007-05-14 line 1471
+!AIVDO,1,1,,A,852HH<hMD=8=<=DMD0,4*06,1179173406.44
+#
+# 8. Too short to hold an application identifier (32 bits), and a 88-bit
+#    message whose spare bit is set and whose DAC 322 means nothing.
+#    tide3/ais/ais-2009-06-30 line 208; tide3/ais/ais-2009-06-28 line 1540
+!AIVDM,1,1,,A,8>@q3h,4*4E,rnhcml,1246330795.13
+!AIVDM,1,1,,A,8;PmdiE@ew9pw?@,2*41,rnhcml,1246171066.12
