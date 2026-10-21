@@ -101,7 +101,7 @@ class Bits:
         self.bits = bits
 
     @classmethod
-    def from_payload(cls, payload: str, fill_bits: int = 0) -> "Bits":
+    def from_payload(cls, payload: str, fill_bits: int = 0) -> Bits:
         """Build directly from an !AIVDM payload and its fill-bit count."""
         return cls(payload_to_bits(payload, fill_bits))
 

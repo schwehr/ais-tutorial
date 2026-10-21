@@ -83,7 +83,7 @@ Characters are the six-bit ASCII of Table 47 — `@` is 0, `A`–`Z` are 1–26,
 2. **Six-bit alignment in the sentence.** The receiver armours the 184 bits into 31 characters (186 bits) and sets the fill-bit field to 2 (chapter 2). After the fill bits are removed we are back to 184 bits: 72 of header, 18 whole characters, and 4 bits that belong to no character. Our decoder reports them as `trailing_bits` and ignores them.
 3. **`@` ends the text.** A six-bit spare that happens to be a whole character decodes as `@`, and transponders that allocate a fixed buffer pad with `@` too. Like every text field in this tutorial, the decoder cuts at the first `@` and strips trailing spaces (chapter 2).
 
-How much text fits in how many slots is given by the standard, bit stuffing included: 10/48/85/122/156 characters for 1–5 slots of message 12 [M.1371-5 Annex 8 Table 62] and 16/53/90/128/161 for message 14 [M.1371-5 Annex 8 Table 64]. Applications "should minimise the use of slots by limiting the number of characters to the numbers given" [M.1371-5 Annex 8 §3.10].
+How much text fits in how many slots is given by the standard, bit stuffing included: 10/48/85/122/156 characters for 1–5 slots of message 12 [M.1371-5 Annex 8 Table 62] and 16/53/90/128/161 for message 14 [M.1371-5 Annex 8 Table 64]. "It is recommended that any application minimizes the use of slots by limiting the number of characters to the numbers given, if possible" [M.1371-5 Annex 8 §3.10, §3.12].
 
 ### Sequence numbers, retries and acknowledgements
 

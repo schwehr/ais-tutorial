@@ -389,7 +389,7 @@ def decode_whale_notice(bits: Bits, o: int, data_bits: int) -> dict:
 
 # --- the registry ----------------------------------------------------------
 
-Decoder = Callable[[Bits, int, int], dict]   # a type alias (plain assignment works on Python 3.10+)
+type Decoder = Callable[[Bits, int, int], dict]
 
 # (dac, fi) -> (name, minimum data bits, decoder)
 DECODERS: dict[tuple[int, int], tuple[str, int, Decoder]] = {

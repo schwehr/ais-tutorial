@@ -47,7 +47,7 @@ All four decoders read NMEA log lines and print one JSON object per line
 are built and checked against each other by `tests/run_tests.sh`.
 
 ```sh
-# Python 3.10+ (no packages needed)
+# Python 3.14+ (no packages needed); use python3.14 explicitly if python3 is older
 python3 code/python/decode.py data/ch03-position-reports.nmea
 
 # C++17 (g++ or clang++)
@@ -61,6 +61,7 @@ make -C code/cpp && code/cpp/build/decode data/ch03-position-reports.nmea
 
 # Everything, compared byte-for-byte with tests/expected/
 tests/run_tests.sh
+PYTHON=python3.14 tests/run_tests.sh   # if plain python3 is older than 3.14
 ```
 
 ## Repository layout

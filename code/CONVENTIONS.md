@@ -141,4 +141,10 @@ Rules that make byte-identical output possible:
   for errors, no `unwrap()` on input-derived values.
 * TypeScript `strict`, ES2022 target, CommonJS modules for plain `node`,
   `Map`-free plain objects with a custom sorted stringify.
-* Python 3.10+, standard library only, type hints, dataclasses.
+* Python 3.14+, standard library only, type hints, dataclasses. Modern
+  typing only: `X | None` (PEP 604), built-in generics `list[str]` /
+  `dict[int, str]` (PEP 585), `collections.abc.Callable`, `type` aliases
+  (PEP 695); no `typing.Optional`/`List`, no quoted forward references and
+  no `from __future__ import annotations` (PEP 649 makes them unnecessary).
+  `decode.py` refuses to run on an older interpreter; the test scripts
+  honour `PYTHON=python3.14` when plain `python3` is older.

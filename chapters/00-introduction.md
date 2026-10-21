@@ -149,7 +149,7 @@ but because the point is to see every line that touches the data.
 
 | Language | Toolchain | Check with |
 |---|---|---|
-| Python | 3.10 or newer, standard library only | `python3 --version` |
+| Python | **3.14 or newer**, standard library only (the code uses PEP 604 `X \| None` unions, PEP 585 built-in generics, PEP 695 `type` aliases and PEP 649 deferred annotations; if your `python3` is older, run `python3.14 …` and `PYTHON=python3.14 tests/run_tests.sh`) | `python3 --version` |
 | C++ | `g++` or `clang++` with C++17; `make` | `g++ --version` |
 | Rust | 1.70 or newer (`cargo`, `rustc`); no crates | `cargo --version` |
 | TypeScript | `tsc` 5 or newer and `node` 18 or newer; no npm packages | `tsc --version`, `node --version` |

@@ -460,7 +460,10 @@ everywhere.
 > **Language notes (Python).** `class Bits:` bundles data (`self.bits`)
 > with the methods that read it; `self` is the object, passed explicitly.
 > `@classmethod` marks a method that receives the class (`cls`) instead of
-> an instance — a "named constructor" (`Bits.from_payload(...)`).
+> an instance — a "named constructor" (`Bits.from_payload(...)`). Its
+> return hint `-> Bits` names the class that is still being defined; that
+> works because Python 3.14 evaluates annotations lazily (PEP 649), where
+> older versions needed `-> "Bits"` or `from __future__ import annotations`.
 > Defining `__len__` lets `len(bits)` work on your own class ("dunder"
 > methods hook into built-in syntax). `int(s, 2)` parses a string of binary
 > digits; `format(v, "06b")` is its inverse, producing six zero-padded
