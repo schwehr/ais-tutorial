@@ -133,10 +133,15 @@ impl<T: Into<Json>> From<Option<T>> for Json {
 
 // --- Serialisation ---------------------------------------------------------
 
+/// |value| at or above this prints as `null`: JSON has no nan/inf tokens,
+/// and above 1e21 JavaScript's `toFixed` switches to exponent notation, so
+/// the four languages could not agree on the digits anyway (CONVENTIONS §2).
+pub const FIXED_LIMIT: f64 = 1e21;
+
 /// Format a float with `decimals` places, printing negative zero as positive.
 fn format_fixed(value: f64, decimals: usize) -> String {
-    if value.is_nan() {
-        return "nan".to_string(); // Python spells it in lower case
+    if !value.is_finite() || value.abs() >= FIXED_LIMIT {
+        return "null".to_string();
     }
     // `{:.*}` takes the precision from the first argument.
     let s = format!("{:.*}", decimals, value);

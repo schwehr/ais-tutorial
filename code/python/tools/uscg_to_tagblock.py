@@ -30,7 +30,7 @@ from aistut.tagblock import format_tag_block     # noqa: E402
 from aistut.uscg import parse_uscg_fields        # noqa: E402
 
 
-def convert(line: str, counter: int, group_ids: dict) -> str:
+def convert(line: str, counter: int, group_ids: dict[tuple[str, str, str], int]) -> str:
     s = parse_sentence(line)
     meta = parse_uscg_fields(s.after_checksum)
     params: dict[str, str] = {}
@@ -38,7 +38,7 @@ def convert(line: str, counter: int, group_ids: dict) -> str:
         params["s"] = str(meta["station"])
     if "time" in meta:
         params["c"] = str(int(float(str(meta["time"]))))
-    extras = []
+    extras: list[str] = []
     if "signal_dbm" in meta:
         extras.append(f"d{meta['signal_dbm']}")
     if "time_of_arrival_s" in meta:
@@ -60,7 +60,7 @@ def convert(line: str, counter: int, group_ids: dict) -> str:
 
 
 def main() -> None:
-    group_ids: dict = {}
+    group_ids: dict[tuple[str, str, str], int] = {}
     counter = 0
     for raw in sys.stdin:
         raw = raw.strip()

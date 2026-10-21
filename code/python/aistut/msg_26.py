@@ -28,8 +28,6 @@ sender may have omitted it, or padded more), so `data` includes it and
 the chapter explains how to reason about `data_bits % 8`.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 from .msg_1_2_3 import decode_itdma, decode_sotdma

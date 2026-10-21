@@ -209,7 +209,15 @@ std::optional<Json> process_line(const std::string& line, long long lineno, Asse
         out["skipped"] = "no parser";
         return out;
     }
-    out.update(parser(s));
+    // A GPS sentence with a valid checksum can still carry a non-numeric
+    // field. The py:: helpers throw std::invalid_argument with Python's
+    // exact ValueError text; report it like any other bad line.
+    try {
+        out.update(parser(s));
+    } catch (const std::invalid_argument& e) {
+        out["error"] = e.what();
+        out["raw"] = s.raw;
+    }
     return out;
 }
 
@@ -270,9 +278,9 @@ int main(int argc, char** argv) {
             aistut::run(file, lineno, assembler);
         }   // `file` is closed automatically here (RAII)
     } catch (const std::exception& e) {
-        // A malformed GPS number ("int('x')" in Python) is not caught by the
-        // reference implementation either; it stops with a traceback. We
-        // stop with a one-line message and the same non-zero status.
+        // Data problems are all reported as JSON error objects above; this
+        // only catches programming errors (and keeps the output written so
+        // far). Flush, say what happened, exit non-zero like Python would.
         std::cout.flush();
         std::cerr << "decode: line " << lineno << ": " << e.what() << '\n';
         return 1;

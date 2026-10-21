@@ -20,8 +20,6 @@ bits. It is also the only interrogation that does *not* use message 15
 [Annex 8 Table 46 note 4].
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 

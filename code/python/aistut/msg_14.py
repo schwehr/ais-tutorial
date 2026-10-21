@@ -18,8 +18,6 @@ Length rule: the 40-bit header is required (DecodeError otherwise); the
 text handling is shared with message 12 (see msg_12.decode_text_field).
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 from .msg_12 import decode_text_field
@@ -28,7 +26,7 @@ HEADER_BITS = 40
 
 # The six texts that distress beacons are required to send (Annex 1
 # §2.1.6-2.1.8). A watch-keeping application matches on these.
-BEACON_TEXTS = {
+BEACON_TEXTS: dict[str, str] = {
     "SART ACTIVE": "AIS-SART active",
     "SART TEST": "AIS-SART test",
     "MOB ACTIVE": "MOB-AIS active",

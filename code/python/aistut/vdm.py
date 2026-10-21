@@ -18,10 +18,7 @@ payload characters = 360 bits) is split across several VDM sentences with
 the same sequential id; only the *last* fragment carries non-zero fill bits.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Optional
 
 from .nmea import Sentence
 
@@ -32,7 +29,7 @@ class Vdm:
     own_ship: bool          # True for VDO
     total: int
     number: int
-    seq_id: Optional[int]
+    seq_id: int | None
     channel: str
     payload: str
     fill_bits: int
@@ -97,7 +94,7 @@ class Assembler:
     def __init__(self) -> None:
         self._pending: dict[tuple, list[Vdm]] = {}
 
-    def add(self, frag: Vdm) -> Optional[Message]:
+    def add(self, frag: Vdm) -> Message | None:
         if frag.total == 1:
             return Message(frag.payload, frag.fill_bits, frag.channel,
                            frag.talker, frag.own_ship, [frag])

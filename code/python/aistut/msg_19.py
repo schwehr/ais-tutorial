@@ -40,13 +40,11 @@ Python notes for readers new to the language
   helper between modules is just an `import` — there is no header file.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import epfd_text, require_bits, ship_type_text
 from .msg_18 import ASSIGNED_MODE, decode_common_position
 
-DTE = {0: "data terminal available", 1: "data terminal not available"}
+DTE: dict[int, str] = {0: "data terminal available", 1: "data terminal not available"}
 
 
 def decode_dimensions(bits: Bits, start: int) -> dict:

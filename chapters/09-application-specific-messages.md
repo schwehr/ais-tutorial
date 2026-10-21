@@ -314,13 +314,13 @@ The message modules are in chapter 8. [`code/python/aistut/asm.py`](../code/pyth
 Two helpers do most of the work for the met/hydro tables:
 
 ```python
-def _na(raw: int, sentinel: int) -> Optional[int]:
+def _na(raw: int, sentinel: int) -> int | None:
     """`raw` unless it equals the not-available sentinel, in which case None."""
     return None if raw == sentinel else raw
 
 
 def _scaled(raw: int, sentinel: int, divisor: float, decimals: int,
-            offset: float = 0.0) -> Optional[Fixed]:
+            offset: float = 0.0) -> Fixed | None:
     """raw / divisor + offset with `decimals` places, or None if raw == sentinel."""
     if raw == sentinel:
         return None
@@ -331,7 +331,7 @@ The whale notice is a loop over fixed-size records:
 
 ```python
 WHALE_RECORD_BITS = 112
-WHALE_ZONE_TYPE = {0: "right whales not observed", 1: "right whales present"}
+WHALE_ZONE_TYPE: dict[int, str] = {0: "right whales not observed", 1: "right whales present"}
 
 
 def decode_whale_notice(bits: Bits, o: int, data_bits: int) -> dict:
@@ -426,7 +426,7 @@ def decode_text_telegram(bits: Bits, o: int, data_bits: int) -> dict:
     }
 ```
 
-> **Language notes (Python).** `Optional[Fixed]` is "a `Fixed` or `None`"; the JSON writer prints `None` as `null`. `(data_bits - 12) // 6 * 6` rounds down to a multiple of 6 — integer division then multiplication. `dict.get(key, default)` is how `zone_type_text` survives a value the table does not list. Nothing else here is new since chapter 3; the message is long, the constructs are not.
+> **Language notes (Python).** `Fixed | None` is "a `Fixed` or `None`"; the JSON writer prints `None` as `null`. `(data_bits - 12) // 6 * 6` rounds down to a multiple of 6 — integer division then multiplication. `dict.get(key, default)` is how `zone_type_text` survives a value the table does not list. Nothing else here is new since chapter 3; the message is long, the constructs are not.
 
 ### C++
 
@@ -612,7 +612,7 @@ export function decodeWhaleNotice(bits: Bits, o: number, dataBits: number): Json
 
 | Concern | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
-| "value or not available" | `Optional[...]`, `None` | `Json` with `nullptr` | `Option<T>` → `null` via `From` | `T \| null` |
+| "value or not available" | `T \| None`, `None` | `Json` with `nullptr` | `Option<T>` → `null` via `From` | `T \| null` |
 | Signed/unsigned helpers | one function, Python ints | `std::int64_t` + `static_cast` | `as i64` casts, closure `u` | one `number` type |
 | Enumeration tables | `dict` with `.get` | `static const char*[]` indexed with a mask | `match` with `_` arm | object with `??` |
 | Bit masks | `& 0x7F`, `>> 7` | same | same | `% 128`, `>= 128` |

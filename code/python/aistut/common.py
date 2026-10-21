@@ -1,7 +1,5 @@
 """common.py — small things shared by several message decoders."""
 
-from __future__ import annotations
-
 
 class DecodeError(ValueError):
     """A message could not be decoded (usually: too few bits).
@@ -25,7 +23,7 @@ def require_bits(msg_type: int, bits_len: int, need: int) -> None:
 # Type of electronic position fixing device (EPFD). ITU-R M.1371-5 Annex 8
 # Table 51 (message 4); the same code list is used in messages 5, 9, 11,
 # 19, 21 and 24.
-EPFD_TYPES = {
+EPFD_TYPES: dict[int, str] = {
     0: "undefined",
     1: "GPS",
     2: "GLONASS",
@@ -48,10 +46,10 @@ def epfd_text(code: int) -> str:
 # category (1–4 = DG/HS/MP category X, Y, Z, OS — formerly A–D, which is
 # what the `_text` strings still say; 5–8 reserved, 9 = no additional
 # information). We spell out the common ones and derive the rest.
-SHIP_TYPE_FIRST_DIGIT = {
+SHIP_TYPE_FIRST_DIGIT: dict[int, str] = {
     2: "WIG", 3: "", 4: "HSC", 5: "", 6: "passenger", 7: "cargo", 8: "tanker", 9: "other",
 }
-SHIP_TYPE_SPECIAL = {
+SHIP_TYPE_SPECIAL: dict[int, str] = {
     0: "not available (default)",
     30: "fishing", 31: "towing", 32: "towing, length > 200 m or breadth > 25 m",
     33: "dredging or underwater operations", 34: "diving operations",
@@ -61,7 +59,7 @@ SHIP_TYPE_SPECIAL = {
     54: "anti-pollution equipment", 55: "law enforcement", 56: "spare - local vessel",
     57: "spare - local vessel", 58: "medical transport", 59: "noncombatant ship (RR Res. 18)",
 }
-HAZARD_DIGIT = {
+HAZARD_DIGIT: dict[int, str] = {
     0: "all ships of this type", 1: "hazardous category A", 2: "hazardous category B",
     3: "hazardous category C", 4: "hazardous category D", 5: "reserved", 6: "reserved",
     7: "reserved", 8: "reserved", 9: "no additional information",

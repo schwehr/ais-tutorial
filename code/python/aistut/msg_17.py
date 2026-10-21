@@ -30,8 +30,6 @@ bits were present. Fewer than 40 data bits (but more than zero) is reported
 as `rtcm: null` — nothing meaningful can be read from a partial header.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 from .jsonout import Fixed
@@ -40,7 +38,7 @@ LON_NOT_AVAILABLE = 181 * 600   # 0x1A838 — 1/10-minute units
 LAT_NOT_AVAILABLE = 91 * 600    # 0x0D548
 
 # Reference-station health, Table 69 → ITU-R M.823 (the RTCM SC-104 v2 code).
-HEALTH = {
+HEALTH: dict[int, str] = {
     0: "UDRE scale factor 1.0",
     1: "UDRE scale factor 0.75",
     2: "UDRE scale factor 0.5",

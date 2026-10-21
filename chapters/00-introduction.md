@@ -293,7 +293,7 @@ each of them than four unrelated examples would. Each version is written in
 the idiom its own community would recognise, not as a transliteration:
 
 * **Python** is the reference. Functions and `dataclass`es, dictionaries
-  for JSON objects, `Optional` for missing values, exceptions for errors.
+  for JSON objects, `X | None` type hints for missing values, exceptions for errors.
   It is the shortest and the one the test fixtures are generated from.
 * **C++17** shows what the same design looks like with static types and no
   garbage collector: header-only modules, `struct`s as data bundles,

@@ -18,10 +18,8 @@ problem               {"line":5,"error":"checksum mismatch","raw":"..."}
 Logger comments (# ...) and blank lines print nothing.
 """
 
-from __future__ import annotations
-
 import sys
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from .bits import Bits
 from .common import DecodeError
@@ -89,7 +87,7 @@ def decode_ais(msg: Message) -> dict:
     return out
 
 
-def process_line(line: str, lineno: int, asm: Assembler) -> Optional[dict]:
+def process_line(line: str, lineno: int, asm: Assembler) -> dict | None:
     """Handle one text line. Returns a dict to print, or None to stay quiet."""
     stripped = line.strip()
     if not stripped or stripped.startswith("#"):
@@ -140,7 +138,15 @@ def process_line(line: str, lineno: int, asm: Assembler) -> Optional[dict]:
         out["address"] = s.address
         out["skipped"] = "no parser"
         return out
-    out.update(parser(s))
+    # A GPS sentence with a valid checksum can still carry a non-numeric
+    # field (a receiver firmware bug, or a logger that re-computes
+    # checksums). int()/float() raise ValueError; report it like any other
+    # bad line instead of letting it abort the whole run.
+    try:
+        out.update(parser(s))
+    except ValueError as e:
+        out["error"] = str(e)
+        out["raw"] = s.raw
     return out
 
 

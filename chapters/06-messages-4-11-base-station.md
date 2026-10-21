@@ -322,13 +322,13 @@ HOUR_NA = 24
 MINUTE_NA = 60
 SECOND_NA = 60
 
-TRANSMISSION_CONTROL = {
+TRANSMISSION_CONTROL: dict[int, str] = {
     0: "Class A stops message 27 within base station coverage (default)",
     1: "Class A requested to transmit message 27 within base station coverage",
 }
 
 
-def utc_iso(year: int, month: int, day: int, hour: int, minute: int, second: int) -> Optional[str]:
+def utc_iso(year: int, month: int, day: int, hour: int, minute: int, second: int) -> str | None:
     """Join the six UTC fields into 'YYYY-MM-DDTHH:MM:SSZ', or None.
 
     None is returned when *any* component is its not-available value or
@@ -397,7 +397,7 @@ def decode(bits: Bits) -> dict:
 > `decode_sotdma` was written as public precisely so this chapter could
 > reuse it. The f-string format spec `{year:04d}` means "decimal, zero-pad
 > to width 4" — the same mini-language as `format(x, '.6f')` in
-> `jsonout.py`. `Optional[str]` is the type hint for "a `str` or `None`".
+> `jsonout.py`. `str | None` is the type hint for "a `str` or `None`".
 
 ### C++
 

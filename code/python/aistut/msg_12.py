@@ -24,8 +24,6 @@ real message often carries 2 or 4 stray bits after the last character.
 We count them in `trailing_bits` and ignore them.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 

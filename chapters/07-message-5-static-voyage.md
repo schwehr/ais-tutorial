@@ -248,7 +248,7 @@ from .common import epfd_text, require_bits, ship_type_text
 from .jsonout import Fixed
 
 # Table 52, "AIS version indicator".
-AIS_VERSION = {
+AIS_VERSION: dict[int, str] = {
     0: "ITU-R M.1371-1",
     1: "ITU-R M.1371-3 or later",
     2: "ITU-R M.1371-5 or later",
@@ -256,7 +256,7 @@ AIS_VERSION = {
 }
 
 # Table 52, "DTE" (data terminal equipment ready), §3.3.1.
-DTE_TEXT = {0: "available", 1: "not available (default)"}
+DTE_TEXT: dict[int, str] = {0: "available", 1: "not available (default)"}
 
 
 def imo_range_text(imo: int) -> str:

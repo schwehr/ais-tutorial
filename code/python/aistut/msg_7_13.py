@@ -29,8 +29,6 @@ as are present, up to four. Bits left over after the last complete group
 the reader can see them; they are never interpreted.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 

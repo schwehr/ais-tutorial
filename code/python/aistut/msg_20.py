@@ -24,8 +24,6 @@ a non-standard length (e.g. 80 bits) is still decoded and the oddity is
 visible in the output.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 

@@ -185,8 +185,8 @@ ALTITUDE_MAX = 4094          # "4 094 m or higher"
 SOG_NOT_AVAILABLE = 1023
 SOG_MAX = 1022               # "1 022 knots or higher"
 
-ALTITUDE_SENSOR = {0: "GNSS", 1: "barometric"}
-ASSIGNED_MODE = {0: "autonomous and continuous", 1: "assigned"}
+ALTITUDE_SENSOR: dict[int, str] = {0: "GNSS", 1: "barometric"}
+ASSIGNED_MODE: dict[int, str] = {0: "autonomous and continuous", 1: "assigned"}
 
 
 def decode(bits: Bits) -> dict:

@@ -209,7 +209,18 @@ export function processLine(line: string, lineno: number, asm: Assembler): JsonO
     out["skipped"] = "no parser";
     return out;
   }
-  Object.assign(out, parser(s));
+  // A GPS sentence with a valid checksum can still carry a non-numeric
+  // field. pyInt()/pyFloat() throw ValueError with Python's exact text;
+  // report it like any other bad line instead of aborting the run.
+  try {
+    Object.assign(out, parser(s));
+  } catch (e) {
+    if (!(e instanceof ValueError)) {
+      throw e;
+    }
+    out["error"] = e.message;
+    out["raw"] = s.raw;
+  }
   return out;
 }
 
@@ -273,16 +284,22 @@ export function main(argv: readonly string[]): number {
   const asm = new Assembler();
   const output = new Output();
   let lineno = 0;
-  for (const name of argv) {
-    for (const line of splitLines(readText(name))) {
-      lineno += 1;
-      const result = processLine(line, lineno, asm);
-      if (result !== null) {
-        output.add(dumps(result));
+  // `finally` runs whether the loop finishes or throws, so a programming
+  // error on line 100 000 cannot discard the 99 999 results already
+  // buffered (Python and C++ flush their stdout on the way out as well).
+  try {
+    for (const name of argv) {
+      for (const line of splitLines(readText(name))) {
+        lineno += 1;
+        const result = processLine(line, lineno, asm);
+        if (result !== null) {
+          output.add(dumps(result));
+        }
       }
     }
+  } finally {
+    output.flush();
   }
-  output.flush();
   return 0;
 }
 

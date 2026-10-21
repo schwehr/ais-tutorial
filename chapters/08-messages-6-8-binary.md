@@ -291,7 +291,7 @@ def decode(bits: Bits) -> dict:
 And the registry's entry point in [`code/python/aistut/asm.py`](../code/python/aistut/asm.py):
 
 ```python
-Decoder = Callable[[Bits, int, int], dict]
+type Decoder = Callable[[Bits, int, int], dict]
 
 # (dac, fi) -> (name, minimum data bits, decoder)
 DECODERS: dict[tuple[int, int], tuple[str, int, Decoder]] = {
@@ -302,7 +302,7 @@ DECODERS: dict[tuple[int, int], tuple[str, int, Decoder]] = {
 }
 
 
-def decode(dac: int, fi: int, bits: Bits, offset: int) -> Optional[dict]:
+def decode(dac: int, fi: int, bits: Bits, offset: int) -> dict | None:
     """Decode the application data that starts at `offset`.
 
     Returns None when (dac, fi) is unknown. For a known pair the result

@@ -27,8 +27,6 @@ decoded into `application`. Trailing byte-alignment padding is part of
 `data`; the receiver cannot tell it from payload (chapter 8 §8.6).
 """
 
-from __future__ import annotations
-
 from . import asm
 from .bits import Bits
 from .common import require_bits

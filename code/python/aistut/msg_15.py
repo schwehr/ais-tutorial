@@ -50,14 +50,12 @@ JSON array `interrogations`, in message order. Rules:
     form).
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 
 # Table 46 message names, used for the `_text` companion of a requested
 # message type. The names are abbreviated from the "Name" column.
-MESSAGE_NAMES = {
+MESSAGE_NAMES: dict[int, str] = {
     0: "none",
     1: "position report",
     2: "position report (assigned)",

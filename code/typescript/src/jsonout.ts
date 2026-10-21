@@ -63,6 +63,14 @@ export class Fixed {
 }
 
 /**
+ * |x| at or above this prints as `null`: JSON has no nan/inf tokens, and
+ * from 1e21 upwards `toFixed` itself switches to exponent notation
+ * (`(1e21).toFixed(2)` is "1e+21"), so the four languages could not agree
+ * on the digits anyway (CONVENTIONS §2).
+ */
+export const FIXED_LIMIT = 1e21;
+
+/**
  * Format `x` with `decimals` places exactly like C's `printf("%.*f")`.
  *
  * `toFixed` already prints the *exact* decimal expansion of the double,
@@ -74,9 +82,8 @@ export class Fixed {
  * that case the fix is to make the last digit even.
  */
 export function formatFixed(x: number, decimals: number): string {
-  if (!Number.isFinite(x)) {
-    // Python prints inf/nan this way; JavaScript would say "Infinity"/"NaN".
-    return Number.isNaN(x) ? "nan" : x < 0 ? "-inf" : "inf";
+  if (!Number.isFinite(x) || Math.abs(x) >= FIXED_LIMIT) {
+    return "null";
   }
   let s = x.toFixed(decimals);
   const scaled = x * 2 ** (decimals + 1); // exact: multiplying by a power of 2

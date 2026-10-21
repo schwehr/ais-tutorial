@@ -238,7 +238,7 @@ from .msg_12 import decode_text_field
 
 HEADER_BITS = 40
 
-BEACON_TEXTS = {
+BEACON_TEXTS: dict[str, str] = {
     "SART ACTIVE": "AIS-SART active",
     "SART TEST": "AIS-SART test",
     "MOB ACTIVE": "MOB-AIS active",

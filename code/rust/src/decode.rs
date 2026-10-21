@@ -198,8 +198,9 @@ pub fn process_line(line: &str, lineno: usize, asm: &mut Assembler) -> Option<Ob
     match parser(&s) {
         Ok(fields) => out.extend(fields),
         Err(e) => {
-            // The Python reference would raise here (uncaught ValueError);
-            // we report the same text as a line error instead of crashing.
+            // A GPS sentence with a valid checksum can still carry a
+            // non-numeric field; report Python's ValueError text as a line
+            // error (all four decoders do this identically).
             put(&mut out, "error", e.to_string());
             put(&mut out, "raw", s.raw.as_str());
         }

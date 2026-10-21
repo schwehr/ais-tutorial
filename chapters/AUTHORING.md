@@ -99,7 +99,7 @@ The citation keys used, with the specific sections.
 
 | Construct | First explained in |
 |---|---|
-| Python: functions, f-strings, slicing, `int(s, 2)`, dict, list, `dataclass`, type hints, `Optional`, exceptions, modules/packages | ch. 1–2 |
+| Python: functions, f-strings, slicing, `int(s, 2)`, dict, list, `dataclass`, type hints, `X | None`, exceptions, modules/packages | ch. 1–2 |
 | C++: `#include`, `std::string`/`string_view`, `std::vector`, `struct`/`class`, `std::optional`, `std::map`, references vs values, `const`, exceptions, header-only design, `snprintf` | ch. 1–2 |
 | Rust: `fn`, ownership and borrowing (`&str` vs `String`), `Option`/`Result` and `?`, `match`, `struct`/`impl`, `enum` with data, `Vec`, `BTreeMap`, `impl Display`, modules | ch. 1–2 |
 | TypeScript: `interface`/`type`, `class`, union types `number | null`, `readonly`, `Map`, arrow functions, template literals, modules/imports, bitwise 32-bit pitfall, `toFixed` | ch. 1–2 |

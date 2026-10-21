@@ -29,8 +29,6 @@ Python notes for readers new to the language
   them, but editors and `mypy` use them.
 """
 
-from __future__ import annotations
-
 
 # --- 1. Armouring ---------------------------------------------------------
 #

@@ -3,7 +3,11 @@
 # output with tests/expected/<name>.jsonl.
 #
 #   tests/run_tests.sh                 # all four languages
+#   PYTHON=python3.14 tests/run_tests.sh   # if plain python3 is older than 3.14
 #   tests/run_tests.sh python rust     # a subset
+#
+# The Python decoder requires Python 3.14 or newer; set PYTHON to the
+# interpreter to use (default: python3).
 #
 # Exit status is non-zero if any build or comparison fails.
 
@@ -27,7 +31,7 @@ build() {
 
 run() {   # run <lang> <file>
   case "$1" in
-    python)     python3 code/python/decode.py "$2" ;;
+    python)     "${PYTHON:-python3}" code/python/decode.py "$2" ;;
     cpp)        code/cpp/build/decode "$2" ;;
     rust)       code/rust/target/release/decode "$2" ;;
     typescript) node code/typescript/dist/decode.js "$2" ;;

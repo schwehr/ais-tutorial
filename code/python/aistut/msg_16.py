@@ -44,15 +44,12 @@ present the second assignment is decoded; otherwise bits 92-95 are
 reported as `spare2`. Anything else is counted in `trailing_bits`.
 """
 
-from __future__ import annotations
-
-from typing import Optional
 
 from .bits import Bits
 from .common import require_bits
 
 # Table 67 text under note (1): increment code -> slots between assigned slots.
-SLOT_INCREMENTS = {1: 1125, 2: 375, 3: 225, 4: 125, 5: 75, 6: 45}
+SLOT_INCREMENTS: dict[int, int] = {1: 1125, 2: 375, 3: 225, 4: 125, 5: 75, 6: 45}
 
 # 2250 slots per minute per channel (Annex 2 §3.1.2), so 1125 slots = 30 s,
 # 375 = 10 s, 225 = 6 s, 125 = 3.33 s, 75 = 2 s, 45 = 1.2 s.
@@ -60,8 +57,8 @@ SLOT_INCREMENTS = {1: 1125, 2: 375, 3: 225, 4: 125, 5: 75, 6: 45}
 
 def assignment(mmsi: int, offset: int, increment: int) -> dict:
     """Interpret one (destination, offset, increment) triple."""
-    reports: Optional[int] = None
-    slots: Optional[int] = None
+    reports: int | None = None
+    slots: int | None = None
     if increment == 0:
         text = "reporting rate"
         reports = offset

@@ -42,8 +42,6 @@ Python notes for readers new to the language
   state is identical in every message that carries one.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 from .jsonout import Fixed
@@ -53,13 +51,13 @@ from .msg_1_2_3 import decode_itdma, decode_sotdma
 # communication state field.
 CS_FIXED_COMM_STATE = "1100000000000000110"
 
-CLASS_B_UNIT = {0: "Class B SOTDMA unit", 1: "Class B CS unit"}
-CLASS_B_DISPLAY = {0: "no display for messages 12 and 14", 1: "integrated display for messages 12 and 14"}
-CLASS_B_DSC = {0: "no DSC function", 1: "DSC function (dedicated or time-shared)"}
-CLASS_B_BAND = {0: "upper 525 kHz of the marine band only", 1: "whole marine band"}
-CLASS_B_MSG22 = {0: "AIS 1 and AIS 2 only, no message 22 frequency management",
-                 1: "frequency management via message 22"}
-ASSIGNED_MODE = {0: "autonomous and continuous", 1: "assigned"}
+CLASS_B_UNIT: dict[int, str] = {0: "Class B SOTDMA unit", 1: "Class B CS unit"}
+CLASS_B_DISPLAY: dict[int, str] = {0: "no display for messages 12 and 14", 1: "integrated display for messages 12 and 14"}
+CLASS_B_DSC: dict[int, str] = {0: "no DSC function", 1: "DSC function (dedicated or time-shared)"}
+CLASS_B_BAND: dict[int, str] = {0: "upper 525 kHz of the marine band only", 1: "whole marine band"}
+CLASS_B_MSG22: dict[int, str] = {0: "AIS 1 and AIS 2 only, no message 22 frequency management",
+                                 1: "frequency management via message 22"}
+ASSIGNED_MODE: dict[int, str] = {0: "autonomous and continuous", 1: "assigned"}
 
 
 def decode_common_position(bits: Bits, start: int) -> dict:

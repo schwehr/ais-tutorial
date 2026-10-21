@@ -27,11 +27,14 @@ final time are always present. Known prefixes:
     (none) a bare number: UNIX time in seconds, possibly with a fraction
 """
 
-from __future__ import annotations
-
-from typing import Optional
 
 from .jsonout import Fixed
+
+
+def _is_ascii_digits(s: str) -> bool:
+    """Non-empty and only '0'..'9'. Plain `str.isdigit()` also accepts
+    '²' and Arabic-Indic digits, which the other three ports do not."""
+    return s.isascii() and s.isdigit()
 
 
 def parse_uscg_fields(extras: list[str]) -> dict:
@@ -47,20 +50,20 @@ def parse_uscg_fields(extras: list[str]) -> dict:
             continue
         code, rest = item[0], item[1:]
         try:
-            if code == "s" and rest.lstrip("-").isdigit():
+            if code == "s" and _is_ascii_digits(rest.lstrip("-")):
                 out["rssi"] = int(rest)
-            elif code == "d" and rest.lstrip("-").isdigit():
+            elif code == "d" and _is_ascii_digits(rest.lstrip("-")):
                 out["signal_dbm"] = int(rest)
             elif code == "T":
                 out["time_of_arrival_s"] = Fixed(float(rest), 8)
-            elif code == "S" and rest.isdigit():
+            elif code == "S" and _is_ascii_digits(rest):
                 out["slot"] = int(rest)
-            elif code == "x" and rest.isdigit():
+            elif code == "x" and _is_ascii_digits(rest):
                 out["sentence_counter"] = int(rest)
             elif code in ("r", "b") and rest:
                 out["station"] = rest
                 out["station_kind"] = "base" if code == "b" else "receiver"
-            elif item.replace(".", "", 1).isdigit():
+            elif _is_ascii_digits(item.replace(".", "", 1)):
                 # A bare number is the UNIX receive time.
                 out["time"] = Fixed(float(item), 2) if "." in item else int(item)
             else:
@@ -72,7 +75,7 @@ def parse_uscg_fields(extras: list[str]) -> dict:
     return out
 
 
-def time_of_arrival_to_utc(unix_time: int, toa_s: Optional[float]) -> Optional[Fixed]:
+def time_of_arrival_to_utc(unix_time: int, toa_s: float | None) -> Fixed | None:
     """Combine the coarse UNIX time with the fine `T` field.
 
     `T` is seconds past the start of the UTC minute measured by the

@@ -672,13 +672,13 @@ from .msg_1_2_3 import decode_itdma, decode_sotdma
 # communication state field.
 CS_FIXED_COMM_STATE = "1100000000000000110"
 
-CLASS_B_UNIT = {0: "Class B SOTDMA unit", 1: "Class B CS unit"}
-CLASS_B_DISPLAY = {0: "no display for messages 12 and 14", 1: "integrated display for messages 12 and 14"}
-CLASS_B_DSC = {0: "no DSC function", 1: "DSC function (dedicated or time-shared)"}
-CLASS_B_BAND = {0: "upper 525 kHz of the marine band only", 1: "whole marine band"}
-CLASS_B_MSG22 = {0: "AIS 1 and AIS 2 only, no message 22 frequency management",
-                 1: "frequency management via message 22"}
-ASSIGNED_MODE = {0: "autonomous and continuous", 1: "assigned"}
+CLASS_B_UNIT: dict[int, str] = {0: "Class B SOTDMA unit", 1: "Class B CS unit"}
+CLASS_B_DISPLAY: dict[int, str] = {0: "no display for messages 12 and 14", 1: "integrated display for messages 12 and 14"}
+CLASS_B_DSC: dict[int, str] = {0: "no DSC function", 1: "DSC function (dedicated or time-shared)"}
+CLASS_B_BAND: dict[int, str] = {0: "upper 525 kHz of the marine band only", 1: "whole marine band"}
+CLASS_B_MSG22: dict[int, str] = {0: "AIS 1 and AIS 2 only, no message 22 frequency management",
+                                 1: "frequency management via message 22"}
+ASSIGNED_MODE: dict[int, str] = {0: "autonomous and continuous", 1: "assigned"}
 
 
 def decode_common_position(bits: Bits, start: int) -> dict:
@@ -759,7 +759,7 @@ sense of some of them is easy to get backwards.
 ```python
 from .msg_18 import ASSIGNED_MODE, decode_common_position
 
-DTE = {0: "data terminal available", 1: "data terminal not available"}
+DTE: dict[int, str] = {0: "data terminal available", 1: "data terminal not available"}
 
 
 def decode_dimensions(bits: Bits, start: int) -> dict:
@@ -840,7 +840,7 @@ only for the all-zero block.
 from .common import epfd_text, require_bits, ship_type_text
 from .msg_19 import decode_dimensions
 
-PART_TEXT = {0: "part A", 1: "part B", 2: "reserved", 3: "reserved"}
+PART_TEXT: dict[int, str] = {0: "part A", 1: "part B", 2: "reserved", 3: "reserved"}
 
 
 def is_auxiliary_craft(mmsi: int) -> bool:

@@ -41,9 +41,6 @@ Python notes for readers new to the language
   every component is available, otherwise the field is `None` (JSON null).
 """
 
-from __future__ import annotations
-
-from typing import Optional
 
 from .bits import Bits
 from .common import epfd_text, require_bits
@@ -58,13 +55,13 @@ HOUR_NA = 24
 MINUTE_NA = 60
 SECOND_NA = 60
 
-TRANSMISSION_CONTROL = {
+TRANSMISSION_CONTROL: dict[int, str] = {
     0: "Class A stops message 27 within base station coverage (default)",
     1: "Class A requested to transmit message 27 within base station coverage",
 }
 
 
-def utc_iso(year: int, month: int, day: int, hour: int, minute: int, second: int) -> Optional[str]:
+def utc_iso(year: int, month: int, day: int, hour: int, minute: int, second: int) -> str | None:
     """Join the six UTC fields into 'YYYY-MM-DDTHH:MM:SSZ', or None.
 
     None is returned when *any* component is its not-available value or

@@ -35,6 +35,7 @@
 
 #pragma once
 
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <map>
@@ -46,12 +47,18 @@
 
 namespace aistut {
 
+// |value| at or above this prints as null: JSON has no nan/inf tokens, and
+// above 1e21 JavaScript's toFixed switches to exponent notation, so the
+// four languages could not agree on the digits anyway (see CONVENTIONS §2).
+constexpr double FIXED_LIMIT = 1e21;
+
 // A floating-point number to be printed with a fixed number of decimals.
 struct Fixed {
     double value;
     int decimals;
 
     std::string str() const {
+        if (!std::isfinite(value) || std::fabs(value) >= FIXED_LIMIT) return "null";
         // First call measures, second call writes. "%.*f" takes the precision
         // from the argument list.
         int length = std::snprintf(nullptr, 0, "%.*f", decimals, value);

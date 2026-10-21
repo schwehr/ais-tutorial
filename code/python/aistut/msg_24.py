@@ -51,13 +51,11 @@ Python notes for readers new to the language
   numeric literals, and chained comparisons `a <= x < b` read like maths.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import epfd_text, require_bits, ship_type_text
 from .msg_19 import decode_dimensions
 
-PART_TEXT = {0: "part A", 1: "part B", 2: "reserved", 3: "reserved"}
+PART_TEXT: dict[int, str] = {0: "part A", 1: "part B", 2: "reserved", 3: "reserved"}
 
 
 def is_auxiliary_craft(mmsi: int) -> bool:

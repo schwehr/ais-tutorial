@@ -21,12 +21,19 @@ The checksum is computed exactly like a sentence checksum: XOR of all
 characters between the two backslashes, excluding the `*hh`.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .nmea import checksum
+
+
+def _is_ascii_digits(s: str) -> bool:
+    """True for a non-empty string of '0'..'9' only.
+
+    `str.isdigit()` alone is a trap: it is also True for '²' (SUPERSCRIPT
+    TWO) and other Unicode digits, which `int()` then rejects. Restricting
+    to ASCII is what the C++, Rust and TypeScript ports do.
+    """
+    return s.isascii() and s.isdigit()
 
 
 @dataclass
@@ -37,22 +44,22 @@ class TagBlock:
 
     # Typed views of the common parameters. Missing -> None.
     @property
-    def time(self) -> Optional[int]:
+    def time(self) -> int | None:
         c = self.params.get("c")
-        return int(c) if c and c.isdigit() else None
+        return int(c) if c and _is_ascii_digits(c) else None
 
     @property
-    def source(self) -> Optional[str]:
+    def source(self) -> str | None:
         return self.params.get("s")
 
     @property
-    def group(self) -> Optional[tuple[int, int, int]]:
+    def group(self) -> tuple[int, int, int] | None:
         """(sentence number, total sentences, group id) from the g: parameter."""
         g = self.params.get("g")
         if not g:
             return None
         parts = g.split("-")
-        if len(parts) != 3 or not all(p.isdigit() for p in parts):
+        if len(parts) != 3 or not all(_is_ascii_digits(p) for p in parts):
             return None
         return int(parts[0]), int(parts[1]), int(parts[2])
 
@@ -65,7 +72,7 @@ class TagBlock:
         return d
 
 
-def split_tag_block(line: str) -> tuple[Optional[TagBlock], str]:
+def split_tag_block(line: str) -> tuple[TagBlock | None, str]:
     """Separate a leading TAG block from the sentence that follows it.
 
     Returns (TagBlock or None, remainder). Lines without a leading

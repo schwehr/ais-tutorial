@@ -41,8 +41,6 @@ spec says the extension never contains '@'; if one is present anyway
 there, as for every other text field.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import epfd_text, require_bits
 from .jsonout import Fixed
@@ -51,7 +49,7 @@ from .msg_19 import decode_dimensions
 # Table 74. Codes 5–19 are listed under "Fixed AtoN", 20–31 under "Floating
 # AtoN"; 1–4 are general. Code 4 was "spare" in M.1371-4 and became
 # "Emergency Wreck Marking Buoy" in M.1371-5.
-ATON_TYPES = {
+ATON_TYPES: dict[int, str] = {
     0: "not specified (default)",
     1: "reference point",
     2: "RACON",
@@ -87,13 +85,13 @@ ATON_TYPES = {
 }
 
 # IALA R0126 Figure 3, status page 7 ("111 RR LL H").
-RACON_STATUS = {
+RACON_STATUS: dict[int, str] = {
     0: "no RACON installed",
     1: "RACON installed but not monitored",
     2: "RACON operational",
     3: "RACON error",
 }
-LIGHT_STATUS = {
+LIGHT_STATUS: dict[int, str] = {
     0: "no light or no monitoring",
     1: "light on",
     2: "light off",

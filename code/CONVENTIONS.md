@@ -53,7 +53,11 @@ Rules that make byte-identical output possible:
    chosen per field (lat/lon 6, SOG 1 or 2, COG 1, ROT 1, …) and identical in
    all four languages. Python wraps them in `Fixed(value, decimals)`; C++
    uses `snprintf("%.*f")`; Rust `format!("{:.*}")`; TypeScript `toFixed()`.
-   Negative zero is printed as `0.0…` (no minus sign).
+   Negative zero is printed as `0.0…` (no minus sign). A `Fixed` whose
+   value is NaN, ±infinity or has |x| ≥ 1e21 prints as `null` in all four
+   (JSON has no `nan`/`inf` tokens, and `toFixed` switches to exponent
+   notation at 1e21); such values only arise from corrupted text such as
+   `hdop` = `inf`, never from a real receiver.
 5. **Strings** are escaped minimally: `"` → `\"`, `\` → `\\`, control
    characters → `\n`, `\r`, `\t` or `\u00XX`. Non-ASCII is passed through
    as UTF-8 (it never occurs in six-bit text).
@@ -64,14 +68,32 @@ Rules that make byte-identical output possible:
    * GPS: `{"line":N,"sentence":"GGA",…}`
    * AIS: `{"line":N,"ais":{…},"channel":"A","talker":"AI","own_ship":false,"payload_bits":168,"fragments":1}`
    * unknown formatter: `{"line":N,"address":"PMTK010","skipped":"no parser"}`
-   * problems: `{"line":N,"error":"<text>","raw":"<line>"}` with these exact
-     texts: `no '$' or '!' in line`, `no checksum`, `checksum mismatch`,
-     `unterminated TAG block`, `payload too short: N bits`,
+   * problems at the line / sentence / VDM-field layer:
+     `{"line":N,"error":"<text>","raw":"<line>"}` with these exact texts:
+     `no '$' or '!' in line`, `no checksum`, `checksum mismatch`,
+     `unterminated TAG block`, `address field too short: '…'`,
+     `VDM needs 6 fields, got N`, `fill bits must be 0..5, got N`,
+     `invalid literal for int() with base 10: '…'`,
+     `could not convert string to float: '…'`. The last two are Python's
+     own `ValueError` messages (including its `repr()` quoting of the
+     offending text); the C++/Rust/TypeScript ports reproduce them with
+     their `py`-compat helpers, and they are what a malformed numeric
+     field in a GGA/GSA/GSV/RMC sentence produces — the GPS parsers never
+     abort the run.
+   * problems at the AIS payload layer are emitted **without** `"raw"` but
+     with `channel`/`talker`/`own_ship`/`fragments` and, once known,
+     `payload_bits` and `msg_type`: `payload too short: N bits`,
      `unknown message type N`, `message N too short: H bits < M`,
      `illegal armour character 'c'`.
    * `"uscg":{…}` and `"tagblock":{…}` are added to any of the above when
      the line carried them.
    * A decoder that is still a stub returns `{"msg_type":N,"not_implemented":true}`.
+8. **Integer range.** Numeric NMEA fields are parsed into 64-bit integers
+   (Python's unbounded `int` and JavaScript's doubles agree with that for
+   every value a receiver can emit). Fields whose value does not fit in
+   64 bits are out of scope: the four decoders may then differ (Python
+   prints the big integer, C++/Rust report `invalid literal…`, TypeScript
+   rounds), and the tests do not cover them.
 
 ## 3. Field naming
 

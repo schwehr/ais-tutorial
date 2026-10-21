@@ -23,8 +23,6 @@ There is no communication state. The message is never acknowledged
 (§3.23). Class B "CS" stations must not transmit it (Table 80).
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 

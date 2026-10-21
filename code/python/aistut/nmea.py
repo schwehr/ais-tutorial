@@ -26,14 +26,12 @@ Python notes
 ------------
 * `@dataclass` auto-generates `__init__`, `__repr__` and `__eq__` for a
   class that is just a bundle of named fields — ideal for parsed records.
-* `Optional[int]` (or `int | None`) means "an int, or None if absent".
+* `int | None` means "an int, or None if absent" (PEP 604 union syntax).
 * `str.partition('*')` splits a string at the first '*' into three parts.
 """
 
-from __future__ import annotations
-
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .jsonout import Fixed
 
@@ -58,7 +56,7 @@ class Sentence:
     talker: str                      # 'GP', 'AI', 'P' for proprietary ...
     formatter: str                   # 'GGA', 'VDM', 'MTK010' ...
     fields: list[str]                # data fields *after* the address field
-    checksum_given: Optional[int]    # value written in the sentence, or None
+    checksum_given: int | None       # value written in the sentence, or None
     checksum_ok: bool                # True only if present and matching
     after_checksum: list[str] = field(default_factory=list)   # USCG extras
     raw: str = ""
@@ -88,7 +86,7 @@ def parse_sentence(line: str) -> Sentence:
     start = line[0]
 
     body, star, tail = line[1:].partition("*")
-    given: Optional[int] = None
+    given: int | None = None
     ok = False
     extras: list[str] = []
     if star:
@@ -115,7 +113,7 @@ def parse_sentence(line: str) -> Sentence:
 # --- Helpers for the GPS formatters ----------------------------------------
 
 
-def parse_latitude(ddmm: str, hemisphere: str) -> Optional[float]:
+def parse_latitude(ddmm: str, hemisphere: str) -> float | None:
     """'4312.2805','N' -> 43.204675 ; empty -> None.
 
     NMEA writes latitude as DDMM.MMMM: two digits of degrees followed by
@@ -130,7 +128,7 @@ def parse_latitude(ddmm: str, hemisphere: str) -> Optional[float]:
     return -value if hemisphere == "S" else value
 
 
-def parse_longitude(dddmm: str, hemisphere: str) -> Optional[float]:
+def parse_longitude(dddmm: str, hemisphere: str) -> float | None:
     """'07052.8474','W' -> -70.88079"""
     if not dddmm:
         return None
@@ -140,14 +138,14 @@ def parse_longitude(dddmm: str, hemisphere: str) -> Optional[float]:
     return -value if hemisphere == "W" else value
 
 
-def parse_utc_time(hhmmss: str) -> Optional[str]:
+def parse_utc_time(hhmmss: str) -> str | None:
     """'000429.000' -> '00:04:29.000' (kept as text; no date is available)."""
     if len(hhmmss) < 6:
         return None
     return f"{hhmmss[0:2]}:{hhmmss[2:4]}:{hhmmss[4:]}"
 
 
-def parse_date(ddmmyy: str) -> Optional[str]:
+def parse_date(ddmmyy: str) -> str | None:
     """'081207' -> '2007-12-08'. Two-digit years: NMEA predates Y2K, we
     assume 2000–2099 which is right for every file in this tutorial."""
     if len(ddmmyy) != 6:
@@ -155,16 +153,16 @@ def parse_date(ddmmyy: str) -> Optional[str]:
     return f"20{ddmmyy[4:6]}-{ddmmyy[2:4]}-{ddmmyy[0:2]}"
 
 
-def opt_float(s: str) -> Optional[float]:
+def opt_float(s: str) -> float | None:
     return float(s) if s else None
 
 
-def fixed(value: Optional[float], decimals: int) -> Optional[Fixed]:
+def fixed(value: float | None, decimals: int) -> Fixed | None:
     """Wrap a float for printing with `decimals` places (see jsonout.py)."""
     return None if value is None else Fixed(value, decimals)
 
 
-def opt_int(s: str) -> Optional[int]:
+def opt_int(s: str) -> int | None:
     return int(s) if s else None
 
 
@@ -173,7 +171,7 @@ def opt_int(s: str) -> Optional[int]:
 # Field numbers below are 1-based positions *after* the address field, which
 # is how the NMEA standard numbers them.
 
-GGA_FIX_QUALITY = {
+GGA_FIX_QUALITY: dict[int, str] = {
     0: "invalid", 1: "GPS fix (SPS)", 2: "DGPS fix", 3: "PPS fix",
     4: "RTK fixed", 5: "RTK float", 6: "estimated (dead reckoning)",
     7: "manual input", 8: "simulation",
@@ -208,7 +206,7 @@ def parse_gga(s: Sentence) -> dict:
     }
 
 
-GSA_MODE2 = {1: "no fix", 2: "2D", 3: "3D"}
+GSA_MODE2: dict[int, str] = {1: "no fix", 2: "2D", 3: "3D"}
 
 
 def parse_gsa(s: Sentence) -> dict:
@@ -258,8 +256,8 @@ def parse_gsv(s: Sentence) -> dict:
     }
 
 
-RMC_MODE = {"A": "autonomous", "D": "differential", "E": "estimated",
-            "M": "manual", "S": "simulator", "N": "not valid"}
+RMC_MODE: dict[str, str] = {"A": "autonomous", "D": "differential", "E": "estimated",
+                            "M": "manual", "S": "simulator", "N": "not valid"}
 
 
 def parse_rmc(s: Sentence) -> dict:
@@ -290,4 +288,6 @@ def parse_rmc(s: Sentence) -> dict:
     }
 
 
-GPS_PARSERS = {"GGA": parse_gga, "GSA": parse_gsa, "GSV": parse_gsv, "RMC": parse_rmc}
+GPS_PARSERS: dict[str, Callable[[Sentence], dict]] = {
+    "GGA": parse_gga, "GSA": parse_gsa, "GSV": parse_gsv, "RMC": parse_rmc,
+}

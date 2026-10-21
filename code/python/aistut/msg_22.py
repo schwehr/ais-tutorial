@@ -28,9 +28,6 @@ Bit layout (zero-based offsets; lengths from Table 75):
    145-167 23  spare
 """
 
-from __future__ import annotations
-
-from typing import Optional
 
 from .bits import Bits
 from .common import require_bits
@@ -40,25 +37,25 @@ LON_NOT_AVAILABLE = 181 * 600   # 0x1A838 — 1/10-minute units
 LAT_NOT_AVAILABLE = 91 * 600    # 0x0D548
 
 # Table 75. The field is 4 bits wide but only 0–2 are defined.
-TXRX_MODE = {
+TXRX_MODE: dict[int, str] = {
     0: "TxA/TxB, RxA/RxB",
     1: "TxA, RxA/RxB",
     2: "TxB, RxA/RxB",
 }
 
-POWER = {0: "high", 1: "low"}
+POWER: dict[int, str] = {0: "high", 1: "low"}
 
 # RR Appendix 18 channels that are simplex (one frequency, "ship & coast"):
 # 6, 8–17 and 67–77. Everything else in 1–28 / 60–88 is a duplex pair.
-SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-                    67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}
+SIMPLEX_CHANNELS: set[int] = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                              67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}
 
 
 def txrx_mode_text(code: int) -> str:
     return TXRX_MODE.get(code, "not used")
 
 
-def channel_frequency_khz(number: int) -> Optional[int]:
+def channel_frequency_khz(number: int) -> int | None:
     """Carrier frequency in kHz for an ITU-R M.1084 Annex 4 channel number.
 
     Two-digit numbers are the RR Appendix 18 channels 1–28 and 60–88;
@@ -83,7 +80,7 @@ def channel_frequency_khz(number: int) -> Optional[int]:
     return coast if prefix == 2 else ship
 
 
-def channel_mhz(number: int) -> Optional[Fixed]:
+def channel_mhz(number: int) -> Fixed | None:
     khz = channel_frequency_khz(number)
     return None if khz is None else Fixed(khz / 1000.0, 3)
 

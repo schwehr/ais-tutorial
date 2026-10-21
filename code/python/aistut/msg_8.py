@@ -21,8 +21,6 @@ identifier) is required; otherwise DecodeError. The rest is `data` /
 `data_bits`, plus `application` when asm.py knows the (dac, fi).
 """
 
-from __future__ import annotations
-
 from . import asm
 from .bits import Bits
 from .common import require_bits

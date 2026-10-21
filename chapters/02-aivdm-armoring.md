@@ -367,7 +367,7 @@ class Bits:
         self.bits = bits
 
     @classmethod
-    def from_payload(cls, payload: str, fill_bits: int = 0) -> "Bits":
+    def from_payload(cls, payload: str, fill_bits: int = 0) -> Bits:
         return cls(payload_to_bits(payload, fill_bits))
 
     def __len__(self) -> int:          # lets you write len(bits)
@@ -416,7 +416,7 @@ class Assembler:
     def __init__(self) -> None:
         self._pending: dict[tuple, list[Vdm]] = {}
 
-    def add(self, frag: Vdm) -> Optional[Message]:
+    def add(self, frag: Vdm) -> Message | None:
         if frag.total == 1:
             return Message(frag.payload, frag.fill_bits, frag.channel,
                            frag.talker, frag.own_ship, [frag])
@@ -466,7 +466,7 @@ everywhere.
 > digits; `format(v, "06b")` is its inverse, producing six zero-padded
 > binary digits. `1 << length` is 2 to the power `length` (shift left).
 > `dict[tuple, list[Vdm]]` is a dictionary keyed by a tuple — tuples are
-> immutable, so they can be keys; lists cannot. `Optional[Message]` means
+> immutable, so they can be keys; lists cannot. `Message | None` means
 > "a `Message` or `None`", and `None` is how `add` says "not yet". A
 > generator expression inside `"".join(...)` builds the string without an
 > intermediate list.
@@ -548,7 +548,7 @@ decimals}` is printed with `snprintf("%.*f")`.
 > `(value >> shift) & 1` isolates one bit; `(value << 1) | bit` appends
 > one. `std::tuple` compares element by element, so it can be a `std::map`
 > key with no extra code; `std::optional<T>` is "a T or nothing" and
-> replaces both Python's `None` return and its `Optional[int]` field.
+> replaces both Python's `None` return and its `int | None` field.
 > `char32_t` and `py::codepoints` exist only so that a stray non-ASCII
 > byte in a log is reported the way Python reports it — the test-suite
 > compares the error text.

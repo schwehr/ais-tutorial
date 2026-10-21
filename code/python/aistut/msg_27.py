@@ -26,8 +26,6 @@ Note the widths: 18/17 bits for lon/lat instead of 28/27, so the scale is
 There is no time stamp (Table 84 NOTE 1): the receiver supplies the time.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 from .jsonout import Fixed
@@ -36,7 +34,7 @@ from .msg_1_2_3 import NAV_STATUS
 LON_NOT_AVAILABLE = 0x1A838   # 181 degrees * 600
 LAT_NOT_AVAILABLE = 0xD548    #  91 degrees * 600
 
-POSITION_LATENCY = {0: "less than 5 s", 1: "greater than 5 s (default)"}
+POSITION_LATENCY: dict[int, str] = {0: "less than 5 s", 1: "greater than 5 s (default)"}
 
 
 def decode(bits: Bits) -> dict:

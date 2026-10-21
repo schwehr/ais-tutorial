@@ -38,15 +38,14 @@ Conventions for the decoded fields
 
 Python notes for readers new to the language
 --------------------------------------------
-* `Callable[[Bits, int, int], dict]` is the type of "a function taking a
-  Bits, an int and an int and returning a dict" — functions are values and
-  can live in a dictionary, which is how the registry works.
+* `Callable[[Bits, int, int], dict]` (from `collections.abc`) is the type
+  of "a function taking a Bits, an int and an int and returning a dict" —
+  functions are values and can live in a dictionary, which is how the
+  registry works. `type Decoder = ...` (PEP 695) gives that type a name.
 * `(dac, fi)` tuples are hashable and therefore usable as dictionary keys.
 """
 
-from __future__ import annotations
-
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from .bits import Bits
 from .jsonout import Fixed
@@ -54,29 +53,29 @@ from .jsonout import Fixed
 # --- small helpers ---------------------------------------------------------
 
 
-def _na(raw: int, sentinel: int) -> Optional[int]:
+def _na(raw: int, sentinel: int) -> int | None:
     """`raw` unless it equals the not-available sentinel, in which case None."""
     return None if raw == sentinel else raw
 
 
 def _scaled(raw: int, sentinel: int, divisor: float, decimals: int,
-            offset: float = 0.0) -> Optional[Fixed]:
+            offset: float = 0.0) -> Fixed | None:
     """raw / divisor + offset with `decimals` places, or None if raw == sentinel."""
     if raw == sentinel:
         return None
     return Fixed(raw / divisor + offset, decimals)
 
 
-TENDENCY = {0: "steady", 1: "decreasing", 2: "increasing", 3: "not available"}
+TENDENCY: dict[int, str] = {0: "steady", 1: "decreasing", 2: "increasing", 3: "not available"}
 
 # WMO 306 code table 4.201 as reproduced in Circ.289 Table 1.1.
-PRECIPITATION = {
+PRECIPITATION: dict[int, str] = {
     0: "reserved", 1: "rain", 2: "thunderstorm", 3: "freezing rain",
     4: "mixed/ice", 5: "snow", 6: "reserved", 7: "not available",
 }
 
 # Beaufort scale, Circ.289 Table 1.2 (the same table is referenced by Circ.236).
-SEA_STATE = {
+SEA_STATE: dict[int, str] = {
     0: "calm (flat)", 1: "light air (ripples)", 2: "light breeze (small wavelets)",
     3: "gentle breeze (large wavelets)", 4: "moderate breeze (small waves)",
     5: "fresh breeze (moderate waves)", 6: "strong breeze (large waves)",
@@ -86,7 +85,7 @@ SEA_STATE = {
     13: "not available", 14: "reserved", 15: "reserved",
 }
 
-ICE = {0: "no", 1: "yes", 2: "reserved", 3: "not available"}
+ICE: dict[int, str] = {0: "no", 1: "yes", 2: "reserved", 3: "not available"}
 
 
 # --- (1, 0) IFM 0: text telegram ------------------------------------------
@@ -263,7 +262,7 @@ LON_1000_NOT_AVAILABLE = 181 * 60000   # 10 860 000
 LAT_1000_NOT_AVAILABLE = 91 * 60000    #  5 460 000
 
 
-def _pressure_289(raw: int) -> Optional[int]:
+def _pressure_289(raw: int) -> int | None:
     """Circ.289 air pressure: 1-401 map to 800-1200 hPa; the ends are clamped."""
     if raw == 511:
         return None
@@ -359,7 +358,7 @@ def decode_met_hydro_289(bits: Bits, o: int, data_bits: int) -> dict:
 #          +72-75  4  spare
 
 WHALE_RECORD_BITS = 112
-WHALE_ZONE_TYPE = {0: "right whales not observed", 1: "right whales present"}
+WHALE_ZONE_TYPE: dict[int, str] = {0: "right whales not observed", 1: "right whales present"}
 
 
 def decode_whale_notice(bits: Bits, o: int, data_bits: int) -> dict:
@@ -390,7 +389,7 @@ def decode_whale_notice(bits: Bits, o: int, data_bits: int) -> dict:
 
 # --- the registry ----------------------------------------------------------
 
-Decoder = Callable[[Bits, int, int], dict]
+Decoder = Callable[[Bits, int, int], dict]   # a type alias (plain assignment works on Python 3.10+)
 
 # (dac, fi) -> (name, minimum data bits, decoder)
 DECODERS: dict[tuple[int, int], tuple[str, int, Decoder]] = {
@@ -410,7 +409,7 @@ NAMES: dict[tuple[int, int], str] = {
 }
 
 
-def decode(dac: int, fi: int, bits: Bits, offset: int) -> Optional[dict]:
+def decode(dac: int, fi: int, bits: Bits, offset: int) -> dict | None:
     """Decode the application data that starts at `offset`.
 
     Returns None when (dac, fi) is unknown. For a known pair the result

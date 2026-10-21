@@ -286,7 +286,7 @@ def parse_uscg_fields(extras: list[str]) -> dict:
     return out
 
 
-def time_of_arrival_to_utc(unix_time: int, toa_s: Optional[float]) -> Optional[Fixed]:
+def time_of_arrival_to_utc(unix_time: int, toa_s: float | None) -> Fixed | None:
     if toa_s is None:
         return None
     minute_start = unix_time - (unix_time % 60)

@@ -310,13 +310,13 @@ Design decisions, all of them documented in the module docstring:
 
 ```python
 # Table 67 text under note (1): increment code -> slots between assigned slots.
-SLOT_INCREMENTS = {1: 1125, 2: 375, 3: 225, 4: 125, 5: 75, 6: 45}
+SLOT_INCREMENTS: dict[int, int] = {1: 1125, 2: 375, 3: 225, 4: 125, 5: 75, 6: 45}
 
 
 def assignment(mmsi: int, offset: int, increment: int) -> dict:
     """Interpret one (destination, offset, increment) triple."""
-    reports: Optional[int] = None
-    slots: Optional[int] = None
+    reports: int | None = None
+    slots: int | None = None
     if increment == 0:
         text = "reporting rate"
         reports = offset
@@ -363,7 +363,7 @@ def decode(bits: Bits) -> dict:
 
 Each assignment carries the raw `offset` and `increment` *and* the interpretation: `reports_per_10_min` is set when the increment is 0, `slot_increment` (in slots) when it is a code 1–6, and both are `null` for 7 and for the undefined codes. We do not apply the mobile's rounding rule (up to the next multiple of 20, clamp at 600) — that is the receiving station's behaviour, and a VTS analyst wants to see what was actually sent.
 
-> **Language notes (Python).** `Optional[int]` (chapter 3) for a value that may be `None`; `dict.get(key, default)` for a table lookup with a fallback. The "decode the first group, then `while`/`if bits.has(...)`" shape is the loop chapter 12 uses for message 7, unrolled because here the groups are not all alike.
+> **Language notes (Python).** `int | None` (chapter 3) for a value that may be `None`; `dict.get(key, default)` for a table lookup with a fallback. The "decode the first group, then `while`/`if bits.has(...)`" shape is the loop chapter 12 uses for message 7, unrolled because here the groups are not all alike.
 
 ### C++
 
@@ -570,7 +570,7 @@ function assignment(mmsi: number, offset: number, increment: number): JsonObject
 
 | Concern | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
-| Optional integer → `null` | `Optional[int]` / `None` | `std::optional<long long>` | `Option<u64>` | `number \| null` |
+| Optional integer → `null` | `int \| None` / `None` | `std::optional<long long>` | `Option<u64>` | `number \| null` |
 | Table lookup with default | `dict.get(k, d)` | `map.find` / `end()` | `match … _ =>` | `obj[k] ?? d` |
 | Growing array of objects | `list.append` | `Json::Array::push_back` | `Vec::push` | `Array.push` |
 | Variable assigned in branches | plain assignment | plain assignment | `let pos;` + definite initialisation | `let pos: number;` + definite assignment |

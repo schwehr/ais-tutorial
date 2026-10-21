@@ -295,11 +295,11 @@ The loop is the same shape as message 7's (chapter 12) but the group is 30 bits,
 ```python
 # RR Appendix 18 channels that are simplex (one frequency, "ship & coast"):
 # 6, 8–17 and 67–77. Everything else in 1–28 / 60–88 is a duplex pair.
-SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-                    67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}
+SIMPLEX_CHANNELS: set[int] = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                              67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77}
 
 
-def channel_frequency_khz(number: int) -> Optional[int]:
+def channel_frequency_khz(number: int) -> int | None:
     prefix, base = divmod(number, 1000)
     if prefix not in (0, 1, 2):
         return None
@@ -313,7 +313,7 @@ def channel_frequency_khz(number: int) -> Optional[int]:
     return coast if prefix == 2 else ship
 
 
-def channel_mhz(number: int) -> Optional[Fixed]:
+def channel_mhz(number: int) -> Fixed | None:
     khz = channel_frequency_khz(number)
     return None if khz is None else Fixed(khz / 1000.0, 3)
 
@@ -426,7 +426,7 @@ def decode(bits: Bits) -> dict:
         "ship_type_text": "all types (default)" if ship_type == 0 else ship_type_text(ship_type),
 ```
 
-> **Language notes (Python).** `divmod(number, 1000)` returns the quotient and remainder as a pair — the four-digit channel number splits into prefix and base in one line. `{6, 8, 9, …}` is a *set literal* and `base in SIMPLEX_CHANNELS` a constant-time membership test. `dict.get(key, default)` and `Optional[int]` are the chapter 1 constructs.
+> **Language notes (Python).** `divmod(number, 1000)` returns the quotient and remainder as a pair — the four-digit channel number splits into prefix and base in one line. `{6, 8, 9, …}` is a *set literal* and `base in SIMPLEX_CHANNELS` a constant-time membership test. `dict.get(key, default)` and `int | None` are the chapter 1 constructs.
 
 ### C++
 
@@ -691,7 +691,7 @@ export function channelMhz(num: number): Fixed | null {
 | Concern | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
 | Set of simplex channels | set literal + `in` | `std::set::count` | `matches!` with range patterns | `Set.has` |
-| Optional frequency | `Optional[int]`, `None` | `std::optional<int>`, `nullopt` | `Option<u64>`, `None` | `number \| null` |
+| Optional frequency | `int \| None`, `None` | `std::optional<int>`, `nullopt` | `Option<u64>`, `None` | `number \| null` |
 | Nested `rtcm` or null | dict or `None` | `Json(…)` vs `Json(nullptr)` | `Option<Obj>` via `From` | `JsonObject \| null` |
 | Leftover bits as number | `bits.uint` of any width | `std::uint64_t` (≤ 32 bits used) | `u64` | `number` (safe ≤ 53 bits) |
 | Enumeration with gaps (txrx 3–15) | `dict.get(code, default)` | `switch` with `default` | `match` with `_` | `code in TABLE ? … : default` |

@@ -27,8 +27,6 @@ Table 76 gives no not-available value for the region; we apply the 181°/91°
 sentinels of message 22 (the same 1/10-minute fields) for `region_available`.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits, ship_type_text
 from .jsonout import Fixed
@@ -37,7 +35,7 @@ LON_NOT_AVAILABLE = 181 * 600   # 0x1A838 — 1/10-minute units
 LAT_NOT_AVAILABLE = 91 * 600    # 0x0D548
 
 # Table 76.
-STATION_TYPE = {
+STATION_TYPE: dict[int, str] = {
     0: "all types of mobiles (default)",
     1: "Class A mobile stations only",
     2: "all types of Class B mobile stations",
@@ -57,7 +55,7 @@ STATION_TYPE = {
 }
 
 # Table 76.
-TXRX_MODE = {
+TXRX_MODE: dict[int, str] = {
     0: "TxA/TxB, RxA/RxB",
     1: "TxA, RxA/RxB",
     2: "TxB, RxA/RxB",
@@ -65,7 +63,7 @@ TXRX_MODE = {
 }
 
 # Table 77.
-REPORTING_INTERVAL = {
+REPORTING_INTERVAL: dict[int, str] = {
     0: "as given by the autonomous mode",
     1: "10 min",
     2: "6 min",

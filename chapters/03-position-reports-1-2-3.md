@@ -695,7 +695,7 @@ from .bits import Bits
 from .common import require_bits
 from .jsonout import Fixed
 
-NAV_STATUS = {
+NAV_STATUS: dict[int, str] = {
     0: "under way using engine",
     1: "at anchor",
     2: "not under command",
@@ -714,14 +714,14 @@ NAV_STATUS = {
     15: "undefined (default)",
 }
 
-SYNC_STATE = {
+SYNC_STATE: dict[int, str] = {
     0: "UTC direct",
     1: "UTC indirect",
     2: "synchronized to base station",
     3: "synchronized to another station",
 }
 
-SPECIAL_MANOEUVRE = {0: "not available", 1: "not engaged", 2: "engaged", 3: "reserved"}
+SPECIAL_MANOEUVRE: dict[int, str] = {0: "not available", 1: "not engaged", 2: "engaged", 3: "reserved"}
 
 
 def decode_rot(raw: int) -> dict:

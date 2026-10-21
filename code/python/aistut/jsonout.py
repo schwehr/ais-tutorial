@@ -12,11 +12,19 @@ languages do not reproduce. So we follow two rules everywhere:
      and JavaScript's `toFixed` do).
 
 Supported values: None, bool, int, Fixed, str, list, dict.
+
+A `Fixed` whose value is NaN, ±infinity or of magnitude 1e21 or more is
+printed as `null`: JSON has no `nan`/`inf` tokens, and above 1e21
+JavaScript's `toFixed` switches to exponent notation, so the four languages
+could not agree on the digits anyway. Such values never come from a real
+receiver; they only arise from corrupted text like `hdop` = `inf`.
 """
 
-from __future__ import annotations
-
+import math
 from dataclasses import dataclass
+
+# |value| at or above this prints as null (see the module docstring).
+FIXED_LIMIT = 1e21
 
 
 @dataclass(frozen=True)
@@ -27,6 +35,8 @@ class Fixed:
     decimals: int
 
     def __str__(self) -> str:
+        if not math.isfinite(self.value) or abs(self.value) >= FIXED_LIMIT:
+            return "null"
         s = format(self.value, f".{self.decimals}f")
         if s.startswith("-") and float(s) == 0.0:   # avoid "-0.0"
             s = s[1:]

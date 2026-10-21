@@ -190,7 +190,7 @@ explains what those lost fields are good for.
 The converter itself is short enough to read in full:
 
 ```python
-def convert(line: str, counter: int, group_ids: dict) -> str:
+def convert(line: str, counter: int, group_ids: dict[tuple[str, str, str], int]) -> str:
     s = parse_sentence(line)
     meta = parse_uscg_fields(s.after_checksum)
     params: dict[str, str] = {}
@@ -198,7 +198,7 @@ def convert(line: str, counter: int, group_ids: dict) -> str:
         params["s"] = str(meta["station"])
     if "time" in meta:
         params["c"] = str(int(float(str(meta["time"]))))
-    extras = []
+    extras: list[str] = []
     if "signal_dbm" in meta:
         extras.append(f"d{meta['signal_dbm']}")
     if "time_of_arrival_s" in meta:
@@ -290,16 +290,16 @@ class TagBlock:
 
     # Typed views of the common parameters. Missing -> None.
     @property
-    def time(self) -> Optional[int]:
+    def time(self) -> int | None:
         c = self.params.get("c")
         return int(c) if c and c.isdigit() else None
 
     @property
-    def source(self) -> Optional[str]:
+    def source(self) -> str | None:
         return self.params.get("s")
 
     @property
-    def group(self) -> Optional[tuple[int, int, int]]:
+    def group(self) -> tuple[int, int, int] | None:
         """(sentence number, total sentences, group id) from the g: parameter."""
         g = self.params.get("g")
         if not g:
@@ -318,7 +318,7 @@ class TagBlock:
         return d
 
 
-def split_tag_block(line: str) -> tuple[Optional[TagBlock], str]:
+def split_tag_block(line: str) -> tuple[TagBlock | None, str]:
     line = line.strip()
     if not line.startswith("\\"):
         return None, line
@@ -667,7 +667,7 @@ export function splitTagBlock(rawLine: string): [TagBlock | null, string] {
 >   `common.ts` are as in chapter 1.
 
 **Where the four differ.** The logic is identical; the differences are
-all in how "maybe absent" is spelled: Python `Optional` + `None`, C++
+all in how "maybe absent" is spelled: Python `X | None` + `None`, C++
 `std::optional` + `std::nullopt`, Rust `Option` with `?`/`.ok()`/`.map()`,
 TypeScript `T | null` with `??`. Only Rust returns the remainder as a
 *view* into the input; the other three copy it. Only Rust reports the

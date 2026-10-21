@@ -35,8 +35,6 @@ overflow a 10-bit tenth-knot field); and the time stamp starts at bit 128
 instead of 137.
 """
 
-from __future__ import annotations
-
 from .bits import Bits
 from .common import require_bits
 from .jsonout import Fixed
@@ -47,8 +45,8 @@ ALTITUDE_MAX = 4094          # "4 094 m or higher"
 SOG_NOT_AVAILABLE = 1023
 SOG_MAX = 1022               # "1 022 knots or higher"
 
-ALTITUDE_SENSOR = {0: "GNSS", 1: "barometric"}
-ASSIGNED_MODE = {0: "autonomous and continuous", 1: "assigned"}
+ALTITUDE_SENSOR: dict[int, str] = {0: "GNSS", 1: "barometric"}
+ASSIGNED_MODE: dict[int, str] = {0: "autonomous and continuous", 1: "assigned"}
 
 
 def decode(bits: Bits) -> dict:
