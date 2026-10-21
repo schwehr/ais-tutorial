@@ -328,7 +328,7 @@ Three design decisions, all visible in the output:
 * **Every ASM decoder takes `(bits, offset, data_bits)`**, never a fixed position, so one function serves message 6 (data at 88), message 8 (data at 56) and, if you extend it, messages 25/26 (data at 40–88, chapter 16).
 * **A short payload is not an error of the message.** A message 8 with DAC 1 FI 31 and 100 data bits is still a valid message 8; only the application layer failed. Hence `"error"` inside `application`, not a `DecodeError`.
 
-> **Language notes (Python).** `Callable[[Bits, int, int], dict]` (from `collections.abc`) names a function type, and the `type Decoder = …` statement (PEP 695, Python 3.12+) gives it a short alias; functions are ordinary values, so a dictionary of them is a dispatch table — the same pattern `decode.py` uses for message types. A tuple `(dac, fi)` is hashable and therefore a legal dictionary key. `name, need, func = entry` unpacks a 3-tuple.
+> **Language notes (Python).** `Callable[[Bits, int, int], dict]` names a function type; functions are ordinary values, so a dictionary of them is a dispatch table — the same pattern `decode.py` uses for message types. A tuple `(dac, fi)` is hashable and therefore a legal dictionary key. `name, need, func = entry` unpacks a 3-tuple.
 
 ### C++
 
