@@ -24,6 +24,12 @@
 // * `std::optional<T>` (C++17) is "a T, or nothing" — Python's `Optional[T]`
 //   / `None`. We return `std::nullopt` where Python would raise ValueError
 //   and let the caller decide whether that is an error.
+// * `std::expected<T, E>` (C++23) is "a T, or an error E". Where an optional
+//   only says *that* something failed, an expected also carries *why* — here
+//   Python's exact ValueError text — so the caller can report it without
+//   a `try`/`catch`. `std::unexpected(text)` builds the error side.
+// * `[[nodiscard]]` on a function asks the compiler to warn when a caller
+//   throws the result away — ignoring a parsed value is always a bug here.
 // * `namespace aistut::py { ... }` nests a namespace `py` inside `aistut`
 //   (C++17 nested-namespace syntax). Callers write `py::strip(s)`.
 
@@ -32,6 +38,7 @@
 #include <cctype>
 #include <cerrno>
 #include <cstdlib>
+#include <expected>
 #include <limits>
 #include <optional>
 #include <stdexcept>
@@ -117,8 +124,8 @@ struct Partition {
 
 inline Partition partition(std::string_view s, char sep) {
     std::size_t at = s.find(sep);
-    if (at == std::string_view::npos) return {std::string(s), "", false};
-    return {std::string(s.substr(0, at)), std::string(s.substr(at + 1)), true};
+    if (at == std::string_view::npos) return {.head = std::string(s), .tail = "", .found = false};
+    return {.head = std::string(s.substr(0, at)), .tail = std::string(s.substr(at + 1)), .found = true};
 }
 
 // --- Numbers ----------------------------------------------------------------
@@ -144,7 +151,7 @@ inline int digit_value(char c) {
 // "0x" prefix for base 16, and single underscores *between* digits
 // ("1_000"). Python integers are unbounded; we give up (nullopt) if the
 // value does not fit in a `long long`, which never happens with real data.
-inline std::optional<long long> to_int(std::string_view text, int base = 10) {
+[[nodiscard]] inline std::optional<long long> to_int(std::string_view text, int base = 10) {
     std::string s = strip(text);
     std::size_t i = 0;
     bool negative = false;
@@ -182,7 +189,7 @@ inline std::optional<long long> to_int(std::string_view text, int base = 10) {
 // in any case, surrounding whitespace and underscores between digits. It
 // rejects the hexadecimal floats ("0x1p3") that C's strtod would accept, so
 // we check the characters ourselves before calling strtod.
-inline std::optional<double> to_float(std::string_view text) {
+[[nodiscard]] inline std::optional<double> to_float(std::string_view text) {
     std::string s = strip(text);
     if (s.empty()) return std::nullopt;
     std::string cleaned;
@@ -267,6 +274,16 @@ inline long long int_or_throw(std::string_view text) {
 inline double float_or_throw(std::string_view text) {
     auto v = to_float(text);
     if (!v) throw std::invalid_argument("could not convert string to float: " + repr(text));
+    return *v;
+}
+
+// The same conversion with the error as a *value* instead of an exception:
+// `std::expected<long long, std::string>` holds either the number or
+// Python's ValueError text. Used where the caller wants to return the
+// complaint to its own caller rather than catch it (see vdm.hpp).
+[[nodiscard]] inline std::expected<long long, std::string> int_expected(std::string_view text) {
+    auto v = to_int(text);
+    if (!v) return std::unexpected("invalid literal for int() with base 10: " + repr(text));
     return *v;
 }
 

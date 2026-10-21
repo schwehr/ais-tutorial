@@ -33,16 +33,27 @@
 //   handling. Catching by `const&` avoids copying the exception object and
 //   preserves its dynamic type. The order of catch clauses matters: more
 //   specific types first.
+// * Not every failure is an exception: `parse_vdm` returns a
+//   `std::expected<Vdm, std::string>` (C++23), so a bad VDM field is an
+//   ordinary `if (!frag)` with the error text in `frag.error()`.
 // * `auto [tag, rest] = ...` is a structured binding (C++17) that unpacks a
 //   pair into two named variables.
+// * Output goes through `std::println` (C++23, `<print>`): `println("{}", s)`
+//   writes `s` and a newline to standard output, `println(stderr, ...)` to
+//   standard error. It is Python's `print()` with `str.format` placeholders,
+//   and it replaces both `std::cout <<` chains and C's `printf`.
 // * RAII: the `std::ifstream` closes its file automatically when it goes
 //   out of scope — no `with` block or explicit close() needed.
 
+#include <cstdio>
+#include <expected>
+#include <format>
 #include <fstream>
 #include <iostream>
 #include <istream>
 #include <map>
 #include <optional>
+#include <print>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -122,7 +133,7 @@ Json decode_ais(const Message& msg) {
     }
     if (bits->size() < 6) {
         return Json::Object{
-            {"error", "payload too short: " + std::to_string(bits->size()) + " bits"},
+            {"error", std::format("payload too short: {} bits", bits->size())},
             {"payload_bits", bits->size()},
         };
     }
@@ -130,7 +141,7 @@ Json decode_ais(const Message& msg) {
     auto found = DECODERS.find(msg_type);
     Json out = Json::Object{{"payload_bits", bits->size()}};
     if (found == DECODERS.end()) {
-        out["error"] = "unknown message type " + std::to_string(msg_type);
+        out["error"] = std::format("unknown message type {}", msg_type);
         out["msg_type"] = msg_type;
         return out;
     }
@@ -181,15 +192,13 @@ std::optional<Json> process_line(const std::string& line, long long lineno, Asse
     }
 
     if (s.formatter == "VDM" || s.formatter == "VDO") {
-        Vdm frag;
-        try {
-            frag = parse_vdm(s);
-        } catch (const std::invalid_argument& e) {
-            out["error"] = e.what();
+        std::expected<Vdm, std::string> frag = parse_vdm(s);
+        if (!frag) {
+            out["error"] = frag.error();
             out["raw"] = s.raw;
             return out;
         }
-        std::optional<Message> msg = asm_.add(frag);
+        std::optional<Message> msg = asm_.add(*frag);
         if (!msg) return std::nullopt;             // waiting for more fragments
         out.update(decode_ais(*msg));
         out["channel"] = msg->channel;
@@ -245,7 +254,7 @@ int run(std::istream& in, long long& lineno, Assembler& asm_) {
         ++lineno;
         std::string line = py::utf8_replace_invalid(raw_line);
         std::optional<Json> result = process_line(line, lineno, asm_);
-        if (result) std::cout << result->dump() << '\n';
+        if (result) std::println("{}", result->dump());
     }
     return 0;
 }
@@ -254,11 +263,13 @@ int run(std::istream& in, long long& lineno, Assembler& asm_) {
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        std::cout << "usage: decode FILE [FILE...]   (use '-' for standard input)\n"
-                     "Prints one JSON object per NMEA/AIS line; see decode.cpp for the shapes.\n";
+        std::println("usage: decode FILE [FILE...]   (use '-' for standard input)");
+        std::println("Prints one JSON object per NMEA/AIS line; see decode.cpp for the shapes.");
         return 2;
     }
-    // Do not synchronise C++ streams with C stdio: much faster output.
+    // Do not synchronise C++ streams with C stdio: much faster character-
+    // at-a-time reading from std::cin. (Output uses std::println, which
+    // writes to C's stdout; input and output never share a stream.)
     std::ios::sync_with_stdio(false);
 
     aistut::Assembler assembler;
@@ -272,7 +283,7 @@ int main(int argc, char** argv) {
             }
             std::ifstream file(name, std::ios::binary);
             if (!file) {
-                std::cerr << "decode: cannot open " << name << '\n';
+                std::println(stderr, "decode: cannot open {}", name);
                 return 1;
             }
             aistut::run(file, lineno, assembler);
@@ -281,10 +292,10 @@ int main(int argc, char** argv) {
         // Data problems are all reported as JSON error objects above; this
         // only catches programming errors (and keeps the output written so
         // far). Flush, say what happened, exit non-zero like Python would.
-        std::cout.flush();
-        std::cerr << "decode: line " << lineno << ": " << e.what() << '\n';
+        std::fflush(stdout);
+        std::println(stderr, "decode: line {}: {}", lineno, e.what());
         return 1;
     }
-    std::cout.flush();
+    std::fflush(stdout);
     return 0;
 }

@@ -39,14 +39,14 @@
 // * `std::optional<std::string>` is "a string or nothing". `std::nullopt` is
 //   the nothing; `Json` has a constructor for it that prints `null`. Python
 //   used `None` for the same job.
-// * `snprintf` with "%04u" zero-pads to four digits — the equivalent of the
-//   Python format spec `{year:04d}`.
+// * `std::format` with "{:04}" zero-pads to four digits — the same format
+//   spec as Python's `{year:04d}`; "{:02}" pads to two.
 
 #pragma once
 
 #include <array>
 #include <cstdint>
-#include <cstdio>
+#include <format>
 #include <optional>
 #include <string>
 
@@ -80,11 +80,7 @@ inline std::optional<std::string> utc_iso(std::uint64_t year, std::uint64_t mont
                                           std::uint64_t hour, std::uint64_t minute, std::uint64_t second) {
     if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) return std::nullopt;
     if (hour > 23 || minute > 59 || second > 59) return std::nullopt;
-    char buf[32];
-    std::snprintf(buf, sizeof buf, "%04u-%02u-%02uT%02u:%02u:%02uZ",
-                  static_cast<unsigned>(year), static_cast<unsigned>(month), static_cast<unsigned>(day),
-                  static_cast<unsigned>(hour), static_cast<unsigned>(minute), static_cast<unsigned>(second));
-    return std::string(buf);
+    return std::format("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z", year, month, day, hour, minute, second);
 }
 
 // Decode a message 4 or 11. Throws DecodeError if shorter than 168 bits.

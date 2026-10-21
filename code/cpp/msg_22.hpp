@@ -32,8 +32,8 @@
 // * `std::optional<int>` is the return type for "a frequency, or nothing".
 //   `Json` has a constructor for `std::optional<int>` that maps an empty
 //   optional to `null`, so the value can be stored directly.
-// * `std::set<int>` with `.count(x)` is the C++ spelling of Python's
-//   `x in some_set`.
+// * `std::set<int>` with `.contains(x)` (C++20) is the C++ spelling of
+//   Python's `x in some_set`.
 
 #pragma once
 
@@ -88,7 +88,7 @@ inline std::optional<int> channel_frequency_khz(int number) {
     } else {
         return std::nullopt;
     }
-    int coast = SIMPLEX_CHANNELS.count(base) ? ship : ship + 4600;
+    int coast = SIMPLEX_CHANNELS.contains(base) ? ship : ship + 4600;
     return prefix == 2 ? coast : ship;
 }
 

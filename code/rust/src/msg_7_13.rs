@@ -84,7 +84,7 @@ mod tests {
         let one = Bits::from_payload("=000001H=C0<", 0).unwrap();
         assert_eq!(one.len(), 72);
         let json = decode(&one).unwrap();
-        assert_eq!(json.to_string().contains("\"trailing_bits\":0"), true);
+        assert!(json.to_string().contains("\"trailing_bits\":0"));
         // 71 bits: too short.
         let short = Bits::from_payload("=000001H=C0<", 1).unwrap();
         assert_eq!(

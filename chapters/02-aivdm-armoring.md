@@ -460,7 +460,10 @@ everywhere.
 > **Language notes (Python).** `class Bits:` bundles data (`self.bits`)
 > with the methods that read it; `self` is the object, passed explicitly.
 > `@classmethod` marks a method that receives the class (`cls`) instead of
-> an instance — a "named constructor" (`Bits.from_payload(...)`).
+> an instance — a "named constructor" (`Bits.from_payload(...)`). Its
+> return hint `-> Bits` names the class that is still being defined; that
+> works because Python 3.14 evaluates annotations lazily (PEP 649), where
+> older versions needed `-> "Bits"` or `from __future__ import annotations`.
 > Defining `__len__` lets `len(bits)` work on your own class ("dunder"
 > methods hook into built-in syntax). `int(s, 2)` parses a string of binary
 > digits; `format(v, "06b")` is its inverse, producing six zero-padded
@@ -489,7 +492,7 @@ inline int armor_char_to_value(char32_t ch) {
 
 inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, long long fill_bits = 0) {
     if (fill_bits < 0 || fill_bits > 5) {
-        throw std::invalid_argument("fill bits must be 0..5, got " + std::to_string(fill_bits));
+        throw std::invalid_argument(std::format("fill bits must be 0..5, got {}", fill_bits));
     }
     std::vector<std::uint8_t> bits;
     bits.reserve(payload.size() * 6);
@@ -513,8 +516,7 @@ and `Bits::uint` rebuilds a number by shifting in one bit at a time:
 ```cpp
     std::uint64_t uint(std::size_t start, std::size_t length) const {
         if (!has(start, length)) {
-            throw std::out_of_range("field " + std::to_string(start) + "+" + std::to_string(length) +
-                                    " beyond " + std::to_string(bits_.size()) + " bits");
+            throw std::out_of_range(std::format("field {}+{} beyond {} bits", start, length, bits_.size()));
         }
         std::uint64_t value = 0;
         for (std::size_t i = start; i < start + length; ++i) {
@@ -527,14 +529,18 @@ and `Bits::uint` rebuilds a number by shifting in one bit at a time:
 The `Assembler` in `vdm.hpp` is the Python one with types written out:
 the pending table is `std::map<Key, std::vector<Vdm>>` where `Key` is
 `std::tuple<std::string, std::string, std::optional<long long>>`, and
-`add` returns `std::optional<Message>`. `decode.cpp` is the only `.cpp`
+`add` returns `std::optional<Message>`. `parse_vdm` returns a
+`std::expected<Vdm, std::string>` — either the parsed fragment or the
+error text that Python would have raised as a `ValueError` — so the
+driver checks `if (!frag)` and reports `frag.error()` instead of catching
+an exception. `decode.cpp` is the only `.cpp`
 file; all modules are headers (`#pragma once`, `inline` functions), so the
 whole program is one translation unit and the `Makefile` has one compile
 line. Its `DECODERS` is a `std::map<int, Decoder>` where `Decoder` is a
 function-pointer type `Json (*)(const Bits&)`. `jsonout.hpp` builds JSON
 from a `Json` class wrapping a `std::variant`; because a `std::map` keeps
 its keys sorted, the sorted-keys rule costs nothing, and `Fixed{value,
-decimals}` is printed with `snprintf("%.*f")`.
+decimals}` is printed with `std::format("{:.{}f}", value, decimals)`.
 
 > **Language notes (C++).** A `class` has `public:` members (the
 > interface) and `private:` members (`bits_`, by convention with a trailing
@@ -552,6 +558,20 @@ decimals}` is printed with `snprintf("%.*f")`.
 > `char32_t` and `py::codepoints` exist only so that a stray non-ASCII
 > byte in a log is reported the way Python reports it — the test-suite
 > compares the error text.
+
+> **Language notes (C++20/23).** **`std::expected<T, E>`** (C++23,
+> `<expected>`) is "a T, or an error E" — `std::optional` with a reason
+> attached. `parse_vdm` returns `std::unexpected(text)` for a bad field;
+> the caller tests `if (!frag)`, reads `frag.error()`, or dereferences
+> `*frag` for the value. Use it where failure is *expected data*, as a bad
+> log line is, and keep exceptions for programming errors. A **designated
+> initialiser** (C++20) names each member when building a struct —
+> `Message{.payload = …, .fill_bits = …, .channel = …}` — so that two
+> strings or two integers cannot be swapped silently; `Vdm`, `Message`
+> and `py::Partition` are built that way. `std::format("{:.{}f}", value,
+> decimals)` is the fixed-decimal format with the precision taken from the
+> next argument (C's `"%.*f"`); both are correctly rounded, which is why
+> `Fixed` prints the same digits as Python's `format(x, '.6f')`.
 
 ### Rust
 

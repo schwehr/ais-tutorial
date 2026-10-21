@@ -8,9 +8,9 @@
 //   1. Object keys are written in sorted order. `std::map` keeps its keys
 //      sorted, so this happens by itself.
 //   2. Every non-integer number is wrapped in `Fixed{value, decimals}` and
-//      printed with exactly that many decimals (`snprintf("%.*f")`, which
-//      rounds the exact binary value the same way Python's `format(x, '.6f')`,
-//      Rust's `{:.6}` and JavaScript's `toFixed` do).
+//      printed with exactly that many decimals (`std::format("{:.{}f}")`,
+//      which rounds the exact binary value the same way Python's
+//      `format(x, '.6f')`, Rust's `{:.6}` and JavaScript's `toFixed` do).
 //
 // Supported values: null, bool, integer, Fixed, string, array, object.
 //
@@ -29,15 +29,22 @@
 //   convert to `bool` (pointers are convertible to bool!) — a classic C++ trap.
 // * `std::vector<Json>` inside `Json` is a *recursive* type. C++17 allows
 //   `std::vector` of an incomplete type, which is what makes this possible.
-// * `snprintf` is the C function that formats into a buffer; calling it with
-//   a null buffer and size 0 returns how many characters it *would* write,
-//   so we can size a `std::string` exactly and format into it.
+// * `std::format` (C++20) is Python's `str.format` for C++: `{}` is a
+//   placeholder, `{:.6f}` means "fixed, six decimals", and `{:.{}f}` takes
+//   the precision from the next argument, like `"%.*f"` in C. It returns a
+//   `std::string`, so there is no buffer to size. Both `std::format` and
+//   glibc's `printf` print the correctly rounded decimal expansion of the
+//   binary double, which is why the output is byte-identical to the
+//   `snprintf("%.*f")` the C++17 version used.
+// * `Fixed{.value = v, .decimals = d}` is a *designated initialiser*
+//   (C++20): the member names are written out, so the two numbers cannot
+//   be swapped by accident.
 
 #pragma once
 
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
+#include <format>
 #include <map>
 #include <optional>
 #include <stdexcept>
@@ -57,16 +64,13 @@ struct Fixed {
     double value;
     int decimals;
 
-    std::string str() const {
+    [[nodiscard]] std::string str() const {
         if (!std::isfinite(value) || std::fabs(value) >= FIXED_LIMIT) return "null";
-        // First call measures, second call writes. "%.*f" takes the precision
-        // from the argument list.
-        int length = std::snprintf(nullptr, 0, "%.*f", decimals, value);
-        std::string s(static_cast<std::size_t>(length), '\0');
-        std::snprintf(&s[0], s.size() + 1, "%.*f", decimals, value);
+        // "{:.{}f}" takes the precision from the next argument (C's "%.*f").
+        std::string s = std::format("{:.{}f}", value, decimals);
         // Avoid "-0.0": if the text is negative but its numeric value is
         // zero (e.g. -0.00001 rounded to 1 decimal), drop the minus sign.
-        if (!s.empty() && s[0] == '-' && std::strtod(s.c_str(), nullptr) == 0.0) {
+        if (s.starts_with('-') && std::strtod(s.c_str(), nullptr) == 0.0) {
             s.erase(0, 1);
         }
         return s;
@@ -101,13 +105,13 @@ public:
     Json(const std::optional<Fixed>& v) : Json() { if (v) value_ = *v; }
 
     // Named helpers read better than bare constructors at call sites.
-    static Json fixed(double value, int decimals) { return Json(Fixed{value, decimals}); }
+    static Json fixed(double value, int decimals) { return Json(Fixed{.value = value, .decimals = decimals}); }
     static Json object() { return Json(Object{}); }
     static Json array() { return Json(Array{}); }
 
     // --- Inspection ---------------------------------------------------------
-    bool is_null() const { return std::holds_alternative<std::nullptr_t>(value_); }
-    bool is_object() const { return std::holds_alternative<Object>(value_); }
+    [[nodiscard]] bool is_null() const { return std::holds_alternative<std::nullptr_t>(value_); }
+    [[nodiscard]] bool is_object() const { return std::holds_alternative<Object>(value_); }
 
     // Access the object's map. Throws if this is not an object: in this
     // tutorial that is always a programming error, never a data error.
@@ -131,7 +135,7 @@ public:
     }
 
     // --- Serialisation ------------------------------------------------------
-    std::string dump() const {
+    [[nodiscard]] std::string dump() const {
         std::string out;
         write(out);
         return out;
@@ -155,9 +159,7 @@ private:
             } else if (c == '\t') {
                 out += "\\t";
             } else if (u < 0x20) {
-                char buf[8];
-                std::snprintf(buf, sizeof buf, "\\u%04x", u);
-                out += buf;
+                out += std::format("\\u{:04x}", u);   // other control characters
             } else {
                 out.push_back(c);
             }

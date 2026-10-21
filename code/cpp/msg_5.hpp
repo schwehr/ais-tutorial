@@ -39,9 +39,9 @@
 // * `std::to_string(imo)` turns the number into decimal text so that the
 //   check-digit loop can look at single digits — the same trick as Python's
 //   `str(imo)`. `c - '0'` converts a digit character back to its value.
-// * A `std::string` is built with `+` and `+=`; `snprintf` is used for the
-//   zero-padded "%02d" pieces of the ETA text because C++17 has no
-//   built-in equivalent of Python's f"{month:02d}".
+// * A `std::string` is built with `+` and `+=`; `std::format("{:02}", v)`
+//   (C++20) produces the zero-padded two-digit pieces of the ETA text — the
+//   same format spec as Python's f"{month:02d}".
 // * `static_cast<int>` appears wherever a 64-bit `uint64` from `Bits`
 //   meets an `int` parameter: C++ would convert silently, but the explicit
 //   cast documents that we know the value fits.
@@ -50,7 +50,7 @@
 
 #include <array>
 #include <cstdint>
-#include <cstdio>
+#include <format>
 #include <string>
 
 #include "bits.hpp"
@@ -95,11 +95,7 @@ inline bool imo_check_digit_ok(std::uint64_t imo) {
 
 // 'MM-DD HH:MM' in UTC with '??' for each part that is not available.
 inline std::string eta_text(int month, int day, int hour, int minute) {
-    auto two = [](int v) {
-        char buf[16];  // "%02d" of any int fits in 11 characters plus NUL
-        std::snprintf(buf, sizeof buf, "%02d", v);
-        return std::string(buf);
-    };
+    auto two = [](int v) { return std::format("{:02}", v); };
     std::string mm = (1 <= month && month <= 12) ? two(month) : "??";
     std::string dd = (1 <= day && day <= 31) ? two(day) : "??";
     std::string hh = hour <= 23 ? two(hour) : "??";

@@ -157,7 +157,7 @@ def main(argv: list[str]) -> int:
     asm = Assembler()
     lineno = 0
     for name in argv:
-        stream = sys.stdin if name == "-" else open(name, "r", encoding="utf-8", errors="replace")
+        stream = sys.stdin if name == "-" else open(name, encoding="utf-8", errors="replace")
         with stream:
             for line in stream:
                 lineno += 1

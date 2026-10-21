@@ -33,6 +33,10 @@
 //!   hashable types are hashable.
 //! * `Option<Message>` is the return type of `add`: `None` means "keep
 //!   feeding me fragments", `Some(msg)` means "here is a complete message".
+//! * `else if let Some(group) = … && group.last().is_some_and(…)` is a
+//!   *let chain* (edition 2024): one `if` both looks the pending group up
+//!   and checks that the new fragment continues it. `is_some_and` asks a
+//!   question of an `Option` without a `match`.
 
 use std::collections::HashMap;
 use std::fmt;
@@ -184,20 +188,15 @@ impl Assembler {
         let completes_group = frag.number == frag.total;
         if frag.number == 1 {
             self.pending.insert(key.clone(), vec![frag]);
+        } else if let Some(group) = self.pending.get_mut(&key)
+            && group.last().is_some_and(|last| last.number == frag.number - 1)
+        {
+            // A let chain: the fragment continues the pending group, and
+            // `group` is already borrowed mutably so we can push onto it.
+            group.push(frag);
         } else {
-            // Does this fragment continue the pending group?
-            let continues = self
-                .pending
-                .get(&key)
-                .and_then(|group| group.last())
-                .is_some_and(|last| last.number == frag.number - 1);
-            if !continues {
-                self.pending.remove(&key); // out of order: drop
-                return None;
-            }
-            if let Some(group) = self.pending.get_mut(&key) {
-                group.push(frag);
-            }
+            self.pending.remove(&key); // out of order: drop
+            return None;
         }
         if completes_group {
             // `remove` hands the Vec back to us (ownership moves out of the map).

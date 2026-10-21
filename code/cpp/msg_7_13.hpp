@@ -33,13 +33,21 @@
 //   call builds the per-station object in place.
 // * `constexpr std::size_t` is a compile-time constant with a type; prefer
 //   it to `#define` for named numbers.
-// * `acks.size()` returns `std::size_t` (unsigned), which is why the loop
-//   bound `MAX_GROUPS` is also `std::size_t` — mixing signed and unsigned in
-//   a comparison draws a warning under -Wextra.
+// * The repeated groups are walked with a *range pipeline* (C++20/23):
+//   `std::views::iota(a, b)` is Python's `range(a, b)` over bit positions,
+//   `std::views::chunk(32)` cuts it into runs of 32 (the last run may be
+//   shorter — those are the trailing bits), and `std::views::take(4)` stops
+//   after four groups. Nothing is materialised: the pipeline is evaluated
+//   lazily as the `for` loop pulls from it. `group.front()` is the first
+//   position of each run.
+// * `acks.size()` returns `std::size_t` (unsigned), which is why the group
+//   limit `MAX_GROUPS` is also `std::size_t` — mixing signed and unsigned in
+//   arithmetic draws a warning under -Wextra.
 
 #pragma once
 
 #include <cstddef>
+#include <ranges>
 
 #include "bits.hpp"
 #include "common.hpp"
@@ -69,13 +77,14 @@ inline Json decode_msg_7_13(const Bits& bits) {
     require_bits(msg_type, bits.size(), HEADER_BITS + GROUP_BITS);
 
     Json::Array acks;
-    std::size_t pos = HEADER_BITS;
-    // Loop over the repeated groups. `bits.has` is the guard that stops us
-    // at the end of a 72-, 104-, 136- or 168-bit message.
-    while (acks.size() < MAX_GROUPS && bits.has(pos, GROUP_BITS)) {
-        acks.push_back(decode_ack(bits, pos));
-        pos += GROUP_BITS;
+    // Cut the bit positions after the header into 32-bit groups, at most
+    // four. A final short group is the byte padding, not an acknowledgement.
+    for (auto group : std::views::iota(HEADER_BITS, bits.size()) | std::views::chunk(GROUP_BITS) |
+                          std::views::take(MAX_GROUPS)) {
+        if (group.size() < GROUP_BITS) break;
+        acks.push_back(decode_ack(bits, group.front()));
     }
+    std::size_t pos = HEADER_BITS + acks.size() * GROUP_BITS;   // first unread bit
 
     return Json::Object{
         {"msg_type", msg_type},

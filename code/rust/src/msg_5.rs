@@ -41,8 +41,10 @@
 //! * `matches!(month, 1..=12)` is a macro that returns `true` if the value
 //!   fits the pattern — a compact way to write a range test.
 //! * `imo.to_string().bytes()` gives the decimal digits as ASCII bytes;
-//!   `b - b'0'` turns a digit byte into its value. `zip` pairs each digit
-//!   with its weight, exactly like Python's `zip(digits, weights)`.
+//!   `b - b'0'` turns a digit byte into its value and `u64::from(…)` widens
+//!   it — `From` only exists for conversions that cannot lose data, which
+//!   is why we prefer it to `as`. `zip` pairs each digit with its weight,
+//!   exactly like Python's `zip(digits, weights)`.
 //! * `format!("{month:02}")` is the zero-padded formatting that Python
 //!   writes as `f"{month:02d}"`.
 //! * Closures: `let two = |v: u64| …` defines a small local function; the
@@ -90,7 +92,7 @@ pub fn imo_check_digit_ok(imo: u64) -> bool {
     if !(1_000_000..=9_999_999).contains(&imo) {
         return false;
     }
-    let digits: Vec<u64> = imo.to_string().bytes().map(|b| (b - b'0') as u64).collect();
+    let digits: Vec<u64> = imo.to_string().bytes().map(|b| u64::from(b - b'0')).collect();
     let total: u64 = digits[..6].iter().zip([7, 6, 5, 4, 3, 2]).map(|(d, w)| d * w).sum();
     total % 10 == digits[6]
 }

@@ -88,14 +88,15 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
     put(&mut out, "spare", bits.uint(38, 2));
     let mut assignments: Vec<Json> =
         vec![assignment(bits.uint(40, 30), bits.uint(70, 12), bits.uint(82, 10))];
-    let pos;
-    if bits.has(92, 52) {
+    // `if` is an expression: each branch does its work and then yields the
+    // offset where the fixed part ends, so `pos` is initialised in one step.
+    let pos = if bits.has(92, 52) {
         assignments.push(assignment(bits.uint(92, 30), bits.uint(122, 12), bits.uint(134, 10)));
-        pos = 144;
+        144
     } else {
         put(&mut out, "spare2", bits.uint(92, 4));
-        pos = 96;
-    }
+        96
+    };
     put(&mut out, "assignments", assignments);
     put(&mut out, "trailing_bits", bits.len() - pos);
     Ok(Json::Obj(out))

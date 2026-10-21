@@ -527,11 +527,11 @@ pub fn split_tag_block(line: &str) -> Result<(Option<TagBlock>, &str), Untermina
         None => (inner, None),
     };
     let mut ok = false;
-    if let Some(h) = hexpart {
-        if h.chars().count() >= 2 {
-            let first_two: String = h.chars().take(2).collect();
-            ok = py_int_radix(&first_two, 16) == Some(i64::from(checksum(body)));
-        }
+    if let Some(h) = hexpart
+        && h.chars().count() >= 2
+    {
+        let first_two: String = h.chars().take(2).collect();
+        ok = py_int_radix(&first_two, 16) == Some(i64::from(checksum(body)));
     }
     let mut params = BTreeMap::new();
     for item in body.split(',') {
@@ -558,6 +558,10 @@ pub fn split_tag_block(line: &str) -> Result<(Option<TagBlock>, &str), Untermina
 > * `let Some(x) = expr else { return … };` (a *let-else*, Rust 1.65) binds
 >   on success and diverges otherwise — a tidy way to peel off the opening
 >   backslash with `strip_prefix`.
+> * `if let Some(h) = hexpart && h.chars().count() >= 2 { … }` is a *let
+>   chain* (edition 2024): a pattern match and an ordinary boolean test
+>   joined by `&&` in one `if`, with `h` usable in the second test. Before
+>   edition 2024 this had to be two nested `if`s.
 > * `BTreeMap<String, String>` is the sorted dictionary of chapter 1;
 >   iteration with `for (k, v) in &self.params` yields references, in key
 >   order.

@@ -35,6 +35,9 @@
 //!   of the raw parameters on demand, like Python `@property`.
 //! * `BTreeMap<String, String>` keeps the parameters sorted, which the JSON
 //!   writer needs anyway.
+//! * `if let Some(h) = hexpart && h.chars().count() >= 2 { … }` is a *let
+//!   chain*: a pattern match and an ordinary condition in one `if`, with the
+//!   bound name usable in the condition. Stable since edition 2024.
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -131,12 +134,15 @@ pub fn split_tag_block(line: &str) -> Result<(Option<TagBlock>, &str), Untermina
         Some((b, h)) => (b, Some(h)),
         None => (inner, None),
     };
+    // A *let chain* (edition 2024): the pattern test and the length test
+    // are joined with `&&` in one `if`, and `h` is in scope for the second
+    // test. Before 2024 this needed two nested `if`s.
     let mut ok = false;
-    if let Some(h) = hexpart {
-        if h.chars().count() >= 2 {
-            let first_two: String = h.chars().take(2).collect();
-            ok = py_int_radix(&first_two, 16) == Some(i64::from(checksum(body)));
-        }
+    if let Some(h) = hexpart
+        && h.chars().count() >= 2
+    {
+        let first_two: String = h.chars().take(2).collect();
+        ok = py_int_radix(&first_two, 16) == Some(i64::from(checksum(body)));
     }
     let mut params = BTreeMap::new();
     for item in body.split(',') {

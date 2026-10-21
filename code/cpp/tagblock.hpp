@@ -32,11 +32,14 @@
 //   and can be returned by value, unlike a C array.
 // * Python's `@property` methods become ordinary `const` member functions
 //   here; the call needs parentheses: `tag.time()`.
+// * `std::format("\\{}*{:02X}\\", body, checksum)` (C++20) replaces a
+//   `snprintf` into a fixed buffer: `{:02X}` is the format spec for two
+//   zero-padded upper-case hex digits, exactly as in Python.
 
 #pragma once
 
 #include <array>
-#include <cstdio>
+#include <format>
 #include <map>
 #include <optional>
 #include <stdexcept>
@@ -131,9 +134,8 @@ inline std::string format_tag_block(const std::vector<std::pair<std::string, std
         if (!body.empty()) body += ",";
         body += code + ":" + value;
     }
-    char hex[16];
-    std::snprintf(hex, sizeof hex, "%02X", checksum(body));
-    return "\\" + body + "*" + hex + "\\";
+    // "{:02X}": two upper-case hex digits, zero-padded (Python's f"{x:02X}").
+    return std::format("\\{}*{:02X}\\", body, checksum(body));
 }
 
 }  // namespace aistut

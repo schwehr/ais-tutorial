@@ -575,8 +575,9 @@ inline Json decode_msg_21(const Bits& bits) {
 >   of range, so no bounds check is needed — the same reasoning as the
 >   16-entry navigation-status table in chapter 3.
 > * `status` is kept unsigned (`std::uint64_t`) so that `>>` is a logical
->   shift; shifting a negative *signed* value right is implementation-
->   defined in C++17.
+>   shift; shifting a negative *signed* value right was implementation-
+>   defined before C++20 (C++20 pins it down as arithmetic), and an
+>   unsigned type still documents that these are bit flags, not a number.
 
 ### Rust
 
@@ -627,7 +628,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
     put(&mut out, "mmsi", bits.uint(8, 30));
     put(&mut out, "aton_type", aton_type);
     put(&mut out, "aton_type_text", aton_type_text(aton_type));
-    put(&mut out, "full_name", format!("{}{}", name, name_extension));
+    put(&mut out, "full_name", format!("{name}{name_extension}"));
     put(&mut out, "name", name);
     put(&mut out, "name_extension", name_extension);
     put(&mut out, "name_extension_bits", extension_bits);
@@ -657,7 +658,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
 >   the listed patterns; `20..=31` is an inclusive range pattern (`20..31`
 >   would exclude 31).
 > * **Ownership shows up in the order of the `put` calls.** `full_name` is
->   built first with `format!("{}{}", name, name_extension)`, which only
+>   built first with `format!("{name}{name_extension}")` (inline format arguments), which only
 >   *borrows* the two strings. Had we written `name + &name_extension`, the
 >   `+` would *move* `name` into the result and the later
 >   `put(&mut out, "name", name)` would not compile ("use of moved value").

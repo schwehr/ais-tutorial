@@ -45,7 +45,8 @@
 //!   returning `bool`; `20..=31` is an *inclusive* range pattern.
 //! * `usize::min(a, b)` (or `a.min(b)`) is the counterpart of Python's
 //!   `min(a, b)`; both operands must be `usize` here because `bits.len()` is.
-//! * `format!("{}{}", name, name_extension)` builds the full name without
+//! * `format!("{name}{name_extension}")` (inline format arguments: the
+//!   variable name goes inside the braces) builds the full name without
 //!   moving `name` out, so `name` can still be stored in the object
 //!   afterwards. Writing `name + &name_extension` would *consume* `name`
 //!   (ownership moves into the `+`), and a later use would not compile.
@@ -178,7 +179,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
     put(&mut out, "mmsi", bits.uint(8, 30));
     put(&mut out, "aton_type", aton_type);
     put(&mut out, "aton_type_text", aton_type_text(aton_type));
-    put(&mut out, "full_name", format!("{}{}", name, name_extension));
+    put(&mut out, "full_name", format!("{name}{name_extension}"));
     put(&mut out, "name", name);
     put(&mut out, "name_extension", name_extension);
     put(&mut out, "name_extension_bits", extension_bits);
@@ -241,7 +242,7 @@ mod tests {
         assert_eq!(obj["racon_status_text"], Json::from("RACON operational"));
         assert_eq!(obj["light_status"], Json::from(3u64));
         assert_eq!(obj["health_alarm"], Json::from(true));
-        assert!(decode_status(1).get("racon_status").is_none());
+        assert!(!decode_status(1).contains_key("racon_status"));
     }
 
     #[test]

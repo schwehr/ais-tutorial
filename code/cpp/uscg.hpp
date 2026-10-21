@@ -35,12 +35,18 @@
 //   styles are idiomatic; optionals are preferred when failure is routine.
 // * `item[0]` is a `char`; `item.substr(1)` is the rest. Characters compare
 //   with single quotes: `code == 's'`.
+// * `std::span<const std::string>` (C++20) is to a vector what
+//   `std::string_view` is to a string: a non-owning (pointer, length) view.
+//   The function can read the caller's `std::vector<std::string>` — or any
+//   contiguous array of strings — without copying and without being tied to
+//   one container type.
 // * `std::abs` from <cmath> works on doubles; the <cstdlib> one is for ints.
 
 #pragma once
 
 #include <cmath>
 #include <optional>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -53,7 +59,7 @@ namespace aistut {
 //
 // Unknown or malformed items are kept verbatim in `unparsed` so that no
 // information is silently lost.
-inline Json parse_uscg_fields(const std::vector<std::string>& extras) {
+inline Json parse_uscg_fields(std::span<const std::string> extras) {
     Json out = Json::object();
     Json::Array unparsed;
     for (const std::string& item : extras) {

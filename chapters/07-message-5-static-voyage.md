@@ -398,11 +398,7 @@ inline bool imo_check_digit_ok(std::uint64_t imo) {
 }
 
 inline std::string eta_text(int month, int day, int hour, int minute) {
-    auto two = [](int v) {
-        char buf[16];  // "%02d" of any int fits in 11 characters plus NUL
-        std::snprintf(buf, sizeof buf, "%02d", v);
-        return std::string(buf);
-    };
+    auto two = [](int v) { return std::format("{:02}", v); };
     std::string mm = (1 <= month && month <= 12) ? two(month) : "??";
     std::string dd = (1 <= day && day <= 31) ? two(day) : "??";
     std::string hh = hour <= 23 ? two(hour) : "??";
@@ -441,7 +437,7 @@ inline Json decode_msg_5(const Bits& bits) {
 > **Language notes (C++).**
 > * `std::to_string(imo)` is Python's `str(imo)`; a `std::string` can be indexed like an array and `digits[i] - '0'` turns the character `'7'` into the integer 7, because characters are small integers in C++.
 > * `auto two = [](int v) { … };` is a *lambda*: a function defined inside another function. The `[]` is the (empty) capture list — the lambda uses nothing from the enclosing scope.
-> * There is no built-in zero-padded formatting of integers into a `std::string` in C++17, hence `snprintf` into a stack buffer. The buffer is deliberately large enough for any `int` so that the compiler's `-Wformat-truncation` check is satisfied.
+> * `std::format("{:02}", v)` (C++20) is the zero-padded two-digit format, with the same spec as the Python f-string `f"{v:02d}"`. It returns a `std::string`, so there is no stack buffer to size and no `-Wformat-truncation` warning to appease as there was with `snprintf`.
 > * `1 <= month && month <= 12`: a chained `1 <= month <= 12` compiles in C++ but means `(1 <= month) <= 12`, i.e. `true <= 12`, which is always true. Keep the `&&`.
 
 ### Rust
@@ -471,7 +467,7 @@ pub fn imo_check_digit_ok(imo: u64) -> bool {
     if !(1_000_000..=9_999_999).contains(&imo) {
         return false;
     }
-    let digits: Vec<u64> = imo.to_string().bytes().map(|b| (b - b'0') as u64).collect();
+    let digits: Vec<u64> = imo.to_string().bytes().map(|b| u64::from(b - b'0')).collect();
     let total: u64 = digits[..6].iter().zip([7, 6, 5, 4, 3, 2]).map(|(d, w)| d * w).sum();
     total % 10 == digits[6]
 }
@@ -511,7 +507,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
 
 > **Language notes (Rust).**
 > * Range patterns in `match` (`1..=999_999 =>`) replace Python's `if … <= … <= …` chains; underscores in numeric literals are ignored and only help the eye.
-> * `imo.to_string().bytes()` yields the ASCII bytes of the decimal text; `b - b'0'` (a byte literal) is the same digit trick as in C++. `.map(…).collect()` builds a `Vec`, and `zip` with a fixed array pairs digits with weights; `.sum()` needs the type annotation `let total: u64` so the compiler knows what to add into.
+> * `imo.to_string().bytes()` yields the ASCII bytes of the decimal text; `b - b'0'` (a byte literal) is the same digit trick as in C++, and `u64::from(…)` widens the byte — `From` exists only for conversions that cannot lose data, so it is preferred to `as`. `.map(…).collect()` builds a `Vec`, and `zip` with a fixed array pairs digits with weights; `.sum()` needs the type annotation `let total: u64` so the compiler knows what to add into.
 > * `matches!(month, 1..=12)` expands to a `match` that returns a `bool` — handy inside an `if`.
 > * The `#[cfg(test)] mod tests` block at the end of the file contains unit tests (`cargo test msg_5` runs them) for the check digit, the ETA defaults and the hand-decoded Cape Cod message; the other languages rely on the integration test only.
 

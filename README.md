@@ -47,13 +47,13 @@ All four decoders read NMEA log lines and print one JSON object per line
 are built and checked against each other by `tests/run_tests.sh`.
 
 ```sh
-# Python 3.10+ (no packages needed)
+# Python 3.14+ (no packages needed); use python3.14 explicitly if python3 is older
 python3 code/python/decode.py data/ch03-position-reports.nmea
 
-# C++17 (g++ or clang++)
+# C++23 (g++ 14+ or clang++ 18+ with libstdc++ 14+)
 make -C code/cpp && code/cpp/build/decode data/ch03-position-reports.nmea
 
-# Rust 1.70+ (no crates)
+# Rust 1.93+ (edition 2024, no crates)
 (cd code/rust && cargo build --release) && code/rust/target/release/decode data/ch03-position-reports.nmea
 
 # TypeScript (tsc 5+, node 18+; no npm packages)
@@ -61,6 +61,7 @@ make -C code/cpp && code/cpp/build/decode data/ch03-position-reports.nmea
 
 # Everything, compared byte-for-byte with tests/expected/
 tests/run_tests.sh
+PYTHON=python3.14 tests/run_tests.sh   # if plain python3 is older than 3.14
 ```
 
 ## Repository layout

@@ -7,13 +7,21 @@
 #   tests/run_tests.sh python rust     # a subset
 #
 # The Python decoder requires Python 3.14 or newer; set PYTHON to the
-# interpreter to use (default: python3).
+# interpreter to use (default: python3.14 if present, else python3).
 #
 # Exit status is non-zero if any build or comparison fails.
 
 set -u
 cd "$(dirname "$0")/.."
 ROOT=$(pwd)
+
+if [ -z "${PYTHON:-}" ]; then
+  if command -v python3.14 >/dev/null 2>&1; then
+    PYTHON=python3.14
+  else
+    PYTHON=python3
+  fi
+fi
 
 LANGS=("$@")
 if [ ${#LANGS[@]} -eq 0 ]; then
@@ -22,7 +30,10 @@ fi
 
 build() {
   case "$1" in
-    python)     : ;;
+    python)
+      "${PYTHON:-python3}" -m unittest discover -q -s code/python/aistut -t code/python -p "*_test.py" &&
+      "${PYTHON:-python3}" -m unittest discover -q -s code/python/tools -p "*_test.py"
+      ;;
     cpp)        make -s -C code/cpp ;;
     rust)       (cd code/rust && cargo build --quiet --release) ;;
     typescript) (cd code/typescript && tsc -p tsconfig.json) ;;

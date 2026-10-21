@@ -37,11 +37,17 @@
 // * `std::size_t` is the unsigned type used for sizes and indices. Mixing it
 //   with signed `int` provokes compiler warnings, so offsets here are
 //   `std::size_t` throughout.
+// * `inline constexpr` on the six-bit table makes it a compile-time constant
+//   that every including file shares; `static_assert` checks its length
+//   while compiling, so a typo in the table cannot reach a running program.
+// * `std::format("field {}+{} beyond {} bits", …)` (C++20) assembles the
+//   error text from its pieces — the C++ twin of a Python f-string.
 
 #pragma once
 
 #include <cstddef>
 #include <cstdint>
+#include <format>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -84,7 +90,7 @@ inline int armor_char_to_value(char32_t ch) {
 //     payload_to_bits("1w", 4)  -> 0 0 0 0 0 1 1 1     (last char 'w' = 111111, drop 4 bits)
 inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, long long fill_bits = 0) {
     if (fill_bits < 0 || fill_bits > 5) {
-        throw std::invalid_argument("fill bits must be 0..5, got " + std::to_string(fill_bits));
+        throw std::invalid_argument(std::format("fill bits must be 0..5, got {}", fill_bits));
     }
     std::vector<std::uint8_t> bits;
     bits.reserve(payload.size() * 6);
@@ -109,7 +115,7 @@ inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, long 
 // sign, destination, safety messages) pack one character into 6 bits using a
 // different table: 0–31 map to '@'..'_' and 32–63 map to ' '..'?'.
 
-inline const char SIXBIT_ASCII[65] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ !\"#$%&'()*+,-./0123456789:;<=>?";
+inline constexpr char SIXBIT_ASCII[65] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_ !\"#$%&'()*+,-./0123456789:;<=>?";
 static_assert(sizeof(SIXBIT_ASCII) == 65, "64 characters plus the terminating NUL");
 
 // --- 3. The Bits reader -----------------------------------------------------
@@ -128,7 +134,7 @@ public:
     }
 
     // Build directly from an !AIVDM payload and its fill-bit count.
-    static Bits from_payload(std::string_view payload, long long fill_bits = 0) {
+    [[nodiscard]] static Bits from_payload(std::string_view payload, long long fill_bits = 0) {
         return Bits(payload_to_bits(payload, fill_bits));
     }
 
@@ -143,8 +149,7 @@ public:
     // Unsigned big-endian integer from `length` bits at `start`.
     std::uint64_t uint(std::size_t start, std::size_t length) const {
         if (!has(start, length)) {
-            throw std::out_of_range("field " + std::to_string(start) + "+" + std::to_string(length) +
-                                    " beyond " + std::to_string(bits_.size()) + " bits");
+            throw std::out_of_range(std::format("field {}+{} beyond {} bits", start, length, bits_.size()));
         }
         if (length > 64) {
             // Python integers are unbounded; ours are not. No AIS field is

@@ -423,11 +423,7 @@ inline std::optional<std::string> utc_iso(std::uint64_t year, std::uint64_t mont
                                           std::uint64_t hour, std::uint64_t minute, std::uint64_t second) {
     if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) return std::nullopt;
     if (hour > 23 || minute > 59 || second > 59) return std::nullopt;
-    char buf[32];
-    std::snprintf(buf, sizeof buf, "%04u-%02u-%02uT%02u:%02u:%02uZ",
-                  static_cast<unsigned>(year), static_cast<unsigned>(month), static_cast<unsigned>(day),
-                  static_cast<unsigned>(hour), static_cast<unsigned>(minute), static_cast<unsigned>(second));
-    return std::string(buf);
+    return std::format("{:04}-{:02}-{:02}T{:02}:{:02}:{:02}Z", year, month, day, hour, minute, second);
 }
 
 // Decode a message 4 or 11. Throws DecodeError if shorter than 168 bits.
@@ -486,9 +482,11 @@ inline Json decode_msg_4_11(const Bits& bits) {
 > identical. `std::optional<std::string>` is "a string or nothing";
 > `std::nullopt` is the nothing, `*iso` extracts the string once you have
 > tested `iso` in boolean context. `Json(nullptr)` selects the
-> `std::nullptr_t` constructor and prints `null`. `snprintf` with `%04u`
-> zero-pads to four digits; the `static_cast<unsigned>` calls exist because
-> `%u` expects exactly `unsigned int`, not `uint64_t`. `inline constexpr`
+> `std::nullptr_t` constructor and prints `null`. `std::format` (C++20)
+> with `{:04}` zero-pads to four digits and `{:02}` to two — the same
+> format specs as the Python f-string — and it is type-safe: it takes the
+> `std::uint64_t` arguments as they are, where C's `%u` would have needed a
+> `static_cast<unsigned>` for each. `inline constexpr`
 > at namespace scope gives a compile-time constant with a single
 > definition across all includers (C++17).
 
@@ -591,7 +589,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
 > with no `match` at the call site. `(1..=9999).contains(&year)` is the
 > idiomatic range test — `..=` is an inclusive range, and `contains` takes
 > a reference, hence the `&`. `format!("{year:04}")` captures the local
-> variable by name (Rust 2021) and zero-pads to width 4. The module also
+> variable by name (an *inline format argument*) and zero-pads to width 4. The module also
 > has `#[cfg(test)]` unit tests that decode two lines from the data file;
 > run them with `cargo test` in `code/rust`.
 
@@ -959,9 +957,8 @@ anything.
    `tests/expected/ch06-base-station-reports.jsonl`; you should get about
    +120 for 3669730, −102 for 312670, +1 for receiver 003669946 and −4
    for receiver 003669945 on the same transmission.
-   (`datetime.datetime.fromisoformat` accepts the `Z` suffix in
-   Python 3.11+; strip it and add `tzinfo=timezone.utc` on older
-   versions.)
+   (`datetime.datetime.fromisoformat` accepts the `Z` suffix directly and
+   `.timestamp()` turns it into UNIX seconds.)
 3. **(TypeScript)** `utcIso` accepts 31 April and 30 February. Add a
    calendar check (28/29/30/31 days per month, leap years) and make it
    return `null` for impossible dates. Keep the output identical for every

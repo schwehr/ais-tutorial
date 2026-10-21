@@ -39,6 +39,10 @@
 //   iterator; comparing it with `.end()` is the C++ idiom for "not found".
 // * A "function pointer" `Json (*)(const Sentence&)` lets us put parsers in a
 //   table (`GPS_PARSERS`), exactly as Python stores functions in a dict.
+// * `std::optional::transform` (C++23) is one of the *monadic* operations
+//   (`transform`, `and_then`, `or_else`): it applies a function to the value
+//   if there is one and passes the emptiness through otherwise, saving an
+//   `if (!value) return …` at each call site.
 
 #pragma once
 
@@ -61,7 +65,7 @@ namespace aistut {
 //
 // Python XORs code points (`ord(ch)`), so a non-ASCII character counts once
 // and with its full value — we do the same rather than XOR raw UTF-8 bytes.
-inline int checksum(std::string_view body) {
+[[nodiscard]] inline int checksum(std::string_view body) {
     int value = 0;
     for (char32_t cp : py::codepoints(body)) {
         value ^= static_cast<int>(cp);
@@ -190,9 +194,11 @@ inline std::optional<double> opt_float(const std::string& s) {
 }
 
 // Wrap an optional float for printing with `decimals` places (see jsonout.hpp).
+// `optional::transform` (C++23) applies the lambda only when a value is
+// present and yields an empty optional otherwise; `Json` turns that empty
+// optional into `null`. Python: `None if value is None else Fixed(value, d)`.
 inline Json fixed(std::optional<double> value, int decimals) {
-    if (!value) return Json();
-    return Json::fixed(*value, decimals);
+    return value.transform([decimals](double v) { return Fixed{.value = v, .decimals = decimals}; });
 }
 
 inline std::optional<long long> opt_int(const std::string& s) {

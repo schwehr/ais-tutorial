@@ -492,14 +492,13 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
     // ... header ...
     let mut assignments: Vec<Json> =
         vec![assignment(bits.uint(40, 30), bits.uint(70, 12), bits.uint(82, 10))];
-    let pos;
-    if bits.has(92, 52) {
+    let pos = if bits.has(92, 52) {
         assignments.push(assignment(bits.uint(92, 30), bits.uint(122, 12), bits.uint(134, 10)));
-        pos = 144;
+        144
     } else {
         put(&mut out, "spare2", bits.uint(92, 4));
-        pos = 96;
-    }
+        96
+    };
     put(&mut out, "assignments", assignments);
     put(&mut out, "trailing_bits", bits.len() - pos);
     Ok(Json::Obj(out))
@@ -510,7 +509,7 @@ In [`code/rust/src/msg_15.rs`](../code/rust/src/msg_15.rs) `message_name` is one
 
 > **Language notes (Rust).**
 > * `Option<u64>` goes straight into `put` because `jsonout` implements `From<Option<T>>` (chapter 6), and `let text = if … { … } else { … };` is the `if`-expression of chapter 3; the branch that also sets `reports` does so with a statement before its final expression.
-> * `let pos;` declares a variable without a value; the compiler checks that every path assigns it exactly once before use (*definite initialisation*). Python would simply assign in each branch.
+> * `let pos = if … { …; 144 } else { …; 96 };` uses the `if` as an expression: each branch does its work (pushing the second assignment or recording the spare) and then yields the offset where the fixed part ends. Python would assign `pos` separately in each branch; Rust lets the branch *be* the value, so `pos` is initialised in one step and can never be forgotten.
 > * `vec![…]` creates a `Vec` with initial contents.
 
 ### TypeScript

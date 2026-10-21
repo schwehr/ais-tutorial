@@ -131,11 +131,9 @@ pub fn parse_sentence(line: &str) -> Result<Sentence, NmeaError> {
     let mut extras: Vec<String> = Vec::new();
     let body = match after_start.split_once('*') {
         Some((body, tail)) => {
-            // Python: hexpart, _, rest = tail.partition(",")
-            let (hexpart, rest) = match tail.split_once(',') {
-                Some((h, r)) => (h, r),
-                None => (tail, ""),
-            };
+            // Python: hexpart, _, rest = tail.partition(","). `unwrap_or`
+            // supplies the "no comma" answer instead of a two-arm `match`.
+            let (hexpart, rest) = tail.split_once(',').unwrap_or((tail, ""));
             let first_two: String = hexpart.chars().take(2).collect();
             given = py_int_radix(&first_two, 16);
             ok = given == Some(i64::from(checksum(body)));

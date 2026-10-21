@@ -9,13 +9,17 @@
 // * `NotImplemented` is a separate exception so that `decode.cpp` can tell
 //   "this decoder is a stub" apart from "this message is broken".
 // * The tables are `const std::map<int, std::string>` — the closest thing to
-//   a Python dict literal. `.count(key)` is a terse way to ask "is key in the
-//   map?" (it returns 0 or 1 for a std::map).
+//   a Python dict literal. `.contains(key)` (C++20) asks "is key in the
+//   map?" — Python's `key in d`.
+// * `std::format("message {} too short: {} bits < {}", …)` (C++20) builds the
+//   error text the way a Python f-string would; the `{}` placeholders are
+//   filled in order.
 // * `std::div`-style splitting of a number into tens and ones is just `/`
 //   and `%` in C++; Python's `divmod(code, 10)` returns both at once.
 
 #pragma once
 
+#include <format>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -29,8 +33,7 @@ namespace aistut {
 class DecodeError : public std::invalid_argument {
 public:
     DecodeError(int msg_type, std::size_t need_bits, std::size_t have_bits)
-        : std::invalid_argument("message " + std::to_string(msg_type) + " too short: " +
-                                std::to_string(have_bits) + " bits < " + std::to_string(need_bits)),
+        : std::invalid_argument(std::format("message {} too short: {} bits < {}", msg_type, have_bits, need_bits)),
           msg_type(msg_type), need_bits(need_bits), have_bits(have_bits) {}
 
     int msg_type;
@@ -102,7 +105,7 @@ inline std::string ship_type_text(int code) {
     if (code >= 200) return "reserved for future use";
     int tens = code / 10;
     int ones = code % 10;
-    if (SHIP_TYPE_FIRST_DIGIT.count(tens) && tens != 3 && tens != 5) {
+    if (SHIP_TYPE_FIRST_DIGIT.contains(tens) && tens != 3 && tens != 5) {
         return SHIP_TYPE_FIRST_DIGIT.at(tens) + ", " + HAZARD_DIGIT.at(ones);
     }
     return "reserved";

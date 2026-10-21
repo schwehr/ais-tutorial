@@ -322,7 +322,7 @@ def time_of_arrival_to_utc(unix_time: int, toa_s: float | None) -> Fixed | None:
 ### C++
 
 ```cpp
-inline Json parse_uscg_fields(const std::vector<std::string>& extras) {
+inline Json parse_uscg_fields(std::span<const std::string> extras) {
     Json out = Json::object();
     Json::Array unparsed;
     for (const std::string& item : extras) {
@@ -400,6 +400,11 @@ inline Json time_of_arrival_to_utc(long long unix_time, std::optional<double> to
 >   times after 1970, but the habit is worth having.
 > * `for (int k : {-60, 0, 60})` iterates an initializer list — the C++
 >   way to loop over three literal values.
+> * The parameter is a **`std::span<const std::string>`** (C++20): a
+>   non-owning view over a contiguous run of strings, exactly what Rust's
+>   `&[String]` is below. The caller's `std::vector<std::string>` converts
+>   to it implicitly and nothing is copied; the function no longer cares
+>   which container the strings live in.
 
 ### Rust
 

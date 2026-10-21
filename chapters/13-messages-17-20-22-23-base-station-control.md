@@ -436,11 +436,13 @@ def decode(bits: Bits) -> dict:
 inline Json decode_msg_20(const Bits& bits) {
     require_bits(20, bits.size(), 72);
     Json::Array reservations;
-    std::size_t pos = 40;
-    while (reservations.size() < MAX_RESERVATIONS && bits.has(pos, RESERVATION_BITS)) {
-        reservations.push_back(decode_reservation(bits, pos));
-        pos += RESERVATION_BITS;
+    constexpr std::size_t FIRST_GROUP = 40;
+    for (auto group : std::views::iota(FIRST_GROUP, bits.size()) | std::views::chunk(RESERVATION_BITS) |
+                          std::views::take(MAX_RESERVATIONS)) {
+        if (group.size() < RESERVATION_BITS) break;   // the trailing spare bits
+        reservations.push_back(decode_reservation(bits, group.front()));
     }
+    std::size_t pos = FIRST_GROUP + reservations.size() * RESERVATION_BITS;
     std::size_t spare_bits = bits.size() - pos;
     Json spare2 = nullptr;
     if (spare_bits == 0) {
@@ -478,7 +480,7 @@ inline std::optional<int> channel_frequency_khz(int number) {
     } else {
         return std::nullopt;
     }
-    int coast = SIMPLEX_CHANNELS.count(base) ? ship : ship + 4600;
+    int coast = SIMPLEX_CHANNELS.contains(base) ? ship : ship + 4600;
     return prefix == 2 ? coast : ship;
 }
 
@@ -504,7 +506,8 @@ inline Json channel_mhz(int number) {
 
 > **Language notes (C++).**
 > * `std::optional<int>` is the chapter 1 optional: `std::nullopt` empty, `!khz` tests, `*khz` reads. The `Json` class converts an empty optional to `null`, so the value could also have been stored directly.
-> * `std::set<int>::count(x)` is the pre-C++20 spelling of "is x in the set" (it returns 0 or 1). `std::set` is an ordered tree; for 22 small integers that is plenty fast.
+> * `std::set<int>::contains(x)` (C++20) is "is x in the set" — before C++20 one wrote `.count(x)`, which returns 0 or 1. `std::set` is an ordered tree; for 22 small integers that is plenty fast.
+> * The reservation loop is a **range pipeline** (`<ranges>`): `std::views::iota(FIRST_GROUP, bits.size())` is `range(40, len(bits))` over bit positions, `std::views::chunk(RESERVATION_BITS)` (C++23) groups them in thirties, `std::views::take(MAX_RESERVATIONS)` caps the count at four. The stages are glued with `|` and evaluated lazily as the `for` loop iterates; `group.front()` is the first position of a chunk and `group.size()` tells a full group from the trailing spare. It is Python's `while len(...) < 4 and bits.has(...)` expressed as data flow — compare the Rust version below, which keeps the `while`.
 > * Both branches of `?:` must have the same type. `decode_rtcm_header(...)` returns `Json`, so the other branch is written `Json(nullptr)`; `"all types (default)"` is a `const char*`, so it is wrapped in `std::string(...)` to match `ship_type_text`'s return type.
 > * `Json spare2 = nullptr; … spare2 = 0; … spare2 = bits.uint(...)` — a `Json` variable can be reassigned a value of a different JSON type; that is what the `std::variant` inside it is for (chapter 1).
 

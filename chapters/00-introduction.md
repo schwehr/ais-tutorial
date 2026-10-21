@@ -149,9 +149,9 @@ but because the point is to see every line that touches the data.
 
 | Language | Toolchain | Check with |
 |---|---|---|
-| Python | 3.10 or newer, standard library only | `python3 --version` |
-| C++ | `g++` or `clang++` with C++17; `make` | `g++ --version` |
-| Rust | 1.70 or newer (`cargo`, `rustc`); no crates | `cargo --version` |
+| Python | **3.14 or newer**, standard library only (the code uses PEP 604 `X \| None` unions, PEP 585 built-in generics, PEP 695 `type` aliases and PEP 649 deferred annotations; if your `python3` is older, run `python3.14 …` and `PYTHON=python3.14 tests/run_tests.sh`) | `python3 --version` |
+| C++ | `g++` 14 or newer, or `clang++` 18 or newer with libstdc++ 14+, with C++23 (`<print>`, `<expected>`, `std::views::chunk`); `make` | `g++ --version` |
+| Rust | 1.93 or newer (`cargo`, `rustc`; edition 2024); no crates | `cargo --version` |
 | TypeScript | `tsc` 5 or newer and `node` 18 or newer; no npm packages | `tsc --version`, `node --version` |
 
 If you only care about one language, install only that one;
@@ -197,7 +197,7 @@ relevant line:
 # Python (no build step)
 python3 code/python/decode.py data/ch01-gps-itrek-flight.nmea
 
-# C++17
+# C++23
 make -C code/cpp && code/cpp/build/decode data/ch01-gps-itrek-flight.nmea
 
 # Rust
@@ -295,10 +295,13 @@ the idiom its own community would recognise, not as a transliteration:
 * **Python** is the reference. Functions and `dataclass`es, dictionaries
   for JSON objects, `X | None` type hints for missing values, exceptions for errors.
   It is the shortest and the one the test fixtures are generated from.
-* **C++17** shows what the same design looks like with static types and no
+* **C++23** shows what the same design looks like with static types and no
   garbage collector: header-only modules, `struct`s as data bundles,
-  `std::optional` where Python has `None`, `std::map` for objects (which
-  sorts the keys for free), `std::string_view` for borrowed text, and a
+  `std::optional` where Python has `None` (and `std::expected` where
+  Python raises a `ValueError` the caller is meant to catch), `std::map`
+  for objects (which sorts the keys for free), `std::string_view` and
+  `std::span` for borrowed text and arrays, `std::format`/`std::println`
+  for output, range pipelines for repeated groups, and a
   small "Python-compatibility" header so that `strip`, `split` and
   `partition` behave exactly like their Python namesakes.
 * **Rust** adds ownership and exhaustive error handling: `&str` versus

@@ -10,8 +10,8 @@ that keeps the four in step. **Read it before changing any of them.**
 ```
 code/
   python/      aistut/<module>.py          decode.py (CLI)   tools/
-  cpp/         <module>.hpp                decode.cpp        Makefile   (C++17, no dependencies)
-  rust/        src/<module>.rs             src/main.rs       Cargo.toml (edition 2021, no crates)
+  cpp/         <module>.hpp                decode.cpp        Makefile   (C++23, no dependencies)
+  rust/        src/<module>.rs             src/main.rs       Cargo.toml (edition 2024, no crates)
   typescript/  src/<module>.ts             src/decode.ts     tsconfig.json (tsc + node, no npm packages)
 ```
 
@@ -52,7 +52,7 @@ Rules that make byte-identical output possible:
 4. **Non-integers always have an explicit, fixed number of decimals**,
    chosen per field (lat/lon 6, SOG 1 or 2, COG 1, ROT 1, …) and identical in
    all four languages. Python wraps them in `Fixed(value, decimals)`; C++
-   uses `snprintf("%.*f")`; Rust `format!("{:.*}")`; TypeScript `toFixed()`.
+   uses `std::format("{:.{}f}")`; Rust `format!("{:.*}")`; TypeScript `toFixed()`.
    Negative zero is printed as `0.0…` (no minus sign). A `Fixed` whose
    value is NaN, ±infinity or has |x| ≥ 1e21 prints as `null` in all four
    (JSON has no `nan`/`inf` tokens, and `toFixed` switches to exponent
@@ -134,11 +134,27 @@ Rules that make byte-identical output possible:
 * Prefer clarity over speed: explicit loops, named constants, comments that
   say *why*. No clever metaprogramming.
 * No third-party dependencies anywhere. Standard library only.
-* C++17 (`-std=c++17 -Wall -Wextra -pedantic`), header-only modules,
-  `std::map` for objects (sorted for free), `std::optional`, no exceptions
+* C++23 (`-std=c++23 -Wall -Wextra -pedantic`; GCC 14+ / Clang 18+ with
+  libstdc++ 14+), header-only modules, `std::map` for objects (sorted for
+  free), `std::optional` (with the C++23 monadic `transform`),
+  `std::expected` where an error is returned rather than thrown
+  (`parse_vdm`), `std::format`/`std::println` for all text output,
+  `std::string_view`/`std::span` for borrowed data, `std::views::chunk` for
+  repeated bit groups, designated initialisers for structs, no exceptions
   across module boundaries except `DecodeError`.
-* Rust 2021, `#![forbid(unsafe_code)]`, `BTreeMap` for objects, `Result`
-  for errors, no `unwrap()` on input-derived values.
+* Rust edition 2024 (`rust-version = "1.93"`), `#![forbid(unsafe_code)]`,
+  `BTreeMap` for objects, `Result` for errors, no `unwrap()` on
+  input-derived values; `cargo clippy --all-targets -- -D warnings` clean.
+  Prefer the modern spellings when they read better: `let … else`, let
+  chains (`if let Some(x) = a && cond`), `Option::is_some_and`, inline
+  format arguments (`format!("{name}")`), `u64::from(x)` over `as` for
+  widening.
 * TypeScript `strict`, ES2022 target, CommonJS modules for plain `node`,
   `Map`-free plain objects with a custom sorted stringify.
-* Python 3.10+, standard library only, type hints, dataclasses.
+* Python 3.14+, standard library only, type hints, dataclasses. Modern
+  typing only: `X | None` (PEP 604), built-in generics `list[str]` /
+  `dict[int, str]` (PEP 585), `collections.abc.Callable`, `type` aliases
+  (PEP 695); no `typing.Optional`/`List`, no quoted forward references and
+  no `from __future__ import annotations` (PEP 649 makes them unnecessary).
+  `decode.py` refuses to run on an older interpreter; the test scripts
+  honour `PYTHON=python3.14` when plain `python3` is older.

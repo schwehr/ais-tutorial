@@ -26,12 +26,17 @@
 // -----------------------------------------
 // * `Json::Array` is `std::vector<Json>`; `push_back` appends. The vector
 //   is then moved into the object with `Json(std::move(reservations))`.
-// * A `while` loop with two conditions replaces Python's
-//   `while len(...) < 4 and bits.has(...)` one for one.
+// * The reservation groups are visited with a range pipeline (C++20/23):
+//   `std::views::iota(40, size)` enumerates the bit positions after the
+//   header, `std::views::chunk(30)` groups them in thirties and
+//   `std::views::take(4)` caps the count — Python's
+//   `while len(...) < 4 and bits.has(...)` written as data flow. A short
+//   final chunk is the spare, so the loop `break`s on it.
 
 #pragma once
 
 #include <cstdint>
+#include <ranges>
 #include <utility>
 
 #include "bits.hpp"
@@ -64,11 +69,13 @@ inline Json decode_reservation(const Bits& bits, std::size_t start) {
 inline Json decode_msg_20(const Bits& bits) {
     require_bits(20, bits.size(), 72);
     Json::Array reservations;
-    std::size_t pos = 40;
-    while (reservations.size() < MAX_RESERVATIONS && bits.has(pos, RESERVATION_BITS)) {
-        reservations.push_back(decode_reservation(bits, pos));
-        pos += RESERVATION_BITS;
+    constexpr std::size_t FIRST_GROUP = 40;
+    for (auto group : std::views::iota(FIRST_GROUP, bits.size()) | std::views::chunk(RESERVATION_BITS) |
+                          std::views::take(MAX_RESERVATIONS)) {
+        if (group.size() < RESERVATION_BITS) break;   // the trailing spare bits
+        reservations.push_back(decode_reservation(bits, group.front()));
     }
+    std::size_t pos = FIRST_GROUP + reservations.size() * RESERVATION_BITS;
     std::size_t spare_bits = bits.size() - pos;
     Json spare2 = nullptr;
     if (spare_bits == 0) {

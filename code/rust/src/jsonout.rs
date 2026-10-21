@@ -8,9 +8,9 @@
 //!   1. Object keys are written in sorted order.
 //!   2. Every non-integer number carries an explicit number of decimals
 //!      (`Json::Fixed(value, decimals)`) and is printed with exactly that
-//!      many (`format!("{:.*}")`, which rounds the exact binary value the
-//!      same way Python's `format(x, '.6f')`, C's `printf` and JavaScript's
-//!      `toFixed` do).
+//!      many (`format!("{value:.decimals$}")`, which rounds the exact binary
+//!      value the same way Python's `format(x, '.6f')`, C's `printf` and
+//!      JavaScript's `toFixed` do).
 //!
 //! Supported values: null, bool, integer, fixed-point number, string, array,
 //! object.
@@ -27,6 +27,8 @@
 //! * The `From<T> for Json` implementations let callers write
 //!   `put(&mut obj, "mmsi", 123)` instead of `Json::Int(123)`; the
 //!   conversion is picked by the compiler from the argument type.
+//! * Format strings name their arguments inline: `format!("{value:.decimals$}")`
+//!   reads `value` and `decimals` straight from the surrounding scope.
 //! * `impl fmt::Display for Json` is how a type opts into `to_string()`,
 //!   `format!("{}")` and `println!("{}")`.
 
@@ -143,8 +145,9 @@ fn format_fixed(value: f64, decimals: usize) -> String {
     if !value.is_finite() || value.abs() >= FIXED_LIMIT {
         return "null".to_string();
     }
-    // `{:.*}` takes the precision from the first argument.
-    let s = format!("{:.*}", decimals, value);
+    // `{value:.decimals$}`: the `$` says "take the precision from the
+    // variable `decimals`" (an inline format argument, like `{value}`).
+    let s = format!("{value:.decimals$}");
     // "-0.000" is mathematically zero; Python's version drops the sign and
     // so do we. The check "every character after '-' is '0' or '.'" is the
     // same as "float(s) == 0.0" for a fixed-point string.
@@ -164,9 +167,11 @@ fn escape(s: &str, out: &mut String) {
             '\n' => out.push_str("\\n"),
             '\r' => out.push_str("\\r"),
             '\t' => out.push_str("\\t"),
-            c if (c as u32) < 0x20 => {
+            c if u32::from(c) < 0x20 => {
                 // Other control characters: \u00XX with lower-case hex.
-                out.push_str(&format!("\\u{:04x}", c as u32));
+                // `u32::from(char)` is the lossless code-point conversion.
+                let code = u32::from(c);
+                out.push_str(&format!("\\u{code:04x}"));
             }
             c => out.push(c), // non-ASCII passes through as UTF-8
         }

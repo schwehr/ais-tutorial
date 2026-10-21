@@ -289,11 +289,14 @@ inline Json decode_msg_7_13(const Bits& bits) {
     require_bits(msg_type, bits.size(), HEADER_BITS + GROUP_BITS);
 
     Json::Array acks;
-    std::size_t pos = HEADER_BITS;
-    while (acks.size() < MAX_GROUPS && bits.has(pos, GROUP_BITS)) {
-        acks.push_back(decode_ack(bits, pos));
-        pos += GROUP_BITS;
+    // Cut the bit positions after the header into 32-bit groups, at most
+    // four. A final short group is the byte padding, not an acknowledgement.
+    for (auto group : std::views::iota(HEADER_BITS, bits.size()) | std::views::chunk(GROUP_BITS) |
+                          std::views::take(MAX_GROUPS)) {
+        if (group.size() < GROUP_BITS) break;
+        acks.push_back(decode_ack(bits, group.front()));
     }
+    std::size_t pos = HEADER_BITS + acks.size() * GROUP_BITS;   // first unread bit
 
     return Json::Object{
         {"msg_type", msg_type},
@@ -341,7 +344,7 @@ inline Json decode_msg_14(const Bits& bits) {
 }
 ```
 
-> **Language notes (C++).** `Json::Array` is a `std::vector<Json>`; `push_back` is `list.append`, and a `Json::Object{...}` brace-initialiser builds the per-station object in place. The constants are `constexpr std::size_t` inside a small `namespace msg_7_13` so that other headers can have their own `HEADER_BITS` without a clash — header-only code shares one global namespace, so names must be scoped. `acks.size()` is unsigned, which is why `MAX_GROUPS` is `std::size_t` too: comparing signed with unsigned draws a warning under `-Wextra`. `std::map::find` returns an iterator; comparing it with `end()` is the "key not found" test, and an empty `std::optional<std::string>` prints as `null`. Our `Json` class has no string accessor, so message 14 decodes the short text a second time instead of reading it back from the object.
+> **Language notes (C++).** `Json::Array` is a `std::vector<Json>`; `push_back` is `list.append`, and a `Json::Object{...}` brace-initialiser builds the per-station object in place. The constants are `constexpr std::size_t` inside a small `namespace msg_7_13` so that other headers can have their own `HEADER_BITS` without a clash — header-only code shares one global namespace, so names must be scoped. The repeated groups are visited with a **range pipeline** (`<ranges>`, C++20/23): `std::views::iota(a, b)` is Python's `range(a, b)` over bit positions, `std::views::chunk(32)` (C++23) cuts that sequence into runs of 32, and `std::views::take(4)` stops after four runs; the `|` joins the stages and nothing is computed until the `for` loop pulls from the pipeline. A last run shorter than 32 is the byte padding, hence the `break`; `group.front()` is the first bit position of a run. `acks.size()` is unsigned, which is why `MAX_GROUPS` is `std::size_t` too: mixing signed with unsigned in arithmetic draws a warning under `-Wextra`. `std::map::find` returns an iterator; comparing it with `end()` is the "key not found" test, and an empty `std::optional<std::string>` prints as `null`. Our `Json` class has no string accessor, so message 14 decodes the short text a second time instead of reading it back from the object.
 
 ### Rust
 
