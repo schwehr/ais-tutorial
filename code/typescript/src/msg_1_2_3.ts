@@ -33,7 +33,7 @@
  *   time rather than in the diff against the Python output.
  * * `Object.assign(out, decodeRot(...))` merges one object into another —
  *   Python's `out.update(...)`.
- * * `sub >> 9` and `(sub >> 2) & 0x3f` are fine here because `sub` is only
+ * * `sub >> 9` and `(sub >> 2) & 0x7f` are fine here because `sub` is only
  *   14 bits wide; see bits.ts for why `>>`/`<<` are dangerous above 31 bits.
  * * Chained ternaries (`a ? x : b ? y : z`) are JavaScript's conditional
  *   expression; indentation makes them readable.
@@ -123,7 +123,7 @@ export function decodeSotdma(bits: Bits, start: number): JsonObject {
     out["slot_number"] = sub;
   } else if (timeout === 1) {
     out["utc_hour"] = sub >> 9;            // bits 13..9
-    out["utc_minute"] = (sub >> 2) & 0x3f; // bits 8..2
+    out["utc_minute"] = (sub >> 2) & 0x7f; // bits 8..2 (7 bits)
   } else { // timeout === 0
     out["slot_offset"] = sub;
   }

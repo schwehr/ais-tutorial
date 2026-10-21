@@ -6,7 +6,7 @@ A TAG block is metadata that *precedes* a sentence on the same line:
     ^                            ^ ^
     backslash  parameter list   checksum of the text between the backslashes
 
-Defined in IEC 61162-1 ed. 4 / NMEA 0183 v4.10 §7.1.2 "TAG block".
+Defined in IEC 61162-1 ed. 4 §7.1.2 "TAG block" (NMEA 0183 v4.10 §7).
 Parameters are `code:value` pairs separated by commas:
 
     c:  UNIX time (seconds, or milliseconds if > 10^10 or configured so)

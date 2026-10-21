@@ -10,9 +10,10 @@ exercise because it forces you to decide what each metadata field *means*:
     r003669946  -> s:003669946   (source station)
     1223901985  -> c:1223901985  (UNIX time, seconds)
     s34486, d-074, T25.497, x78124 have no standard TAG block code; NMEA
-    4.10 allows no private codes, so they are carried in the free text
-    field t: as "s34486 d-074 T25.497 x78124" (at most 15 characters are
-    allowed, so this is lossy — we keep the dBm and the time of arrival).
+    4.10 allows no private codes, so what fits is carried in the free text
+    field t:, which may hold at most 15 characters. That is lossy: we keep
+    only the dBm value and the time of arrival rounded to 10 ms, e.g.
+    "d-74 T25.50", and drop the RSSI and the sentence counter.
 
 Multi-sentence groups get a g:<n>-<total>-<group id> parameter and an
 n:<line> counter so that a downstream program can re-associate fragments

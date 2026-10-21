@@ -13,7 +13,7 @@ Messages 1–3 (chapter 3) tell you *where* a ship is. Message 5 tells you *who*
 
 The fields split into two groups that the IMO performance standard defines separately [MSC.74(69) Annex 3 §6.1–6.2]:
 
-* **Static data** — MMSI, IMO number, call sign, name, type of ship, dimensions and reference point of the position antenna, EPFD type. Set once at installation, protected by a password on the unit [SN/Circ.227 §5.1].
+* **Static data** — MMSI (maritime mobile service identity), IMO number, call sign, name, type of ship, dimensions and reference point of the position antenna, EPFD (electronic position fixing device) type. Set once at installation, protected by a password on the unit [SN/Circ.227 §5.1].
 * **Voyage related data** — draught, destination, ETA (plus the DTE flag and the navigational status, which travels in messages 1–3). Supposed to be typed in by the officer of the watch at the start of each voyage and kept up to date [A.1106(29) §13 Table 1, §23; Encoding Guide].
 
 The first group is reliable to the extent that the installer did a careful job; the second depends on a human remembering to update it, and the GPSD documentation puts it bluntly: "the information in these fields (especially ETA and destination) is not reliable" [AIVDM "Type 5"]. A large part of this chapter is about telling the two apart in the data.
@@ -96,7 +96,7 @@ The 8-bit field is read as two decimal digits [M.1371-5 Annex 8 §3.3.2 Table 53
 | First digit | Category |
 |---|---|
 | 0 (code 0) | not available or no ship (default) |
-| 1 | reserved for future use (codes 1–19) |
+| 1 | reserved for future use (Table 53 lists no first digit 0, so codes 1–9 are undefined as well; our decoder prints "reserved for future use" for 1–19) |
 | 2 | wing-in-ground (WIG) craft |
 | 3 | vessels engaged in an activity — second digit from the "3x" column |
 | 4 | high-speed craft (HSC) |
@@ -658,7 +658,7 @@ Things to notice, object by object:
 
 **Ship type 39 and other "reserved" values.** The test transponder on line 5 uses 39, reserved in Table 53. Decoders must print *something* for every one of the 256 values; ours prints `reserved`, `reserved for regional use` or `reserved for future use` depending on the range, and never raises.
 
-**Destination as a status field.** `HOME`, `SHIFTING`, `ENROUTE`, `ESCORT VESSEL`, `SCIENCE`, `US BTC` and `NOT A VESSEL` all appear in one month of Boston data. Text mining must expect the destination to be an operator's note, not a place.
+**Destination as a status field.** `HOME`, `SHIFTING`, `ENROUTE`, `ESCORT VESSEL`, `SCIENCE` and `US BTC` all appear in one month of Boston data, and the Cape Cod test unit says `NOT A VESSEL`. Text mining must expect the destination to be an operator's note, not a place.
 
 ## 7.7 Exercises
 

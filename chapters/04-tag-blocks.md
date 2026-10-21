@@ -41,7 +41,7 @@ On a ship's bridge TAG blocks are rare: the equipment is wired
 point-to-point, so "who sent this" is already known. The block earns its
 keep in **networked** installations:
 
-* **Shore receiver networks** (VTS, national AIS networks such as the US
+* **Shore receiver networks** (vessel traffic services (VTS), national AIS networks such as the US
   N-AIS, commercial aggregators). A single TCP stream carries the output of
   many receivers; `s:` says which one heard the message and `c:` says when,
   so that downstream consumers can de-duplicate and time-order.
@@ -119,7 +119,7 @@ A few consequences that matter when you parse:
   block does not say which. A practical rule: 10<sup>10</sup> seconds is
   the year 2286, so any `c:` larger than that is milliseconds; anything
   smaller is seconds. The rule fails only for a millisecond talker emitting
-  times before 1970-01-15 (10<sup>10</sup> ms), which does not happen.
+  times before 1970-04-26 (10<sup>10</sup> ms), which does not happen.
   Our `TagBlock.time` property returns the raw integer and leaves the unit
   decision to the caller (exercise 4.7.1).
 * **No private codes.** NMEA 4.10 does not provide an "experimental" or
@@ -265,7 +265,8 @@ the first `:`:
 | `n:4` | `n` | `4` | fourth line from this talker |
 
 No `g:`, so the block applies to the single sentence that follows, a type 1
-position report from MMSI 538002219 (chapter 3).
+position report from maritime mobile service identity (MMSI) 538002219
+(chapter 3).
 
 ## 4.4 The code
 
@@ -364,17 +365,11 @@ line:
 ```
 
 > **Language notes (Python)**
-> * `str.partition(sep)` splits at the *first* occurrence and always returns
->   three strings `(head, sep, tail)`; if `sep` is absent you get
->   `(s, "", "")`. Testing the middle element (`if colon:`) is the idiomatic
->   way to ask "was the separator there?" — cleaner than `split(":", 1)` plus
->   a length check. It is used twice here: once for `*` and once for `:`.
-> * `@property` turns a method into a read-only attribute: callers write
->   `tag.time`, not `tag.time()`. We use it for values that are *derived*
->   from `params` every time, so they can never go stale.
-> * `dict.get(key)` returns `None` for a missing key instead of raising
->   `KeyError`. Combined with `Optional[...]` return types this gives a
->   "missing parameter → `None`" chain without any `try`.
+> * `str.partition`, `@property` and `dict.get` are the chapter 1 constructs
+>   again: `partition` is used twice here (once for `*`, once for `:`), and
+>   testing the middle element (`if colon:`) is the idiomatic "was the
+>   separator there?" check; the `@property` views are *derived* from
+>   `params` on every access, so they can never go stale.
 > * `"\\"` in Python source is a one-character string containing a
 >   backslash; the doubling is source syntax, not data.
 
@@ -447,13 +442,10 @@ inline std::pair<std::optional<TagBlock>, std::string> split_tag_block(std::stri
 ```
 
 > **Language notes (C++)**
-> * `std::map<std::string, std::string>` is the dictionary. Unlike Python's
->   `dict` it is *always sorted by key*, which is why `to_dict()` can copy it
->   straight into the JSON object. Lookup is `params.find(key)`, which
->   returns an *iterator*; comparing it with `params.end()` is the "key is
->   missing" test, and `it->second` is the value. (`params[key]` would
->   silently *insert* an empty string for a missing key — never use it for
->   lookups.)
+> * `std::map<std::string, std::string>` is the dictionary of chapter 1,
+>   always sorted by key — which is why `to_dict()` can copy it straight
+>   into the JSON object. Look up with `find`/`end()`, never with
+>   `params[key]`, which would silently *insert* an empty string.
 > * `std::optional<T>` chains: each typed view returns `std::nullopt` on any
 >   failure, and the caller tests it with `if (auto t = time())` — the
 >   declaration inside the `if` is in scope only when the optional holds a
@@ -566,8 +558,9 @@ pub fn split_tag_block(line: &str) -> Result<(Option<TagBlock>, &str), Untermina
 > * `let Some(x) = expr else { return … };` (a *let-else*, Rust 1.65) binds
 >   on success and diverges otherwise — a tidy way to peel off the opening
 >   backslash with `strip_prefix`.
-> * `BTreeMap<String, String>` is the sorted dictionary; iteration with
->   `for (k, v) in &self.params` yields references, in key order.
+> * `BTreeMap<String, String>` is the sorted dictionary of chapter 1;
+>   iteration with `for (k, v) in &self.params` yields references, in key
+>   order.
 > * The function's return type `Result<(Option<TagBlock>, &str), _>` ties
 >   the lifetime of the returned `&str` to the argument automatically; the
 >   remainder is valid exactly as long as the input line is.
@@ -670,10 +663,8 @@ export function splitTagBlock(rawLine: string): [TagBlock | null, string] {
 > * `[number, number, number] | null` is a *tuple type*: a fixed-length
 >   array whose element types are known. `[...group]` copies it into a
 >   plain array for the JSON writer.
-> * `readonly` on constructor parameters both declares and initialises the
->   fields (a TypeScript shorthand) and forbids later assignment.
-> * `partition` is the tutorial's own helper in `common.ts` returning a
->   three-element tuple so the Python code can be transcribed line by line.
+> * `readonly` constructor parameters and the `partition` helper in
+>   `common.ts` are as in chapter 1.
 
 **Where the four differ.** The logic is identical; the differences are
 all in how "maybe absent" is spelled: Python `Optional` + `None`, C++
@@ -809,9 +800,10 @@ that.
    `1305936051.69`.
 2. **Hand checksum.** Verify the block checksum of line 11
    (`s:nhcml,c:1305936051,n:11` → `2F`) with pencil and paper, the way
-   §4.3 did for line 4. Which single character of the body could you
-   change without changing the checksum? (Hint: XOR is its own inverse;
-   think about swapping two characters.)
+   §4.3 did for line 4. Can you change a *single* character of the body
+   without changing the checksum? Which kind of two-character error goes
+   undetected? (Hint: XOR is commutative; think about swapping two
+   characters.)
 3. **Validation (TypeScript).** Add a method `problems(): string[]` to
    `TagBlock` that returns a list of standard violations: block longer than
    80 characters, `s`/`d`/`t` longer than 15, `c` not an integer, `g` not

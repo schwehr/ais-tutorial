@@ -69,7 +69,8 @@ updated [Safety Alerts, Alert 10-08].
   dimensions (168 bits). Both are sent every 6 minutes, B within one minute
   of A [M.1371-5 Annex 8 §3.22].
 * **Message 19**, the *extended Class B position report*: message 18 plus
-  the name, ship type, dimensions and EPFD in one 312-bit, two-slot
+  the name, ship type, dimensions and EPFD (electronic position fixing
+  device) type in one 312-bit, two-slot
   message. Obsolete: "for future equipment this message is not needed and
   should not be used" [M.1371-5 Annex 8 §3.17]; a CS unit may transmit it
   only in answer to a base station's interrogation
@@ -82,7 +83,7 @@ overhead, about 168 bits of payload. Message 5 is 424 bits; message 19 is
 312. Splitting the static data into two single-slot messages is what lets
 a carrier-sense unit send it at all, and it is why message 19 is on its
 way out. The Class A side was given the same message so that *any* station
-can "associate a MMSI with a name" with part A alone
+can "associate a MMSI with a name" (the maritime mobile service identity, chapter 3) with part A alone
 [M.1371-5 Annex 8 §3.22] — SAR aircraft, for example, send message 5 *and*
 24A/24B [M.1371-5 Annex 1 §2.1.4].
 
@@ -93,7 +94,7 @@ heading is optional [M.1371-5 Annex 7 §3.5.1]. The name is *not* in the
 position report. A chart display that receives only message 18 shows an
 anonymous target for up to six minutes — and a decoder that handles one
 sentence at a time, like ours, never knows the name of a message 18 at all.
-Section 14.7 makes a stateful join of 18 and 24 the main exercise.
+§14.7 makes a stateful join of 18 and 24 the main exercise.
 
 **Reporting intervals** [M.1371-5 Annex 1 §4.2.1 Table 2]:
 
@@ -154,7 +155,7 @@ Annex 7 says so: "Because Class B 'CS' does not use any Communication
 state information, the communication state field in Message 18 should be
 filled with the default value `1100000000000000110` and the communication
 state selector flag field filled with '1'" [M.1371-5 Annex 7 §4.3.3.5],
-[M.1371-5 Annex 8 Table 70]. Read as the ITDMA state that the selector
+[M.1371-5 Annex 8 Table 70]. Read as the ITDMA (incremental TDMA) state that the selector
 announces (chapter 3), the constant means sync state 3 ("synchronized to
 another station"), slot increment 0, number-of-slots code 3 (four slots)
 and keep flag 0 — none of which the unit does. The footnote explains the
@@ -187,7 +188,7 @@ had raised the CS threshold, `$AITXT,01,01,62,Max number of CP exceeded
   `!AIVDM` lines in `sample-data/tide3/ais/ais-2011-05-24`, 706 are message
   18 and 368 are message 24 against 237 message 1 and 42 message 3. The US
   carriage rule permits Class B on some categories of commercial vessel
-  [33 CFR 164.46], and the fishing vessel *Amy Philbrick* (14.5) is one.
+  [33 CFR 164.46], and the fishing vessel *Amy Philbrick* (§14.5) is one.
 * **Harbour and marina management, race committees.** A Class B unit is
   the cheapest way to know where a boat is. Pilot boats, line handlers,
   survey launches and research boats — *R/V Gulf Challenger*, *R/V Coastal
@@ -218,7 +219,8 @@ the message set in this chapter is what a machine will see from them.
    being moved to another boat.
 2. **Fishing-gear markers and "AIS net buoys".** Low-cost transmitters
    built from Class B CS chipsets are sold to mark nets, long-lines and
-   pots. They send message 18 with SOG 0 and a drifting position, and
+   pots. They send message 18 with speed over ground (SOG) 0 and a drifting
+   position, and
    message 24A with whatever the manufacturer chose to put in the 20
    characters — typically a gear number and a battery reading, something
    of the form `NET 3 12.4V` (an illustration, not a sentence from our
@@ -232,7 +234,7 @@ the message set in this chapter is what a machine will see from them.
    we do not cite them. For a decoder the lesson is the same as in
    chapter 7: treat the name as untrusted text, expect `<word> <number>`
    patterns to be gear more often than vessels, and look at the vendor ID
-   (14.2) — a hundred "vessels" with the same manufacturer ID and
+   (§14.2) — a hundred "vessels" with the same manufacturer ID and
    consecutive serial numbers are a fleet of buoys.
 3. **Autonomous surface vehicles, tenders and craft with a parent ship.**
    A USV or a ship's tender carries Class B so that other traffic sees it.
@@ -274,7 +276,7 @@ the message set in this chapter is what a machine will see from them.
    Should be set to zero" [M.1371-5 Annex 8 Table 70]. Nothing standard
    ever used them, but a decoder should print them — ours does, as `spare`
    and `spare2` — because a non-zero value is either a regional experiment
-   or (as in 14.5, line 34) a sign that the whole payload is garbage.
+   or (as in §14.5, line 34) a sign that the whole payload is garbage.
 7. **Equipment fingerprinting and anomaly detection.** The five
    capability flags of message 18 and the vendor ID of message 24B are
    constants burned into the firmware. In our data every CS unit reports
@@ -284,7 +286,7 @@ the message set in this chapter is what a machine will see from them.
    change from report to report, a "SIMRAD" unit that becomes a "COMAR"
    unit under the same MMSI, or a message 24B with an all-`@` vendor ID
    where yesterday there was one, is a second transponder using the same
-   identity. Likewise the malformed MMSIs in 14.5 — `0`, eight-digit
+   identity. Likewise the malformed MMSIs in §14.5 — `0`, eight-digit
    numbers, a non-US MID on a New Hampshire launch — are what mis-programmed Class
    B units look like, and a database should quarantine them rather than
    merge them.
@@ -317,7 +319,7 @@ tables, a bare [Table 70] or [Annex 7 §3.5.1.2] means M.1371-5.
 | 56 | 1 | Position accuracy | flag | 0 | 1 = high (≤ 10 m), determined as in Table 50 [Table 70] |
 | 57–84 | 28 | Longitude | sint, 1/10 000 min | 181° = `0x6791AC0` | East positive, two's complement [Table 70] |
 | 85–111 | 27 | Latitude | sint, 1/10 000 min | 91° = `0x3412140` | North positive [Table 70] |
-| 112–123 | 12 | COG | uint, 1/10° | 3600 | 3601–4095 should not be used [Table 70] |
+| 112–123 | 12 | COG (course over ground) | uint, 1/10° | 3600 | 3601–4095 should not be used [Table 70] |
 | 124–132 | 9 | True heading | uint, degrees | 511 | optional on Class B [Annex 7 §3.5.1.2] |
 | 133–138 | 6 | Time stamp | uint, UTC second | 60 | 61/62/63 (manual, dead reckoning, inoperative) "are not used by CS AIS" [Table 70] |
 | 139–140 | 2 | Spare | — | 0 | as bits 38–45 [Table 70] |
@@ -327,7 +329,7 @@ tables, a bare [Table 70] or [Annex 7 §3.5.1.2] means M.1371-5.
 | 144 | 1 | Class B band flag | flag | 0 | 0 = upper 525 kHz of the marine band only, 1 = whole marine band; "irrelevant if Class B Message 22 flag is 0" [Table 70] |
 | 145 | 1 | Class B message 22 flag | flag | 0 | 1 = frequency management via message 22 (chapter 13); 0 = AIS 1 and AIS 2 only [Table 70] |
 | 146 | 1 | Mode flag | flag | 0 | 0 = autonomous and continuous, 1 = assigned mode [Table 70] |
-| 147 | 1 | RAIM flag | flag | 0 | [Table 70] |
+| 147 | 1 | RAIM flag | flag | 0 | receiver autonomous integrity monitoring [Table 70] |
 | 148 | 1 | Communication state selector | flag | — | 0 = SOTDMA state follows, 1 = ITDMA state follows; "always 1 for Class B CS" [Table 70] |
 | 149–167 | 19 | Communication state | per selector | — | SOTDMA [Annex 2 §3.3.7.2.2 Tables 18–19] or ITDMA [Annex 2 §3.3.7.3.2 Table 20]; CS units send `1100000000000000110` [Table 70], [Annex 7 §4.3.3.5] |
 
@@ -358,7 +360,7 @@ the same `0 1 1 1`.
 **Mode flag.** 1 when the station is in *assigned mode*: a base station
 has set its reporting interval or slots with a message 23 group assignment
 (a CS unit ignores message 16 [M.1371-5 Annex 7 Table 42]; chapter 13).
-In 14.5 you will meet a unit that sets this bit in its own status output
+In §14.5 you will meet a unit that sets this bit in its own status output
 on the open ocean with no base station in sight — and clears it in what
 it actually transmits.
 
@@ -408,7 +410,7 @@ are not defined; our decoder returns the remaining bits raw for them.
 
 That is the whole message: 160 bits, which is 26 armoured characters and
 4 bits, so a correctly built sentence has 27 characters and **2 fill
-bits**. Units that count differently produce 162, 168 or (14.5, line 30)
+bits**. Units that count differently produce 162, 168 or (§14.5, line 30)
 176 bits; our decoder reports anything beyond bit 159 as `spare` with its
 width in `spare_bits`.
 
@@ -429,14 +431,17 @@ width in `spare_bits`.
 | 166–167 | 2 | Spare | — | 0 | [Table 79] |
 
 **The vendor ID, three ways.** In M.1371-2 and -3 the 42 bits were one
-seven-character six-bit string, "the name of the AIS equipment vendor"
-[M.1371-3 Annex 8 Table 76], [AIVDM "Type 24"]. M.1371-4 split the same
+undivided field, "unique identification of the unit by a number as
+defined by the manufacturer" with the seven-`@` default of a six-bit text
+field [M.1371-3 Annex 8 Table 76]; GPSD glosses it as "the name of the AIS
+equipment vendor" [AIVDM "Type 24"], which is what manufacturers actually
+put there. M.1371-4 split the same
 42 bits into a three-character manufacturer mnemonic, a 4-bit model code
 and a 20-bit serial number [M.1371-4 Annex 8 Table 76A], numbering the
 bits from the MSB: bits 41…24 manufacturer, 23…20 model, 19…0 serial — in
 our zero-based payload offsets 48–65, 66–69 and 70–89. The change was
 "incompatible", and GPSD doubts "that field practice has caught up"
-[AIVDM "Type 24"]. It had not, in 2009–2011: every unit in 14.5 sends a
+[AIVDM "Type 24"]. It had not, in 2009–2011: every unit in §14.5 sends a
 readable seven-character string (`WESTMAR`, `SIMRAD`, `COMAR`, `FEC0001`),
 and the model/serial numbers that fall out of the -4 split are the bit
 patterns of the letters `TMAR`, `RAD@`, `AR@@` and `0001`. Our decoder does
@@ -521,11 +526,11 @@ for type of ship should be 37 (pleasure craft)" [M.1371-5 Annex 7
 A = 7 m, B = 4 m, C = 3 m, D = 1 m (an 11 m boat, 4 m wide, antenna
 starboard of centre near the stern), ship type **56** ("spare — for
 assignments to local vessels" in Table 53 [M.1371-5 Annex 8 Table 53]; two
-of the three UNH boats in 14.5 use it). The `@` padding is NMEA's way of sending a fixed-width six-bit
+of the three UNH boats in §14.5 use it). The `@` padding is NMEA's way of sending a fixed-width six-bit
 text field in plain ASCII [IEC 61162-1 §7.3.3]; the voyage fields stay at
 their defaults because a Class B has nowhere to send them. Two years later
 the same unit, at sea, broadcast exactly these values in message 24
-(14.5, lines 24–25) — the configuration survived, and so did the
+(§14.5, lines 24–25) — the configuration survived, and so did the
 "NONE" call sign.
 
 ## 14.3 Decoding one message by hand
@@ -591,11 +596,11 @@ Cutting at Table 70's offsets:
 is a boat alongside, its GPS reporting the last course it had. The
 receiver logged the sentence at 1306256812.5 = 2011-05-24 17:06:**52**.5
 UTC and the time stamp says the fix was taken at second **52** — the
-unit's clock and the logger's agree to the second (compare the AtoN in
-chapter 15, which was 15 s off). Taking the 19 comm-state bits apart as
+unit's clock and the logger's agree to the second (compare the aid to navigation (AtoN) in
+chapter 15, which is 15 s off). Taking the 19 comm-state bits apart as
 ITDMA [M.1371-5 Annex 2 Table 20]: sync state `11` = 3, slot increment
 `0000000000000` = 0, number of slots `011` = 3 (meaning four), keep flag
-`0`. Meaningless for a CS unit, as 14.1 explained, and the decoder marks
+`0`. Meaningless for a CS unit, as §14.1 explained, and the decoder marks
 it `cs_fixed_comm_state: true`.
 
 ### Message 24 part A
@@ -894,18 +899,18 @@ The length check happens in two stages: 40 bits to read the part number,
 then 160 or 168 depending on it. The error text follows the shared
 convention (`message 24 too short: H bits < M`) with whichever minimum
 applied. `vendor_id` and `manufacturer_id` both start at bit 48 — the two
-readings of the same field discussed in 14.2. `epfd` is the M.1371-5
-reading of bits 162–165 (14.2, "The last six bits"); `epfd_text` comes
+readings of the same field discussed in §14.2. `epfd` is the M.1371-5
+reading of bits 162–165 (§14.2, "The last six bits"); `epfd_text` comes
 from the same table shared with messages 4, 5 and 19. For part A, `spare`
 holds at most 8 bits even when more are present (line 30 of the data has
 16), so that the value stays small and comparable across units;
 `spare_bits` tells you how many there really were.
 
 > **Language notes (Python).** `980_000_000` — underscores inside a
-> numeric literal are ignored and group the digits. `a <= x < b` is a
-> chained comparison, evaluated as `a <= x and x < b`. The conditional
-> expression `X if cond else Y` is Python's ternary operator. None of the
-> three has a direct C++ equivalent; see below.
+> numeric literal are ignored and group the digits. `a <= x < b` is the
+> chained comparison of chapter 7 and `X if cond else Y` the conditional
+> expression of chapter 3. None of the three has a direct C++ equivalent;
+> see below.
 
 ### C++
 
@@ -959,7 +964,7 @@ inline bool is_auxiliary_craft(std::uint64_t mmsi) {
 ```
 
 > **Language notes (C++).**
-> * `std::min(spare_bits, std::size_t{8})` — as in chapter 15, both
+> * `std::min(spare_bits, std::size_t{8})` — both
 >   arguments of `std::min` must have the same type. `std::size_t{8}` is a
 >   brace-initialised literal of exactly that type; `8` alone is an `int`
 >   and would not compile.
@@ -1132,9 +1137,11 @@ Message 19 deserves a word. Across every recording in `sample-data/` we
 found no message 19 that decodes to a plausible vessel: the N-AIS pair on
 lines 33–34 has the right length and a valid checksum and nothing else
 (below), and the single-fragment "message 19s" from the `nhcml` receiver
-are 120 bits long. That is consistent with the message's status —
-deprecated since M.1371-3's Class B CS annex, and sent by a CS unit only
-when a base station interrogates it [M.1371-5 Annex 7 Table 42]. So that
+are 120 bits long. That is consistent with the message's status — a CS
+unit has been allowed to send it *only* in answer to a base station's
+interrogation ever since the Class B CS annex first appeared in M.1371-2
+[M.1371-2 Annex 7; M.1371-5 Annex 7 Table 42], and M.1371-5 finally
+declared it "not needed" for future equipment [M.1371-5 Annex 8 §3.17]. So that
 the chapter has one real-looking example, lines 37–38 were produced by a
 short script that assembles Table 71 field by field: bits 0–138 copied
 from the *Cocheco*'s message 18 on line 23 (with the message ID changed to
@@ -1201,7 +1208,7 @@ firmware leaves the optional field empty, so `vendor_id` and
 `manufacturer_id` are empty strings and the model and serial read 0. The
 last six bits are zero too: `epfd: 0` ("undefined") and `spare: 0`, as on
 every part B in this chapter — a 2009 unit has no EPFD field to fill
-(14.2).
+(§14.2).
 
 ### Section A: programming the unit (lines 3–9)
 
@@ -1209,7 +1216,7 @@ every part B in this chapter — a 2009 unit has no EPFD field to fill
 |---|---|---|
 | 3 | message 18, `!AIVDO` | `mmsi: 0`, `sog_knots: 102.3` / `sog_available: false`, `lon: 181.0`, `lat: 91.0`, `position_available: false`, `cog_deg: 360.0`, `true_heading: 511`, `timestamp: 60`, `class_b_unit: 1`, `cs_fixed_comm_state: true`, `assigned_mode: 0`, `channel: ""`, `own_ship: true` |
 | 4 | `$AITXT` | `skipped: "no parser"` — the text was `MMSI not programmed - TX disabled` |
-| 5–8 | `$AISSD`, `$AIVSD` ×2 | `skipped: "no parser"` — see 14.2 |
+| 5–8 | `$AISSD`, `$AIVSD` ×2 | `skipped: "no parser"` — see §14.2 |
 | 9 | message 18, `!AIVDO` | as line 3 but `mmsi: 369970120`, `assigned_mode: 1` |
 
 Line 3 is what a Class B unit says before anyone has touched it: MMSI 0
@@ -1224,10 +1231,10 @@ below). Compare the Class A units of chapter 7
 that broadcast MMSI 0 and 1193046 to the world: the CS specification is
 stricter here, and this unit obeyed it. Five minutes later (line 9) the
 MMSI is 369970120 and the unit is still blind — no position — and has
-turned on its *assigned mode* flag, to which we return in 14.6. The whole
+turned on its *assigned mode* flag, to which we return in §14.6. The whole
 log is like line 3 and line 9: 1 173 `!AIVDO` message 18s, one per second,
 none with a channel letter — the unit never managed a transmission
-indoors (14.1 quoted its `TX attempt failed` and `Max number of CP
+indoors (§14.1 quoted its `TX attempt failed` and `Max number of CP
 exceeded` texts). The USCG metadata after the
 checksum (`rkurt-office2`, chapter 5) is the serial logger's own stamp, not
 a network receiver's.
@@ -1248,12 +1255,12 @@ message 18 has no channel letter, the two message 24 parts have channel
 `B`. The source file explains the difference: it holds 502 message 18
 `!AIVDO`s with an empty channel, one per second, and 18 with a channel —
 one every 30 s, the CS reporting interval for a moving vessel. The
-one-per-second lines are the unit's status output, the pattern we saw with
-the AtoN's `X`/`Y` channel codes in chapter 15; the lines with a channel
+one-per-second lines are the unit's status output, the same pattern as the
+`X`/`Y` channel codes of the AtoN in chapter 15; the lines with a channel
 are the ones it transmitted. Line 11 is one of the status lines, and it
 has `assigned_mode: 1`; every one of the 18 transmitted message 18s in the
 file has `assigned_mode: 0`. The flag means something to the firmware's
-scheduler, not to the air — see 14.6.
+scheduler, not to the air — see §14.6.
 
 ### Section C: four boats at the UNH pier (lines 15–25)
 
@@ -1269,7 +1276,7 @@ the flag pattern `0 1 1 1`; all four pairs arrived A-then-B about one
 second apart, within the one-minute rule [M.1371-5 Annex 8 §3.22]. Things
 to notice:
 
-* **The vendor strings are seven-character names**, as 14.2 predicted:
+* **The vendor strings are seven-character names**, as §14.2 predicted:
   `WESTMAR` (a West Marine-branded unit), `SIMRAD`, `COMAR`. The split
   reading turns `TMAR` into model 5, serial 53330; `RAD@` into model 4,
   serial 528640; `AR@@` into model 0 — "the 0 is not used"
@@ -1281,7 +1288,7 @@ to notice:
   vessel has no good code, and whoever programmed it picked the next
   unused number after 37. The dimensions 8/8/2/2 put the antenna exactly
   amidships, which is what an installer enters when nobody measured.
-* **MMSI 330029917**: 330 is not a US MID (chapter 15 listed them: 338,
+* **MMSI 330029917**: 330 is not a US MID (chapter 3 lists them: 303, 338,
   366–369), the call sign is `NONE` and the vendor is COMAR — the *Coastal
   Surveyor* is a UNH survey launch whose transponder was programmed with
   the wrong country code. Nothing in the message is wrong *syntactically*;
@@ -1407,7 +1414,7 @@ point of the message, and the reason it is no longer needed.
   display flag "probably not reliable" [AIVDM "Type 18"], the band flag is
   defined as "irrelevant" unless the message 22 flag is set
   [M.1371-5 Table 70], and every unit in this chapter reports the same
-  `0 1 1 1`. Use them for fingerprinting (14.1), not for deciding whether
+  `0 1 1 1`. Use them for fingerprinting (§14.1), not for deciding whether
   the skipper can read your safety message.
 * **The assigned-mode flag in SRT status reports.** The 2007 SRT firmware
   (`SW Ver 10.0.7.0 Dec 11 2007` per its own `$PSRT` banner) emits a
@@ -1443,7 +1450,7 @@ point of the message, and the reason it is no longer needed.
 * **One dimension block, one set of names.** Messages 5, 19, 21 and 24B
   all carry the same 30-bit A/B/C/D field, and our four decoders output it
   with the same eight keys (`dim_bow_m` … `beam_m`) from one helper per
-  language (`decode_dimensions`, chapter 14, reused by chapter 15). If you
+  language (`decode_dimensions`, this chapter, reused by chapter 15). If you
   write your own, resist naming the field differently per message — the
   join in exercise 5 is trivial only because the names agree.
 
@@ -1458,7 +1465,7 @@ point of the message, and the reason it is no longer needed.
 2. *(Python)* Write `vendor_reading(part_b: dict) -> str` that returns
    `"string"` when the seven-character `vendor_id` is the right reading
    and `"split"` when the M.1371-4 manufacturer/model/serial reading is,
-   using the rule of thumb from 14.2 (printable tail versus model code
+   using the rule of thumb from §14.2 (printable tail versus model code
    1–15). Run it over `tests/expected/ch14-class-b.jsonl`; it should say
    `"string"` for every part B that has a vendor ID. Then construct, by
    hand, a 42-bit vendor field for manufacturer `SRT`, model 2, serial
@@ -1482,9 +1489,9 @@ point of the message, and the reason it is no longer needed.
    reads bits 162–165 as the M.1371-5 EPFD. Add an `edition_hint` string
    to part B that says `"M.1371-5"` when `epfd` is non-zero and
    `"unknown"` otherwise, and explain in the module docstring why no
-   stronger statement is possible (14.2, "The last six bits"). Then find
+   stronger statement is possible (§14.2, "The last six bits"). Then find
    the only other field in part B whose *value* can betray the edition the
-   unit was built to (hint: 14.2, "The vendor ID, three ways").
+   unit was built to (hint: §14.2, "The vendor ID, three ways").
 5. *(TypeScript)* Write a stateful pairer: read the JSON lines of
    `tests/expected/ch14-class-b.jsonl`, keep for each MMSI the latest part
    A, the latest part B and the latest message 18, and print one line per

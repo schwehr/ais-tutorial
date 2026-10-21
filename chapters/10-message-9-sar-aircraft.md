@@ -1,11 +1,11 @@
-# 10. Message 9 — standard SAR aircraft position report
+# 10. Message 9: standard SAR aircraft position report
 
 > **What you will learn**
 > * Why search-and-rescue (SAR) aircraft have their own position report, how it differs from the Class A report of chapter 3 (altitude instead of rate of turn and heading, speed in whole knots, time stamp in a different place) and how often it is sent.
 > * The 168-bit layout of message 9 [M.1371-5 Annex 8 §3.7 Table 59], its not-available and "at or above" sentinels (4095/4094 m, 1023/1022 kn) and the `111MIDxxx` MMSI format that identifies an aircraft [M.585-9].
 > * How the communication state selector bit chooses between SOTDMA and ITDMA, and how one decoder function serves messages 1–3, 9, 18 and 26.
 > * How to tell that a message type is *absent* from a recording — and how to build, and label, a synthetic example so the code can still be tested.
-> * Language notes: almost none — this chapter deliberately reuses what chapters 3, 6 and 14 introduced, so you can concentrate on the protocol.
+> * Language notes: almost none — this chapter deliberately reuses what chapters 3 and 6 introduced (and shares its selector-bit logic with message 18, chapter 14), so you can concentrate on the protocol.
 
 ## 10.1 Where this fits
 
@@ -26,9 +26,9 @@ Message 9 is the Class A position report (chapter 3) rebuilt for something that 
 
 Sources: [M.1371-5 Annex 8 Table 48] and [Table 59]. A ship's SOG field tops out at 102.2 knots, which no aircraft would tolerate; an aircraft has no rate-of-turn indicator or gyro heading to report; and the one thing a ship never needs — height — becomes the most important field after the position.
 
-"Stations other than aircraft involved in SAR operations should not transmit this message. The default reporting interval for this message should be 10 s" [M.1371-5 Annex 8 §3.7]; Annex 1 Table 2 gives the same 10 s nominal interval for "search and rescue aircraft (airborne mobile equipment)" with a footnote that "shorter RI down to 2 s could be used in the area of search and rescue operations" [M.1371-5 Annex 1 Table 2 note 2]. The message has link priority 1, like every position report, and may be sent with SOTDMA, RATDMA or ITDMA access [M.1371-5 Annex 8 Table 46].
+"Stations other than aircraft involved in SAR operations should not transmit this message. The default reporting interval for this message should be 10 s" [M.1371-5 Annex 8 §3.7]; Annex 1 Table 2 gives the same 10 s nominal interval for "search and rescue aircraft (airborne mobile equipment)" with a footnote that "shorter RI down to 2 s could be used in the area of search and rescue operations" [M.1371-5 Annex 1 Table 2 note 2]. The message has link priority 1, like every position report, and may be sent with SOTDMA, RATDMA or ITDMA access (self-organising, random-access and incremental TDMA; chapter 3) [M.1371-5 Annex 8 Table 46].
 
-The aircraft's identity is an MMSI of the form `111MIDXXX`: three fixed digits `111`, the three-digit maritime identification digits (MID) of the administration, and three digits chosen by that administration, which "may use the seventh digit to differentiate" — `111MID1XX` for fixed-wing aircraft and `111MID5XX` for helicopters are the examples given [M.585-9 Annex 1 §3]. The special identity `111MID000` is a *group* call to all SAR aircraft of that administration [M.585-9 Annex 1 §3 item 5]. The aircraft's message 5 should carry the name `SAR AIRCRAFT NNNNNNN`, where `NNNNNNN` is the aircraft registration, and leaves IMO number, draught and the ship-dimension fields unused or at the administration's discretion [M.1371-5 Annex 8 Table 52].
+The aircraft's identity is a maritime mobile service identity (MMSI) of the form `111MIDXXX`: three fixed digits `111`, the three-digit maritime identification digits (MID) of the administration, and three digits chosen by that administration, which "may use the seventh digit to differentiate" — `111MID1XX` for fixed-wing aircraft and `111MID5XX` for helicopters are the examples given [M.585-9 Annex 1 §3]. The special identity `111MID000` is a *group* call to all SAR aircraft of that administration [M.585-9 Annex 1 §3 item 5]. The aircraft's message 5 should carry the name `SAR AIRCRAFT NNNNNNN`, where `NNNNNNN` is the aircraft registration, and leaves IMO number, draught and the ship-dimension fields unused or at the administration's discretion [M.1371-5 Annex 8 Table 52].
 
 ### Operational use
 
@@ -43,7 +43,7 @@ The aircraft's identity is an MMSI of the form `111MIDXXX`: three fixed digits `
 * **Aircraft tracking by shore networks.** A coastal AIS network sees aircraft tens of miles further than ships because of the altitude. Some shore systems forward message 9 into the same feeds as ship positions; consumers that assume "AIS = surface vessel" then draw a 150-knot "ship" moving over land. A pipeline should route on message type (9) and on the MMSI prefix (`111`) and keep aircraft in their own layer.
 * **Validation rules that a program can apply.** A genuine message 9 has `payload_bits` = 168, an MMSI starting with `111`, altitude < 4094 (or exactly 4094/4095 with the right meaning), SOG < 1022, a position within VHF range of the receiver and a comm-state `sync_state` that makes sense. Anything else is noise or a mis-configured station (§10.6 shows what our receivers actually produced). Chapters 15 and 16 make the same point for messages 21 and 25–27: the rarer the type, the larger the share of garbage among the lines that claim to be it.
 * **Spoofing and security.** A message 9 is as unauthenticated as every other AIS message. An attacker who wants to disrupt a search, or a hobbyist who thinks an "aircraft" on the AIS display is funny, needs only a software-defined radio. Data consumers that drive decisions (RCC displays, collision-avoidance for drones, airspace deconfliction) should cross-check message 9 tracks against radar or ADS-B where available. IMO's MSC.140(76) asks administrations to "take steps necessary to ensure the integrity of the radio channels used for AIS in their waters", which in practice means detecting and locating such transmitters [MSC.140(76)].
-* **Interrogation and assignment.** A base station may ask an aircraft for a message 9 or 24 with a message 15, and may assign it a reporting schedule with a message 16; when so assigned the aircraft sets its *assigned mode flag* [M.1371-5 Annex 8 Table 65; Annex 2 §3.3.6]. Chapter 11 covers both messages; in an automated VTS the aircraft is just another station to be polled.
+* **Interrogation and assignment.** A base station may ask an aircraft for a message 9 or 24 with a message 15, and may assign it a reporting schedule with a message 16; when so assigned the aircraft sets its *assigned mode flag* [M.1371-5 Annex 8 Table 65; Annex 2 §3.3.6]. Chapter 11 covers both messages; in an automated vessel traffic service (VTS) the aircraft is just another station to be polled.
 
 ## 10.2 The specification
 
@@ -56,10 +56,10 @@ Message 9 is fixed at 168 bits, exactly one slot [M.1371-5 Annex 8 §3.7 Table 5
 | 8–37 | 30 | User ID | MMSI | — | `111MIDxxx` for an aircraft [Table 59; M.585-9 Annex 1 §3] |
 | 38–49 | 12 | Altitude (GNSS) | metres, 0–4094 | 4095 | "4 094 = 4 094 m or higher"; source per the altitude sensor bit [Table 59] |
 | 50–59 | 10 | SOG | knots, 0–1022 | 1023 | whole knots; "1 022 = 1 022 knots or higher" [Table 59] |
-| 60 | 1 | Position accuracy | flag | 0 | 1 = high (≤ 10 m), 0 = low (> 10 m); determined per Table 50 from RAIM and differential status [Table 59; Table 50] |
+| 60 | 1 | Position accuracy | flag | 0 | 1 = high (≤ 10 m), 0 = low (> 10 m); determined per Table 50 from the RAIM (receiver autonomous integrity monitoring) flag and differential status [Table 59; Table 50] |
 | 61–88 | 28 | Longitude | signed, 1/10 000 min | 181° = 0x6791AC0 | East positive, two's complement [Table 59] |
 | 89–115 | 27 | Latitude | signed, 1/10 000 min | 91° = 0x3412140 | North positive, two's complement [Table 59] |
-| 116–127 | 12 | COG | 1/10 degree, 0–3599 | 3600 (0xE10) | "3 601–4 095 should not be used" [Table 59] |
+| 116–127 | 12 | COG (course over ground) | 1/10 degree, 0–3599 | 3600 (0xE10) | "3 601–4 095 should not be used" [Table 59] |
 | 128–133 | 6 | Time stamp | UTC second, 0–59 | 60 | 61 = positioning system in manual input mode, 62 = dead reckoning, 63 = inoperative [Table 59] |
 | 134 | 1 | Altitude sensor | enum | — | 0 = GNSS, 1 = barometric source [Table 59] |
 | 135–141 | 7 | Spare | — | 0 | "Not used. Should be set to zero" [Table 59] |
@@ -94,9 +94,9 @@ Enumerations in full:
 
 ### There is no recorded message 9
 
-Before decoding anything we have to be honest about the data. The scan behind this chapter looked at every `!AIVDM`/`!AIVDO` line in `sample-data/` — about five receivers, 2006 to 2011, including the 49 MB USCG N-AIS capture in `sample-data/RightwhaleAisProject/20081013.log` that covers Cape Cod Bay, where Air Station Cape Cod's aircraft fly. It found **no** line whose first six bits are `001001` and whose payload is 168 bits long. The dozen or so lines that *start* like a message 9 are 40 to 328 bits long and come from the `nhjel` receiver in Great Bay, NH, whose checksummed garbage you have met in chapters 6 and 16; three of them are in Part 2 of the data file and §10.5 shows what the decoder makes of them.
+Before decoding anything we have to be honest about the data. The scan behind this chapter looked at every `!AIVDM`/`!AIVDO` line in `sample-data/` — about five receivers, 2006 to 2011, including the 49 MB USCG N-AIS capture in `sample-data/RightwhaleAisProject/20081013.log` that covers Cape Cod Bay, where Air Station Cape Cod's aircraft fly. It found **no** line whose first six bits are `001001` and whose payload is 168 bits long. The dozen or so lines that *start* like a message 9 are 40 to 328 bits long and come from the `nhjel` receiver in Great Bay, NH, whose checksummed garbage you have met in chapters 2, 3 and 6; three of them are in Part 2 of the data file and §10.5 shows what the decoder makes of them.
 
-That is a real result, not a failure of the search: our receivers were in New Hampshire estuaries and on a hotel roof in Norfolk, and SAR aircraft with AIS were rare in 2007–2011. So, as chapter 16 did for message 27, we build the examples ourselves and say so in the data file.
+That is a real result, not a failure of the search: our receivers were in New Hampshire estuaries and on a hotel roof in Norfolk, and SAR aircraft with AIS were rare in 2007–2011. So, as chapters 11, 13 and 16 also have to do for their rarer messages, we build the examples ourselves and say so in the data file.
 
 ### Building a synthetic message 9
 
@@ -239,9 +239,9 @@ def decode(bits: Bits) -> dict:
     return out
 ```
 
-Two spare fields exist, so the second is `spare2` — the same convention chapter 14 used for message 18. `sog_knots` is a bare `int`; everything else that is not an integer (`lon`, `lat`, `cog_deg`) keeps the `Fixed` wrapper and the decimal counts of chapter 3.
+Two spare fields exist, so the second is `spare2` — the same convention chapter 14 uses for message 18. `sog_knots` is a bare `int`; everything else that is not an integer (`lon`, `lat`, `cog_deg`) keeps the `Fixed` wrapper and the decimal counts of chapter 3.
 
-> **Language notes (Python).** Nothing new. `from .msg_1_2_3 import decode_itdma, decode_sotdma` is the relative import you saw in chapters 6 and 14.
+> **Language notes (Python).** Nothing new. `from .msg_1_2_3 import decode_itdma, decode_sotdma` is the relative import you saw in chapter 6.
 
 ### C++
 
@@ -298,7 +298,7 @@ inline Json decode_msg_9(const Bits& bits) {
 ```
 
 > **Language notes (C++).**
-> * `constexpr std::uint64_t ALTITUDE_NOT_AVAILABLE = 4095;` gives the constant the same unsigned 64-bit type that `bits.uint` returns, so `altitude != ALTITUDE_NOT_AVAILABLE` compares like with like and `-Wextra` stays quiet. (Chapter 16 did the same with `std::int64_t` for the *signed* sentinels of message 27.)
+> * `constexpr std::uint64_t ALTITUDE_NOT_AVAILABLE = 4095;` gives the constant the same unsigned 64-bit type that `bits.uint` returns, so `altitude != ALTITUDE_NOT_AVAILABLE` compares like with like and `-Wextra` stays quiet. (Chapter 16 does the same with `std::int64_t` for the *signed* sentinels of message 27.)
 > * `using namespace msg_9;` inside the function body brings the constants into scope for that function only — a smaller hammer than a file-wide `using`.
 
 ### Rust
@@ -344,7 +344,7 @@ pub fn decode(bits: &Bits) -> Result<Json, DecodeError> {
 }
 ```
 
-> **Language notes (Rust).** A one-bit enumeration as `match code { 0 => …, _ => … }` is what chapter 14 used for the Class B flags; the `_` arm keeps the match exhaustive without listing `1` separately. The `#[cfg(test)]` module at the bottom of the file decodes the synthetic sentence and the 120-bit garbage line and checks the exact error text — run `cargo test` in `code/rust` to see it.
+> **Language notes (Rust).** A one-bit enumeration as `match code { 0 => …, _ => … }` is what chapter 14 uses for the Class B flags; the `_` arm keeps the match exhaustive without listing `1` separately. The `#[cfg(test)]` module at the bottom of the file decodes the synthetic sentence and the 120-bit garbage line and checks the exact error text — run `cargo test` in `code/rust` to see it.
 
 ### TypeScript
 
@@ -405,7 +405,7 @@ export function decode(bits: Bits): JsonObject {
    * line 5: aircraft 111366101, 457 m GNSS altitude, 150 kn, SOTDMA (the hand decode above);
    * line 7: the same aircraft ten seconds later — 460 m *barometric*, 152 kn, RAIM on, ITDMA state (increment 375, 1 slot, keep flag set);
    * line 9: helicopter 111366501 with every field at its default: altitude 4095, SOG 1023, position 181°/91°, COG 3600, time stamp 60, DTE 1;
-   * line 11: aircraft 111366102 at the "or higher" sentinels — altitude 4094, SOG 1022 — in assigned mode, time stamp 61 (manual input), synchronized to a base station.
+   * line 11: aircraft 111366102 at the "or higher" sentinels — altitude 4094, SOG 1022 — in assigned mode, time stamp 61 (manual input), synchronised to a base station.
 2. **Recorded, garbage** (lines 15, 17, 19) — three lines from the `nhjel` receiver that begin with a message-9 identifier: `sample-data/tide1/ais/ais-2008-11-27` line 127 (120 bits), `sample-data/tide1/ais/ais-2008-10-09` line 113 (160 bits) and `sample-data/tide1/ais/ais-2008-11-27` line 398 (328 bits).
 
 Run any of the four decoders:
@@ -444,13 +444,13 @@ All four print the seven lines of [`tests/expected/ch10-sar-aircraft.jsonl`](../
 ## 10.6 Pitfalls and real-world deviations
 
 * **Absence is the normal case.** Across our recordings there is not one valid message 9, and a shore receiver anywhere outside a busy coastguard air-station's area may go months without one. [AIVDM "Type 9"] likewise notes that the type is rare. Build your pipeline so that an empty result for a message type is not an error — and so that the garbage that *does* arrive labelled "9" is rejected by length and range checks, not counted (§10.5, line 19).
-* **Length first.** The payload must be exactly 168 bits. The 160-bit line above shows how close noise can come; a 168-bit *minimum* check (which is what `require_bits` enforces) accepts the 328-bit line, so a consumer that wants only genuine reports should additionally require `payload_bits == 168`. We leave that to the layer above the decoder, as chapter 16 did for the 168-bit message 27s that [AIVDM] reports in the wild.
+* **Length first.** The payload must be exactly 168 bits. The 160-bit line above shows how close noise can come; a 168-bit *minimum* check (which is what `require_bits` enforces) accepts the 328-bit line, so a consumer that wants only genuine reports should additionally require `payload_bits == 168`. We leave that to the layer above the decoder, as chapter 16 does for the 168-bit message 27s that [AIVDM] reports in the wild.
 * **MMSI format.** A SAR aircraft MMSI starts with `111` [M.585-9 Annex 1 §3]. In practice some aircraft have been seen transmitting message 9 with a ship-format MMSI, and some ships' transponders can be configured as "SAR aircraft" by mistake; a message 9 with a `2xx`–`7xx` MMSI deserves a look at the message 5 name (`SAR AIRCRAFT …` is the rule [M.1371-5 Table 52]) before you believe either the type or the identity.
 * **Altitude units and datum.** The field is metres, not feet; the bit at 134 tells you whether it is GNSS (geometric, usually above the ellipsoid) or barometric (pressure altitude or QNH-corrected, depending on the installation). Do not compare one aircraft's barometric altitude with another's GNSS altitude to the metre, and do not expect agreement with an ADS-B pressure altitude.
 * **Speed is whole knots.** A decoder written by copy-and-paste from message 1 that divides by 10 will show a 150-knot aircraft doing 15.0 knots — a plausible boat speed, which makes the bug hard to notice. The field widths are identical; only the unit changed [Table 48 vs Table 59].
 * **Time stamp at 128, not 137.** The second copy-and-paste trap: all the fields after the position shift by nine bits relative to message 1. A decoder with message 1 offsets reads the aircraft's COG low bits and the time stamp as a "true heading" and part of the sensor/spare bits as the "time stamp". The symptom is a heading on an aircraft report (message 9 has none) and time stamps that never change.
 * **Reporting interval.** 10 s nominal, 2 s in the search area [M.1371-5 Annex 1 Table 2]; a base station can assign a different rate (chapter 11). An aircraft that reports every 2 s uses 30 slots a minute per channel; several aircraft on scene are a noticeable load on the link, which is one reason the assignment mechanism exists.
-* **M.1371-4 versus M.1371-5, and older editions.** The message 9 table is Table 59 in M.1371-5 and Table 56 in M.1371-4; the layout is the same in both. It was *not* the same in M.1371-1 and -2: there, bits 134–141 were eight bits "reserved for definition by a competent regional authority" and there was no altitude-sensor bit and no assigned-mode flag — M.1371-3 (2007) turned the regional byte into *altitude sensor + 7 spare* and carved the assigned-mode flag out of the spare bits before RAIM [M.1371-5 Table 59; the edition history in Appendix A]. A decoder written against the 2001 text will label bit 134 "regional" and miss the two flags; the order in Table 59 is altitude sensor (134), DTE (142), assigned mode (146), RAIM (147), selector (148).
+* **M.1371-4 versus M.1371-5, and older editions.** The message 9 table is Table 59 in M.1371-5 and Table 56 in M.1371-4; the layout is the same in both. It was *not* the same in M.1371-1 and -2: there, bits 134–141 were eight bits "reserved for definition by a competent regional authority" and there was no altitude-sensor bit and no assigned-mode flag — M.1371-3 (2007) turned the regional byte into *altitude sensor + 7 spare* and carved the assigned-mode flag out of the spare bits before RAIM [M.1371-5 Table 59] (see the edition history under [M.1371-5] in Appendix A). A decoder written against the 2001 text will label bit 134 "regional" and miss the two flags; the order in Table 59 is altitude sensor (134), DTE (142), assigned mode (146), RAIM (147), selector (148).
 
 ## 10.7 Exercises
 
@@ -459,7 +459,7 @@ All four print the seven lines of [`tests/expected/ch10-sar-aircraft.jsonl`](../
 3. **(TypeScript)** Add `isPlausibleSar(obj, receiverLat, receiverLon)` that returns the list of reasons a decoded message 9 is suspect: MMSI not starting with 111, `payload_bits` ≠ 168 (you will need the outer object), `spare` or `spare2` non-zero, position more than 150 nautical miles from the receiver, `sog_knots` > 400 for a `111MID5xx` (helicopter) identity. Run it on the expected output and confirm it flags line 19 and passes lines 5 and 7.
 4. **(C++)** `decode_msg_9` and `decode_msg_18` share the selector-bit logic verbatim. Factor it into `inline Json decode_comm_state(const Bits& bits, std::size_t selector_bit)` in `msg_1_2_3.hpp` (in a copy of the tree — the header is owned by chapter 3) and use it from both. Does the test-suite still pass byte-for-byte?
 5. **(Rust)** Extend the unit tests in `msg_9.rs` with a 168-bit payload whose selector bit is 1 and whose last 19 bits are `1100000000000000110` — the fixed value Class B "CS" units put in message 18 (chapter 14). What does `decode_itdma` make of it (sync state, `slots_raw`, `slots`, `keep_flag`), and why would such a comm state be nonsense in a real message 9?
-6. **(Any language, data)** Using the scanner idea from chapter 16 exercise 6, list every line in `sample-data/tide1/ais/` whose first character is `9` and tabulate payload lengths. How many are 168 bits? What is the distribution of the decoded MMSI's leading digits for those that are long enough to decode? Write two sentences on what this says about counting message types without validation.
+6. **(Any language, data)** Write a small scanner that lists every line in `sample-data/tide1/ais/` whose first character is `9` and tabulate payload lengths. How many are 168 bits? What is the distribution of the decoded MMSI's leading digits for those that are long enough to decode? Write two sentences on what this says about counting message types without validation.
 
 ## 10.8 References
 

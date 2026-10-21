@@ -45,7 +45,8 @@ Message 4 exists for three reasons that the specification spells out:
    number of received stations, provided that two reports have been
    received from that station in the last 40 s" (sync state 2, *base
    direct*) [M.1371-5 Annex 2 §3.1.1.1–§3.1.1.3]. Message 4 carries the
-   number of received stations in its SOTDMA sub-message when the slot
+   number of received stations in its SOTDMA (self-organising TDMA,
+   chapter 3) sub-message when the slot
    time-out is 3, 5 or 7 [M.1371-5 Annex 2 §3.1.1.3; §3.3.7.2.3 Table 19].
 2. **Slot reservation.** A base station reserves slots for itself with
    message 20 (chapter 13), but "FATDMA reservations should consist of a
@@ -107,7 +108,9 @@ watching:
   every 10 s and suddenly does not has either lost its antenna or *X* has
   gone off the air. The *absence* of message 4 is a cheap, continuous test
   of a receiver site. The Great Bay receiver (`nhjel`) in `sample-data/tide1`
-  heard **no** message 4 at all in August 2008 — it was simply out of range
+  heard **no** valid message 4 at all in August 2008 (only a dozen
+  corrupt fragments whose first six bits happened to spell 4) — it was
+  simply out of range
   of every base station — but it heard the message 11 answers that ships
   gave to each other's UTC requests.
 * **Identifying the site.** A base station's position should not move.
@@ -122,7 +125,8 @@ watching:
   with a plausible MMSI can therefore disrupt a whole area; this is the
   threat behind IMO's resolution on protecting the VDL [MSC.140(76)].
   Automatic checks that catch the clumsy cases:
-  * **MMSI format.** Coast stations use `00MIDXXXX` — two leading zeros,
+  * **MMSI (maritime mobile service identity) format.** Coast stations use
+    `00MIDXXXX` — two leading zeros,
     the three-digit maritime identification digits of the administration,
     then four digits [M.585-9 Annex 1 Section 2]. The administration *may*
     use the sixth digit to distinguish kinds of station (`00MID5XXX` for
@@ -169,7 +173,7 @@ below are zero-based; the ITU table gives only lengths.
 | 134–137 | 4 | Type of EPFD | enum | 0 = undefined | see table below [M.1371-5 Table 51] |
 | 138 | 1 | Transmission control for long-range broadcast message | flag | 0 default | 0 = Class A stops message 27 within base-station coverage area; 1 = request Class A to transmit message 27 within the coverage area [M.1371-5 Table 51; Annex 4 §3.3.3] |
 | 139–147 | 9 | Spare | uint | — | "Not used. Should be set to zero" [M.1371-5 Table 51] |
-| 148 | 1 | RAIM flag | flag | 0 default | 1 = RAIM in use [M.1371-5 Table 51] |
+| 148 | 1 | RAIM flag | flag | 0 default | 1 = receiver autonomous integrity monitoring (RAIM) in use [M.1371-5 Table 51] |
 | 149–167 | 19 | Communication state | SOTDMA | — | Always SOTDMA (sync state 2 bits, slot time-out 3 bits, sub-message 14 bits) [M.1371-5 Table 51; Annex 2 §3.3.7.2.2 Table 18, §3.3.7.2.3 Table 19] |
 
 **Type of electronic position fixing device (EPFD)** [M.1371-5 Annex 8
@@ -194,7 +198,8 @@ never changes and PA = 1 is justified.
 
 **Repeat indicator** — mobile stations "should always set the repeat
 indicator to default = 0"; a repeater increments it, and a base station
-transmitting on behalf of another entity (an AtoN, for example) sets it
+transmitting on behalf of another entity (an aid to navigation, AtoN, for
+example) sets it
 non-zero [M.1371-5 Annex 2 §4.6.1]. The L-3 bench unit in §6.5 sends its
 own report with repeat indicator 3.
 
@@ -211,7 +216,7 @@ of range (§6.4).
 
 **Position, PA, RAIM** are bit-for-bit the same as in message 1
 (chapter 3): 28/27-bit two's-complement 1/10 000-minute values with the
-same 181°/91° sentinels [M.1371-5 Table 51; compare Table 48].
+same 181°/91° sentinels [M.1371-5 Table 51; Table 48].
 
 **Transmission control for long-range broadcast message** appeared in
 M.1371-4; in M.1371-3 and earlier bits 138–147 were a 10-bit spare, and
@@ -677,8 +682,8 @@ export function decode(bits: Bits): JsonObject {
 > **Language notes (TypeScript).** `import { decodeSotdma } from
 > "./msg_1_2_3"` imports an `export`ed function from a sibling module;
 > the path is relative and written without the `.ts`/`.js` extension.
-> `string | null` is a *union type* — the TypeScript way to say
-> `Optional[str]` — and because `null` is already a member of `JsonValue`
+> `string | null` is the union type of chapter 1, and because `null` is
+> already a member of `JsonValue`
 > the object literal needs no special case. JavaScript has no `printf`;
 > `String(n).padStart(2, "0")` is the zero-padding idiom, and the little
 > arrow function `p2` keeps the template literal readable. `epfd,` on its
@@ -753,7 +758,7 @@ other columns are the decoder's output.) Things to notice:
   message for date/time, would have been two minutes wrong.
 * **Surveyed vs GPS.** 3669702 (EPFD 7, PA 1) reports exactly the same
   position every time. 3669717 (EPFD 1, PA 0) wobbles in the sixth decimal
-  — about a metre per report — because it is retransmitting a live GPS
+  — a few tenths of a metre per report — because it is retransmitting a live GPS
   fix instead of a surveyed antenna position.
 * **The UTC second is one behind the slot.** Line 1 was sent in slot 10
   (0.27 s into the minute) and says second 59 of the previous minute;
@@ -854,11 +859,12 @@ Almost every field is instructive:
 ```
 
 Line 21 is a 72-bit message 10 (first character `:` = 10). Its decoder
-belongs to chapter 11, so for now the driver prints
-`{"msg_type":10,"not_implemented":true}`; reading bits 8–37 and 40–69 by
-hand [M.1371-5 Annex 8 Table 60] gives source 371043000 asking
-destination 255797000. Line 22, 0.24 s later on the same channel B as the
-spec requires [M.1371-5 Annex 8 §3.2], is the answer:
+belongs to chapter 11; the driver already prints its result,
+`{"dest_mmsi":255797000,"mmsi":371043000,"msg_type":10,…}`, and you can
+confirm it by reading bits 8–37 and 40–69 by hand [M.1371-5 Annex 8
+Table 60]: source 371043000 asking destination 255797000. Line 22,
+0.24 s later on the same channel B as the spec requires [M.1371-5 Annex 8
+§3.2], is the answer:
 
 ```json
 {"ais":{"comm_state":{"scheme":"SOTDMA","slot_offset":0,"slot_timeout":0,"sync_state":0,"sync_state_text":"UTC direct"},"epfd":1,"epfd_text":"GPS","lat":43.103367,"lon":-70.790967,"mmsi":255797000,"msg_type":11,"position_accuracy":0,"position_available":true,"raim":false,"repeat_indicator":0,"spare":0,"transmission_control":0,"transmission_control_text":"Class A stops message 27 within base station coverage (default)","utc_day":22,"utc_day_available":true,"utc_hour":7,"utc_hour_available":true,"utc_iso":"2008-08-22T07:42:06Z","utc_minute":42,"utc_minute_available":true,"utc_month":8,"utc_month_available":true,"utc_second":6,"utc_second_available":true,"utc_year":2008,"utc_year_available":true},"channel":"B","fragments":1,"line":22,"own_ship":false,"payload_bits":168,"talker":"AI","uscg":{"station":"nhjel","station_kind":"receiver","time":1219390927.66}}

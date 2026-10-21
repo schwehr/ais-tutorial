@@ -97,7 +97,7 @@ produced the sentence [AIVDM "Talker IDs"]:
 | `AD`, `AS`, `AT` | Dependent base station, limited base station, transmitting station (rare) |
 
 The talker tells you about the *box that wrote the sentence*, not about
-the ship that sent the radio message — that comes from the MMSI inside the
+the ship that sent the radio message — that comes from the maritime mobile service identity (MMSI) inside the
 payload. In `data/ch02-aivdm-samples.nmea` line 9 an aid-to-navigation unit
 on the bench reports its own transmission as `!ANVDO`.
 
@@ -114,9 +114,11 @@ copy it into the output unchanged: `"channel":"X"` on line 9.
 **Multi-sentence messages.** An NMEA sentence may be at most 82
 characters including `!` and the final CR LF [IEC 61162-1 §7]. After
 `!AIVDM,2,1,1,A,` and `,0*01` there is room for about 60 payload
-characters, i.e. 360 bits. Message 5 (424 bits) and message 19 (312 bits
-plus the header overhead) therefore always need two sentences, and message
-8 with a long binary payload needs up to five. All fragments of one
+characters, i.e. 360 bits. Message 5 (424 bits) therefore always needs two
+sentences; message 19 (312 bits, 52 characters) just fits in one, although
+some equipment splits it anyway (lines 6–7 of the sample file); and a
+message 8 with the longest permitted binary payload (1 008 bits, 168
+characters) needs three. All fragments of one
 message carry the same total (field 1), consecutive numbers (field 2) and
 the same sequential id (field 3); only the last fragment may have non-zero
 fill bits. The sequential id is a counter 0–9 that the *sender of the
@@ -132,7 +134,9 @@ file are two such pairs.
 The first six bits of every payload are the message identifier
 [M.1371-5 Annex 8 §3]. Table 46 of [M.1371-5 Annex 8] lists 27 of them.
 Sizes are from the individual message tables of Annex 8 §3; "M" means
-transmitted by mobile stations, "B" by base stations.
+transmitted by mobile stations, "B" by base stations; the access-scheme
+acronyms (SOTDMA, self-organising TDMA, and the rest) are explained in
+chapter 3.
 
 | ID | Name [M.1371-5 Annex 8 Table 46] | Bits | M/B | Chapter |
 |---|---|---|---|---|
@@ -704,7 +708,7 @@ where C, Python and Rust round to even.
 
 ## 2.5 Sample data and results
 
-`data/ch02-aivdm-samples.nmea` has ten lines (the last one blank):
+`data/ch02-aivdm-samples.nmea` has nine lines:
 
 | Line | Source | What it shows |
 |---|---|---|
@@ -726,8 +730,8 @@ node code/typescript/dist/decode.js data/ch02-aivdm-samples.nmea
 ```
 
 All four print the seven lines of `tests/expected/ch02-aivdm-samples.jsonl`.
-Seven, not ten: line 4 and line 6 are first fragments and print nothing
-(the assembler is waiting), and line 10 is blank. Line 1 in full:
+Seven, not nine: line 4 and line 6 are first fragments and print nothing
+(the assembler is waiting). Line 1 in full:
 
 ```json
 {"ais":{"cog_available":true,"cog_deg":332.8,"comm_state":{"scheme":"SOTDMA","slot_number":68,"slot_timeout":4,"sync_state":0,"sync_state_text":"UTC direct"},"heading_available":false,"lat":36.839477,"lon":-76.279783,"mmsi":367149480,"msg_type":1,"nav_status":15,"nav_status_text":"undefined (default)","position_accuracy":0,"position_available":true,"raim":false,"repeat_indicator":0,"rot_deg_per_min":null,"rot_raw":-128,"rot_text":"not available","sog_available":true,"sog_knots":0.0,"spare":0,"special_manoeuvre":0,"special_manoeuvre_text":"not available","timestamp":1,"true_heading":511},"channel":"A","fragments":1,"line":1,"own_ship":false,"payload_bits":168,"talker":"AI","uscg":{"time":1179170462.87}}
@@ -745,10 +749,10 @@ Selected fields of the other six objects:
 |---|---|---|---|---|---|---|
 | 2 | `AI` | `B` | false | 1 | 168 | message 3, MMSI 212521000, at anchor |
 | 3 | `AI` | `A` | false | 1 | 168 | message 3, MMSI 3669734, at anchor |
-| 5 | `AI` | `A` | false | 2 | 424 | `{"msg_type":5,"not_implemented":true}` |
-| 7 | `AI` | `A` | false | 2 | 312 | `{"msg_type":19,"not_implemented":true}` |
+| 5 | `AI` | `A` | false | 2 | 424 | message 5, MMSI 3669734, name `NOAA TEST`, destination `NOT A VESSEL` (chapter 7) |
+| 7 | `AI` | `A` | false | 2 | 312 | message 19, MMSI 523135452, 88.7 kn and a name of punctuation — a corrupt payload (chapter 14) |
 | 8 | `AI` | `A` | **true** | 1 | 168 | message 1, MMSI 369871000, 19.5 kn |
-| 9 | `AN` | `X` | **true** | 1 | 272 | `{"msg_type":21,"not_implemented":true}` |
+| 9 | `AN` | `X` | **true** | 1 | 272 | message 21, MMSI 3669739, name `NOAA WHALE NOTICES` (chapter 15) |
 
 Points worth checking against the sentences:
 
@@ -759,10 +763,10 @@ Points worth checking against the sentences:
   of message 19.
 * Line 9: 46 characters × 6 = 276, minus 4 fill bits = 272, the minimum
   size of message 21 (the name-extension field is absent).
-* The three `not_implemented` placeholders are what the stub decoders for
-  messages 5, 19 and 21 return in this snapshot of the code; chapters 7,
-  14 and 15 replace them, and the expected files are regenerated when they
-  do.
+* Lines 5, 7 and 9 are decoded in full by the modules of chapters 7, 14
+  and 15; here only the envelope matters. Line 7 is a reminder that a
+  well-formed envelope says nothing about the bits inside: the message 19
+  it carries is structurally valid and semantically garbage.
 * Line 3's MMSI, 3669734, prints with seven digits because it is the
   integer value of 003669734 — a coast-station format identity
   (`00` + MID 366, chapter 3) transmitting a Class A position report. It

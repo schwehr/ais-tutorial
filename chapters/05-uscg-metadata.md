@@ -87,7 +87,8 @@ disagrees with its neighbours has lost GPS time.
   with the best `d`.
 * **Timing-based anomaly and spoof detection.** A transmitter's reported
   `timestamp` field [M.1371-5 Annex 8 §3.1 Table 48] and the slot number in
-  its SOTDMA communication state [M.1371-5 Annex 2 §3.3.7.2.3 Table 19]
+  its self-organising TDMA (SOTDMA) communication state
+  [M.1371-5 Annex 2 §3.3.7.2.3 Table 19]
   must agree with the receiver's `T`. A position that moves 20 km between
   two messages 26 ms apart, or a "ship" whose messages arrive at
   implausible slot times, is a candidate spoof. With `T` from three
@@ -142,9 +143,11 @@ must accept. Sources are the raw recordings described in
 | 11 | `,rnhcml,<decimal>` — the `serial_logger.py --uscg-format` convention: station name and fractional time | `sample-data/tide3/ais/ais-2011-05-21` line 8 (UNH Coastal Marine Lab) |
 
 Two things to notice before any code. The station ids `003669945`–`947`
-look like MMSIs — specifically like coast-station MMSIs, which have the
+look like maritime mobile service identities (MMSIs) — specifically like
+coast-station MMSIs, which have the
 form `00MIDxxxx` with MID 366 = United States [M.585-9 Annex 1 Section 2]
-— and `993689982` looks like an AtoN-format MMSI. But these were
+— and `993689982` looks like an aid-to-navigation (AtoN) format MMSI. But
+these were
 receive-only sites; the ids were **never transmitted on the air**. They are
 network labels borrowed from the MMSI number space, nothing more. And
 `nhcml` is not numeric at all: the parser must treat `r…` as an opaque
@@ -676,8 +679,9 @@ Things worth noticing:
   collection.
 * **The receiver counter resets.** `x` is not a 16-bit counter that wraps
   at 65 535 — values above 200 000 occur. In the 13 Oct 2008 feed each of
-  the three Boston receivers' counters jumps back to 1 a few minutes after
-  04:00 UTC on 14 Oct, i.e. local midnight (EDT): a daily reset, at
+  the three Boston receivers' counters jumps back to 1 within a few minutes
+  of 04:00 UTC on 14 Oct (03:57, 04:00 and 04:02), i.e. local midnight
+  (EDT): a daily reset, at
   slightly different moments per receiver. Use `x` for gap detection
   within a day, and treat a decrease as a day boundary, not as data loss.
 * **Fractional vs integer times.** The USCG feed stamps whole seconds; the
@@ -724,7 +728,9 @@ Things worth noticing:
    that, when both `time` and `time_of_arrival_s` are present, adds
    `"arrival_utc": <seconds with 3 decimals>` using
    `time_of_arrival_to_utc`. Check that lines 1 and 6 produce the same
-   value and that line 7 lands in the minute *before* its log time.
+   value (`1223901985.497`) and that line 7's arrival, `1199163534.258`,
+   is 0.74 s *before* its whole-second log time — the receiver's `T`
+   beats the logger's clock, as it should.
 2. **De-duplication (Rust).** Write a filter that reads
    `data/ch05-uscg-metadata.nmea`, groups lines by (payload, arrival time
    rounded to 26.67 ms — use the log time when `T` is missing), and emits

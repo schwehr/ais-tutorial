@@ -145,7 +145,7 @@ pub fn decode_sotdma(bits: &Bits, start: usize) -> Obj {
         2 | 4 | 6 => put(&mut out, "slot_number", sub),
         1 => {
             put(&mut out, "utc_hour", sub >> 9); // bits 13..9
-            put(&mut out, "utc_minute", (sub >> 2) & 0x3F); // bits 8..2
+            put(&mut out, "utc_minute", (sub >> 2) & 0x7F); // bits 8..2 (7 bits)
         }
         _ => put(&mut out, "slot_offset", sub), // timeout == 0
     }

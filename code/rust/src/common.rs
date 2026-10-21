@@ -93,7 +93,8 @@ pub fn epfd_text(code: u64) -> &'static str {
 
 /// Type of ship and cargo type. ITU-R M.1371-5 Annex 8 Table 53. The first
 /// digit is the vessel category, the second digit (for 2x–9x) the hazard
-/// category (1 = DG/HS/MP category X … 4 = Y, 5–8 reserved, 9 = no additional
+/// category (1–4 = DG/HS/MP category X, Y, Z, OS — formerly A–D, which is
+/// what the `_text` strings still say; 5–8 reserved, 9 = no additional
 /// information). We spell out the common ones and derive the rest.
 pub fn ship_type_text(code: u64) -> String {
     // Python's SHIP_TYPE_SPECIAL dictionary, as a match.

@@ -15,8 +15,8 @@
 !AIVDM,1,1,,B,803OvriK`Q0FDjT6g?TIV3`j0T;000,4*3D,s30590,d-091,T16.19045496,x78755,r003669946,1223902217
 #
 # 3. Message 6, DAC 1 FI 0 (IFM 0 text telegram, empty text) from two USCG
-#    base stations to MMSI 923156; the second station sets the retransmit
-#    flag on its retries (bit 70: '@' -> 'B'), the first never does.
+#    base stations to MMSI 923156; both set the retransmit flag (bit 70:
+#    '@' -> 'B') from their 2nd transmission on (shown: 2nd station's retry).
 #    RightwhaleAisProject/20081013.log lines 232157, 232165, 232187
 !AIVDM,1,1,,B,603Ovl@0>5Q@04000000,0*2B,s26803,d-107,T39.92316035,x150977,r003669946,1223948560
 !AIVDM,1,1,,A,603Owlh0>5Q@04000000,0*01,s30036,d-093,T40.16380142,x150980,r003669946,1223948560

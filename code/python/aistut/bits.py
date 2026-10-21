@@ -11,10 +11,11 @@ is therefore very small:
 
 Spec references:
   * Armouring table: IEC 61162-1 (NMEA 0183) §7.3.3 "Six-bit binary field
-    conversion"; ITU-R M.1371-5 Annex 8 §3 (as reproduced in AIVDM.adoc
+    conversion" (as reproduced in AIVDM.adoc
     "AIVDM/AIVDO Payload Armoring").
   * Six-bit ASCII for text fields: ITU-R M.1371-5 Annex 8 Table 47.
-  * Two's complement for signed fields: ITU-R M.1371-5 Annex 8 §3.3.7.
+  * Two's complement for signed fields: ITU-R M.1371-5 Annex 8 §3 ("Negative
+    numbers are expressed using 2's complement"); bit order Annex 2 §3.3.7.
 
 Python notes for readers new to the language
 --------------------------------------------
@@ -133,7 +134,7 @@ class Bits:
     def text(self, start: int, length: int) -> str:
         """Six-bit ASCII text occupying `length` bits (a multiple of 6).
 
-        Per ITU-R M.1371-5 Annex 8 §3.3.8, unused characters are '@'; in
+        Per ITU-R M.1371-5 Annex 2 §3.3.7, unused characters are '@'; in
         practice names are often space-padded instead. We cut at the first
         '@' and strip trailing spaces.
         """

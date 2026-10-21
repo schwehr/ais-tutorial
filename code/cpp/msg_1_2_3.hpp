@@ -123,7 +123,7 @@ inline Json decode_sotdma(const Bits& bits, std::size_t start) {
         out["slot_number"] = sub;
     } else if (timeout == 1) {
         out["utc_hour"] = sub >> 9;               // bits 13..9
-        out["utc_minute"] = (sub >> 2) & 0x3F;    // bits 8..2
+        out["utc_minute"] = (sub >> 2) & 0x7F;    // bits 8..2 (7 bits)
     } else {  // timeout == 0
         out["slot_offset"] = sub;
     }

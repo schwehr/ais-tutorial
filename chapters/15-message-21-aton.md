@@ -9,7 +9,7 @@
 >   the 20-character name and its 0–14 character extension, the
 >   dimension/reference-point block, the off-position flag and the eight
 >   "AtoN status" bits that ITU leaves to IALA and national authorities.
-> * The first **variable-length** message in this tutorial: how to find the
+> * A message with an optional **variable-length** tail: how to find the
 >   end of the name extension from the payload length, and what the
 >   byte-boundary padding rule means for your decoder.
 > * How to read the four decoders' handling of a field that *may not be
@@ -46,21 +46,21 @@ Three kinds of station send it [IALA R0126 §4.2], [IALA G1062 §6]:
 | **Synthetic** | a physical aid *without* its own AIS; "monitored" if something confirms its state, "predicted" if not | a base station or another AtoN station elsewhere | 0, repeat indicator ≠ 0 | `99MID1xxx` |
 | **Virtual** | nothing — "a digital information object" | a base station or AtoN station | 1 | `99MID6xxx` |
 
-The MMSI format is set by ITU: `99` + the three-digit maritime identification
+The maritime mobile service identity (MMSI) format is set by ITU: `99` + the three-digit maritime identification
 digits (MID) of the licensing country + four digits, i.e. 10 000 identities
 per MID [M.585-9 Annex 1 §4]. The sixth digit is *recommended* (not
 required) to distinguish physical (`1`), virtual (`6`) and mobile (`8`) aids
-[M.585-9 Annex 1 §4 note 4], [IALA R0126 §4.3.1 Table 2]. US MIDs are 338 and
+[M.585-9 Annex 1 §4 ¶4], [IALA R0126 §4.3.1 Table 2]. US MIDs are 338 and
 366–369, so a US virtual aid would be `993676xxx`. You will meet two
 exceptions to the rule in this chapter's data: a coast-station style
 `003669739` that the USCG assigned to a NOAA shore installation, and a bare
 serial number.
 
 Physical AtoN stations come in three hardware classes [IALA G1062 §6.1],
-[IEC 62320-1/-2/-3]: **Type 1** transmit-only (FATDMA slots reserved for it
+[IEC 62320-1/-2/-3]: **Type 1** transmit-only (fixed-access TDMA, FATDMA, slots reserved for it
 by a base station's message 20, chapter 13), **Type 2** with a receiver for
-remote configuration only, and **Type 3** with a full receiver that can use
-RATDMA like a ship and respond to interrogation (message 15, chapter 11). All
+remote configuration only, and **Type 3** with a full receiver that can use random-access TDMA,
+RATDMA, like a ship and respond to interrogation (message 15, chapter 11). All
 three sleep between transmissions to save battery [IALA G1062 §6.1].
 
 ### Operational use
@@ -68,7 +68,7 @@ three sleep between transmissions to save battery [IALA G1062 §6.1].
 * **On the bridge**, message 21 draws a diamond at the aid's position — solid
   for a physical or synthetic aid, dashed for a virtual one [IALA R0126 §4.2]
   — labelled with the name, and in good ECDIS implementations also flagged
-  when `off_position` is set. A lighthouse with EPFD = 7 ("surveyed") doubles
+  when `off_position` is set. A lighthouse with EPFD (electronic position fixing device) type 7 ("surveyed") doubles
   as a radar reference target: the mariner can compare the radar echo with
   the AIS position to check the radar's alignment [M.1371-5 Table 73],
   [IALA G1062 §3].
@@ -109,7 +109,8 @@ is a machine. This is where the message's quirks matter most.
    shore network can alarm on *silence*: no message 21 from buoy X for 10
    minutes means a dead battery, a sunk buoy or a jammed channel. In
    `sample-data/2010-11-l3-aton/ccom-sr162g-2010-09.aivdm` the gaps between
-   the 429 reports are 180 s (322 times) and 360 s (80 times) — the 360 s
+   the 429 reports are 180 s (340 times), 360 s (86 times), once 540 s and
+   once 48 minutes — the 360 s
    gaps are reports the monitor receiver *missed*, one bench-test away from
    a false alarm. The 2024 USCG safety alert on VHF keying blocking AIS
    reception names "Aid to Navigation reports" as a casualty of exactly
@@ -134,8 +135,8 @@ is a machine. This is where the message's quirks matter most.
    the USCG *as an AtoN* [AtoN form v4]: a shore computer in the Cape Cod
    National Seashore visitor centre, type of AtoN 0 ("not in the water and
    not fixed to any reference point"), name `NOAA WHALE NOTICES`, EPFD 1
-   (GPS), and message 8 with DAC 366 every 5 minutes for ten acoustic-buoy
-   zones (the form says FI 22; what is on the air, including line 3 of the
+   (GPS), and message 8 with designated area code (DAC) 366 every 5 minutes for ten acoustic-buoy
+   zones (the form says function identifier (FI) 22; what is on the air, including line 3 of the
    same recording, is FI 34 — chapter 9). Message 21 was the station's *identity beacon*, so that
    anyone seeing the whale notices could find out who sent them. Fishing-gear
    markers, private moorings and race marks have since followed the same
@@ -175,7 +176,7 @@ below).
 | 253–258 | 6 | Time stamp | uint, UTC second | 60 | 61 manual input, 62 dead reckoning, 63 positioning system inoperative [M.1371-5 Table 73] |
 | 259 | 1 | Off-position indicator | flag | 0 | floating aids only; valid only if time stamp ≤ 59 [M.1371-5 Table 73 note] |
 | 260–267 | 8 | AtoN status | bits | `00000000` | "reserved for the indication of the AtoN status" [M.1371-5 Table 73]; IALA page layout [IALA R0126 §4.8.4] |
-| 268 | 1 | RAIM flag | flag | 0 | [M.1371-5 Table 73] |
+| 268 | 1 | RAIM flag | flag | 0 | receiver autonomous integrity monitoring [M.1371-5 Table 73] |
 | 269 | 1 | Virtual AtoN flag | flag | 0 | 1 = "does not physically exist" [M.1371-5 Table 73] |
 | 270 | 1 | Assigned mode flag | flag | 0 | 1 = operating under a message 16 assignment [M.1371-5 Table 73] |
 | 271 | 1 | Spare | — | 0 | [M.1371-5 Table 73] |
@@ -476,7 +477,7 @@ imports `decode_dimensions` from the message 19 module of chapter 14 (`from
 .msg_19 import decode_dimensions`), which outputs `dim_bow_m`,
 `dim_stern_m`, `dim_port_m`, `dim_starboard_m`, `dimensions_available`,
 `reference_point_available`, `length_m` and `beam_m` exactly as messages 5,
-19 and 24B do. For an AtoN "bow" means true north (15.2), `length_m` is the
+19 and 24B do. For an AtoN "bow" means true north (§15.2), `length_m` is the
 north–south extent and `beam_m` the east–west one, and
 `reference_point_available` is false for the all-zero block a virtual aid or
 reference point sends.
@@ -932,7 +933,7 @@ All four decoders print the same error text, produced by `require_bits`
   coast-station format [M.585-9 Annex 1 §2], not `99MIDxxxx`. The USCG issued
   it because the "aid" was a shore computer; ITU allows a base station
   co-located with an AtoN station to use a base-station identity
-  [M.585-9 Annex 1 §4 note 2]. Do not filter message 21 by MMSI prefix.
+  [M.585-9 Annex 1 §4 ¶2]. Do not filter message 21 by MMSI prefix.
 * **Type 0 everywhere.** Both real identities in the data use type 0. A
   display that keys its symbol on the type will show a generic diamond; a
   data miner that counts "buoys" will miss them. The field is "regional
@@ -942,8 +943,8 @@ All four decoders print the same error text, produced by `require_bits`
   6 bits (which looks like a trailing `@`), some with the minimum. Compute
   from `payload_bits`, decode whole characters, cut at `@`, and never
   assume the total is 360.
-* **Table numbering drift.** This message is Table 71/72 in M.1371-4 and
-  Table 73/74 in M.1371-5; the AtoN types were "Table 34bis" in IALA A-126
+* **Table numbering drift.** This message is Table 70/71 in M.1371-4 and
+  Table 73/74 in M.1371-5 (message layout / type codes); the AtoN types were "Table 34bis" in IALA A-126
   edition 1.1 [AtoN form v4]. When a document cites a table number, check
   which edition it means. Code 4 changed meaning between editions
   (spare → emergency wreck marking buoy), so an M.1371-4-era decoder shows
@@ -952,11 +953,13 @@ All four decoders print the same error text, produced by `require_bits`
   own size (or a circle around a buoy); several early implementations put
   the swing radius or the danger area there. Both IALA and the ITU note
   forbid it [IALA R0126 §4.8.3], [M.1371-5 Table 73 note 1].
-* **Reception gaps are not outages.** Section 15.1 counted 80 gaps of 360 s
+* **Reception gaps are not outages.** §15.1 counted 86 gaps of 360 s
   in 429 reports from a transmitter in the same building. Alarm on *several*
   missed intervals, and weight the two channels separately — the station
-  uses both channels (253 reports on A, 176 on B in the September file), so
-  a receiver with one poor channel misses a large share of reports.
+  alternates strictly between the channels (253 reports on A, 176 on B in
+  the September file, 360 s apart on each), so a receiver with one poor
+  channel misses a large share of reports; here nearly every missed report
+  was a channel B one.
 
 ## 15.7 Exercises
 
@@ -1023,7 +1026,7 @@ All four decoders print the same error text, produced by `require_bits`
   differing fixed/floating split).
 * [AtoN form v4] USCG AIS AtoN specification sheet for the NOAA whale
   notice station: MMSI, type 0 rationale, name, EPFD, serial number
-  000631850, intended position, message 8 DAC 366 FI 34 schedule.
+  000631850, intended position, message 8 DAC 366 FI 22 schedule (FI 34 is what the 2008 recordings carry; chapter 9).
 * [Safety Alerts] Safety Alert 01-24 (VHF keying delays AtoN reports).
 * [Toils] for the general theme that the spec, the guidelines and the
   equipment disagree.

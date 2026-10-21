@@ -71,9 +71,9 @@ link (VDL). The link is divided into one-minute *frames* of 2 250 slots of
 26.667 ms each, aligned to the UTC minute [M.1371-5 Annex 2 §3.1.2]:
 
 * **SOTDMA** (self-organising TDMA) is the steady state: a station
-  reserves a slot for 3–8 frames ahead, tells everyone how long it will
+  reserves a slot for 3–7 frames ahead, tells everyone how long it will
   keep it, and picks a replacement before it expires [M.1371-5 Annex 2
-  §3.3.4.3].
+  §3.3.4.4, Table 16 (TMO_MIN, TMO_MAX)].
 * **ITDMA** (incremental TDMA) pre-announces the *next* slot explicitly
   ("my next transmission is 248 slots from now"). It is used "on three
   occasions: data link network entry; temporary changes and transitions in
@@ -153,7 +153,7 @@ them than the designers intended — sometimes legitimately, sometimes not.
   report carries only the UTC *second* of its position fix (the time stamp
   field), so the date and minute come from the receiver's clock (chapter
   5); the same transmission arrives from several receivers and must be
-  de-duplicated (chapter 6 showed one base-station report logged three
+  de-duplicated (chapter 6 shows one base-station report logged three
   times); and MMSIs are reused, mistyped and defaulted, so "one MMSI =
   one ship" is an approximation. §3.5 shows MMSI 1193046 used by a pilot
   boat in New England and a tug in Virginia a year apart.
@@ -218,14 +218,15 @@ them than the designers intended — sometimes legitimately, sometimes not.
   position and no communication state, sent every 3 minutes on separate
   channels [M.1371-5 Annex 4; Annex 8 §3.25] — chapter 16. Base stations
   can switch it off in their coverage area with the bit in message 4
-  that chapter 6 described.
+  that chapter 6 describes.
 * **Devices that are not ships.** Message 1 is the Class A position
   report and only Class A equipment should send it. In practice anything
   with a VHF transmitter can: the right-whale project's own shore
   transponders (`003669739`, `003669734` in chapter 2) sent message 1
   with a coast-station MMSI and a fixed position; the Great Bay receiver
   in `sample-data/tide1` re-encoded its own GPS as a message 1 with MMSI 0;
-  AtoN units configured as mobiles send it instead of message 21; and the
+  aid-to-navigation (AtoN) units configured as mobiles send it instead of
+  message 21; and the
   cheap "fishing-gear AIS" buoys that flooded some coasts after 2015 send
   message 1 or 18 with invented MMSIs and a net number in the name field
   (chapter 7 discusses the name-field abuse; the relevant USCG bulletins
@@ -277,7 +278,8 @@ there. All fourteen reports in this chapter have 0.
 ### User ID — the MMSI (bits 8–37)
 
 The maritime mobile service identity is a nine-digit decimal number
-carried in 30 bits (2³⁰ = 1 073 741 824, enough for ten digits; "the first
+carried in 30 bits (2³⁰ = 1 073 741 824, so every nine-digit number fits
+with room to spare; "the first
 9 digits (most significant digits) should be used only" [M.1371-5 Annex 2
 §3.3.7.2.1]). Its *shape* tells you what kind of station is talking, and
 the three-digit **maritime identification digits (MID)** inside it tell
@@ -347,8 +349,9 @@ Table 48]:
 
 Values 0–8 are the COLREGS categories a ship would show with lights and
 shapes. 9 and 10 are reserved for high-speed craft and wing-in-ground
-craft carrying dangerous goods; 11 and 12 were added in M.1371-4 for
-inland and regional use; 14 was added for AIS-SART in M.1371-4 and
+craft carrying dangerous goods; 11 and 12 were added in M.1371-5 for
+inland and regional use (11–14 were "reserved for future use" through
+M.1371-3); 14 was added for AIS-SART in M.1371-4 and
 widened to MOB and EPIRB devices in M.1371-5. Our `nav_status_text`
 strings abbreviate the long reserved descriptions; the codes are what you
 should test against.
@@ -399,7 +402,9 @@ same threshold as the "changing course" rule for reporting intervals
 `rot_deg_per_min: null` with a `rot_text` explaining which. Note the
 sentence "ROT data should not be derived from COG information"
 [M.1371-5 Table 48] — small vessels with no gyro produce ±127 or −128,
-never a number. In our fourteen lines only two carry a measured rate.
+never a number. In our fourteen lines only three carry a value that is not
+a flag: a measured 0 on line 1, −21 on line 8, and the −11 of line 12,
+which turns out to be corrupt (§3.5).
 
 The sign is in the raw two's-complement value: the top bit of the eight
 set means negative. 0xEB = 235 unsigned is −21 signed (235 − 256). The
@@ -438,9 +443,9 @@ is the root-sum-square of its latitude and longitude error estimates
 differential fix or a RAIM estimate under 10 m; RAIM = 1 just means the
 receiver *had* a RAIM process, not that the fix was good. A plain GPS
 with no RAIM output gives 0/0 — by far the most common combination in
-2007–2008 data (eleven of our twelve decodable lines). Line 7 has RAIM = 1
+2007–2008 data (nine of our twelve decodable lines). Line 7 has RAIM = 1
 with PA = 0 (row 3 of the table: RAIM running, but estimated error over
-10 m); line 8 has PA = 1 with RAIM = 0 (row 4: a differential fix).
+10 m); lines 1 and 8 have PA = 1 with RAIM = 0 (row 4: a differential fix).
 
 ### Longitude and latitude (bits 61–88, 89–115)
 
@@ -520,10 +525,12 @@ engaged in special manoeuvre (i.e. regional passing arrangement on Inland
 Waterway)" [M.1371-5 Table 48]; 3 is not defined and our decoders label
 it "reserved". This is the European inland-waterway "blue sign"
 (passing starboard-to-starboard) in disguise [AIVDM "Types 1, 2 and 3"].
-These five bits have been reshuffled between editions — M.1371-1 had a
-3-bit regional reserved field at 143–145 and a 2-bit spare at 146–147;
-the 2-bit manoeuvre indicator appeared in M.1371-3 [AIVDM "Types 1, 2
-and 3"]. Everything in our data has zeros in all five, as it should
+These five bits have been reshuffled between editions — M.1371-1 and
+M.1371-2 had a 4-bit "reserved for regional applications" field at
+143–146 and a 1-bit spare at 147 [M.1371-2 Annex 2 §3.3.8.2.1 Table 15a];
+the 2-bit manoeuvre indicator appeared in M.1371-3. (The GPSD document
+describes the old layout as 3 + 2 bits, which does not match the ITU
+text.) Everything in our data has zeros in all five, as it should
 outside Europe's rivers.
 
 ### Communication state (bits 149–167)
@@ -643,7 +650,7 @@ is 117 → 69 → 61.) Now walk Table 48 from bit 0:
 
 Cross-checks that cost nothing:
 
-* 42.667° N, 70.460° W is in the Gulf of Maine about 8 NM east of Cape
+* 42.667° N, 70.460° W is in the Gulf of Maine about 6 NM east of Cape
   Ann, Massachusetts; COG 018° at 14.6 kn is a ship bound north-east
   along the coast. (Her message 5 in the same log, decoded with chapter
   7's code, says she is the tanker *NOR'EASTER*, destination PORTLAND.)
@@ -761,7 +768,7 @@ def decode_sotdma(bits: Bits, start: int) -> dict:
         out["slot_number"] = sub
     elif timeout == 1:
         out["utc_hour"] = sub >> 9            # bits 13..9
-        out["utc_minute"] = (sub >> 2) & 0x3F  # bits 8..2
+        out["utc_minute"] = (sub >> 2) & 0x7F  # bits 8..2 (7 bits)
     else:  # timeout == 0
         out["slot_offset"] = sub
     return out
@@ -841,7 +848,7 @@ consumer can tell 0 ("not turning") from −128 ("no sensor") without
 parsing a string. And `decode_sotdma` / `decode_itdma` take a `start`
 offset rather than assuming 149, because messages 4, 9, 11, 18 and 26
 carry the same 19 bits at other positions and reuse these functions
-(chapter 6 already did).
+(chapter 6 does).
 
 > **Language notes (Python).** An *enumeration table* is simply a `dict`
 > from integer to string, defined once at module level in capitals by
@@ -930,7 +937,7 @@ inline Json decode_sotdma(const Bits& bits, std::size_t start) {
         out["slot_number"] = sub;
     } else if (timeout == 1) {
         out["utc_hour"] = sub >> 9;               // bits 13..9
-        out["utc_minute"] = (sub >> 2) & 0x3F;    // bits 8..2
+        out["utc_minute"] = (sub >> 2) & 0x7F;    // bits 8..2 (7 bits)
     } else {  // timeout == 0
         out["slot_offset"] = sub;
     }
@@ -1132,7 +1139,7 @@ pub fn decode_sotdma(bits: &Bits, start: usize) -> Obj {
         2 | 4 | 6 => put(&mut out, "slot_number", sub),
         1 => {
             put(&mut out, "utc_hour", sub >> 9); // bits 13..9
-            put(&mut out, "utc_minute", (sub >> 2) & 0x3F); // bits 8..2
+            put(&mut out, "utc_minute", (sub >> 2) & 0x7F); // bits 8..2 (7 bits)
         }
         _ => put(&mut out, "slot_offset", sub), // timeout == 0
     }
@@ -1313,7 +1320,7 @@ export function decodeSotdma(bits: Bits, start: number): JsonObject {
     out["slot_number"] = sub;
   } else if (timeout === 1) {
     out["utc_hour"] = sub >> 9;            // bits 13..9
-    out["utc_minute"] = (sub >> 2) & 0x3f; // bits 8..2
+    out["utc_minute"] = (sub >> 2) & 0x7f; // bits 8..2 (7 bits)
   } else { // timeout === 0
     out["slot_offset"] = sub;
   }
@@ -1397,7 +1404,7 @@ export function decode(bits: Bits): JsonObject {
 > in JavaScript (the keys become strings internally, which is invisible
 > here). `===` is strict equality — always use it; `==` coerces types.
 > `Object.assign(out, other)` copies `other`'s properties into `out`
-> (`dict.update`). `sub >> 9` and `(sub >> 2) & 0x3f` are safe despite
+> (`dict.update`). `sub >> 9` and `(sub >> 2) & 0x7f` are safe despite
 > the 32-bit pitfall of chapter 2 because `sub` is only 14 bits wide; the
 > lat/lon arithmetic, which is not safe, goes through `Bits.sint` and
 > plain division instead. `null` is a legal `JsonValue`, so
@@ -1458,10 +1465,12 @@ byte for byte. Line 1 in full — the message decoded by hand in §3.3:
 {"ais":{"cog_available":true,"cog_deg":18.0,"comm_state":{"received_stations":5,"scheme":"SOTDMA","slot_timeout":5,"sync_state":0,"sync_state_text":"UTC direct"},"heading_available":true,"lat":42.666992,"lon":-70.459822,"mmsi":538002219,"msg_type":1,"nav_status":0,"nav_status_text":"under way using engine","position_accuracy":1,"position_available":true,"raim":false,"repeat_indicator":0,"rot_deg_per_min":0.0,"rot_raw":0,"rot_text":"not turning","sog_available":true,"sog_knots":14.6,"spare":0,"special_manoeuvre":0,"special_manoeuvre_text":"not available","timestamp":24,"true_heading":18},"channel":"A","fragments":1,"line":1,"own_ship":false,"payload_bits":168,"talker":"AI","uscg":{"rssi":34486,"sentence_counter":78124,"signal_dbm":-74,"station":"003669946","station_kind":"receiver","time":1223901985,"time_of_arrival_s":25.49701619}}
 ```
 
-The `ais` object has 27 keys: the 15 fields of Table 48 before the
-communication state, each enumeration doubled with its `_text`, each
-sentinel field doubled with its `_available`, the rate of turn tripled
-(`rot_raw`, `rot_deg_per_min`, `rot_text`), and `comm_state` nested.
+The `ais` object has 24 keys: the 15 fields of Table 48 before the
+communication state, three enumerations doubled with their `_text`
+(`nav_status`, `special_manoeuvre`, and the rate of turn tripled as
+`rot_raw`, `rot_deg_per_min`, `rot_text`), four sentinel fields doubled
+with their `_available` (SOG, position, COG, heading), and `comm_state`
+nested.
 The rest of the file, in groups.
 
 ### Under way, moored, anchored, undefined (lines 1, 2, 3, 7, 9)
@@ -1555,7 +1564,7 @@ right-whale log contains 229 reports from 1193046.)
 * **Line 8** is `NORTHERN CANYON`, a cable/survey ship whose message 5
   destination reads `SUBSEA OPS 0.5 CPA` — asking passing traffic for
   half a mile. Status 3, 0.6 kn, PA 1 (differential fix), heading 272,
-  COG 253, and the only *measured* rate of turn in the file:
+  COG 253, and the only genuine *non-zero* measured rate of turn in the file:
   `"rot_raw":-21` → (21 / 4.733)² = 19.69 → `"rot_deg_per_min":-19.7`,
   `"rot_text":"turning left"`. Slot increment 0 and keep flag false mean
   "no more ITDMA transmissions; back to the SOTDMA schedule"
@@ -1594,7 +1603,7 @@ Line 11, from the Norfolk, Virginia log of May 2007, is a pilot boat
 `"utc_hour":19,"utc_minute":21`. The logger's epoch stamp 1179170469.4
 is 19:21:09.4 UTC. The hour and minute sub-message is the one place a
 position report says what *time* its sender thinks it is; chapter 6
-used it to catch a base station two minutes slow.
+uses it to catch a base station two minutes slow.
 
 ### A message 2 that is not one (line 12)
 
@@ -1612,7 +1621,7 @@ while turning left at 5.4°/min, at 68.4° N 164.2° W — the Chukchi Sea
 coast of north-west Alaska, the far side of the continent from the
 Norfolk receiver that logged it —
 with MMSI **3669717**, which is 003669717, a *coast-station* identity.
-Chapter 6 met 003669717: it is a GPS-fed base station on the Hampton
+Chapter 6 meets 003669717: it is a GPS-fed base station on the Hampton
 Roads shore at 36.963° N, 76.325° W, reporting every 10 s. Base stations
 send message 4, not message 2, and message 4 is also 168 bits with the
 MMSI in the same place. Message ID 2 is `000010`; message ID 4 is
@@ -1631,7 +1640,7 @@ recompute the checksum (`0B`), and run chapter 6's decoder on it:
 
 (This modified sentence is not in `data/`; it was made in a scratch
 file.) A perfectly ordinary base-station report: 003669717 at
-36.962993° N, 76.325055° W — 6 m from where chapter 6 placed it — saying
+36.962993° N, 76.325055° W — 6 m from where chapter 6 places it — saying
 2007-05-14T20:16:29Z, logged at 20:16:30.22, in slot 1135 (30.27 s into
 the minute). The communication state did not change because bits
 149–167 were never touched; the "at anchor" and the rate of turn were the
@@ -1739,9 +1748,10 @@ decoder does.
   *same* message received by two receivers has the same communication
   state — de-duplicate before building a slot map.
 * **Edition drift in bits 143–147.** Pre-M.1371-3 decoders treat them as a
-  3-bit regional field plus 2-bit spare; current ones as a 2-bit
-  manoeuvre indicator plus 3-bit spare [AIVDM "Types 1, 2 and 3"]. In
-  our data the five bits are always zero, so the readings agree.
+  4-bit regional field plus 1-bit spare; current ones as a 2-bit
+  manoeuvre indicator plus 3-bit spare [M.1371-2 Table 15a; AIVDM "Types
+  1, 2 and 3"]. In our data the five bits are always zero, so the readings
+  agree.
 
 ## 3.7 Exercises
 
@@ -1798,8 +1808,11 @@ decoder does.
   [§3.13 Table 65] — message 3 as the response to interrogation;
   [§3.25] and [Annex 4] — message 27 for satellite reception.
 * [M.1371-5 Annex 1 §4.2.1 Table 1] — Class A reporting intervals.
-* [M.1371-5 Annex 2 §3.1.2] — 2 250-slot frame; [§3.3.4.1–§3.3.4.3] —
-  ITDMA, RATDMA and SOTDMA access schemes; [§3.3.5.2–§3.3.5.3] — network
+* [M.1371-2 Annex 2 §3.3.8.2.1 Table 15a] — the pre-M.1371-3 layout of
+  bits 143–147 (4-bit regional field, 1-bit spare); [M.1371-4 Annex 8
+  Table 45] — navigational status 14 added, 11–13 still reserved.
+* [M.1371-5 Annex 2 §3.1.2] — 2 250-slot frame; [§3.3.4.1–§3.3.4.4] —
+  ITDMA, RATDMA, FATDMA and SOTDMA access schemes; [§3.3.5.2–§3.3.5.3] — network
   entry with message 3; [§3.3.6] — assigned mode and message 2;
   [§3.3.7.2.1–§3.3.7.2.3 Tables 18–19] — SOTDMA communication state and
   sub-messages; [§3.3.7.3.2 Table 20] — ITDMA communication state;

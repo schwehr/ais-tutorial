@@ -67,7 +67,7 @@ IALA G1082 §4]:
 | Station | What it is | Chapters |
 |---|---|---|
 | **Class A** shipborne mobile | SOLAS-mandated transponder; 12.5 W; SOTDMA; messages 1/2/3, 5, … | 3, 7 |
-| **Class B** shipborne mobile | Voluntary fit for small craft; 2 W; "SO" (SOTDMA) or "CS" (carrier sense); messages 18, 19, 24 | 14 |
+| **Class B** shipborne mobile | Voluntary fit for small craft; "SO" (SOTDMA, 5 W) or "CS" (carrier sense, 2 W); messages 18, 19, 24 | 14 |
 | **Base station** | Shore station that can control the link: slot reservation, channel management, DGNSS corrections, interrogation | 6, 11, 13 |
 | **Aid to navigation (AtoN)** | Transponder on (or representing) a buoy or beacon; message 21 | 15 |
 | **SAR aircraft** | Search-and-rescue aircraft; message 9 | 10 |
@@ -93,8 +93,8 @@ a time from the outside in:
    ┌────────────────────────────────────────────────────────────────┐
    │ 5. Log file         # comments, one sentence per line, \r\n    │  ch. 1
    │ ┌────────────────────────────────────────────────────────────┐ │
-   │ │ 4. Metadata        \s:r003,c:1223901985*5B\  (TAG block)   │ │  ch. 4
-   │ │                    …*5C,s1234,d-119,r003669958,1085889680  │ │  ch. 5
+   │ │ 4. Metadata     \s:003669947,c:1223901985*02\  (TAG block) │ │  ch. 4
+   │ │                 …*5C,s1234,d-119,r003669958,1085889680     │ │  ch. 5
    │ │ ┌────────────────────────────────────────────────────────┐ │ │
    │ │ │ 3. NMEA sentence  !AIVDM,1,1,,B,177KQJ5000G?tO…,0*5C  │ │ │  ch. 1–2
    │ │ │ ┌────────────────────────────────────────────────────┐ │ │ │
