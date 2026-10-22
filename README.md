@@ -92,6 +92,8 @@ languages.
 
 ## License
 
-No license file is included yet; the author will choose one. Until then the
-usual default applies — all rights reserved — and the specifications cited in
-Appendix A remain the property of their publishers.
+The tutorial text and documentation are licensed under the Creative Commons
+Attribution 4.0 International License (**CC-BY-4.0**), and the source code and
+tests are licensed under the Apache License, Version 2.0 (**Apache-2.0**); see
+[`LICENSE`](LICENSE). The specifications cited in Appendix A remain the
+property of their publishers.
