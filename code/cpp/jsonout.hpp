@@ -43,6 +43,8 @@
 #pragma once
 
 #include <cmath>
+#include <concepts>
+#include <cstdint>
 #include <cstdlib>
 #include <format>
 #include <map>
@@ -62,7 +64,7 @@ constexpr double FIXED_LIMIT = 1e21;
 // A floating-point number to be printed with a fixed number of decimals.
 struct Fixed {
     double value;
-    int decimals;
+    std::int32_t decimals;
 
     [[nodiscard]] std::string str() const {
         if (!std::isfinite(value) || std::fabs(value) >= FIXED_LIMIT) return "null";
@@ -86,12 +88,9 @@ public:
     Json() : value_(nullptr) {}
     Json(std::nullptr_t) : value_(nullptr) {}
     Json(bool b) : value_(b) {}
-    Json(int i) : value_(static_cast<long long>(i)) {}
-    Json(long i) : value_(static_cast<long long>(i)) {}
-    Json(long long i) : value_(i) {}
-    Json(unsigned int i) : value_(static_cast<long long>(i)) {}
-    Json(unsigned long i) : value_(static_cast<long long>(i)) {}
-    Json(unsigned long long i) : value_(static_cast<long long>(i)) {}
+    template <typename T>
+        requires std::integral<T> && (!std::is_same_v<T, bool>)
+    Json(T i) : value_(static_cast<std::int64_t>(i)) {}
     Json(Fixed f) : value_(f) {}
     Json(const char* s) : value_(std::string(s)) {}
     Json(std::string s) : value_(std::move(s)) {}
@@ -99,13 +98,14 @@ public:
     Json(Object o) : value_(std::move(o)) {}
 
     // Optionals map to null when empty — Python's `None`.
-    Json(const std::optional<long long>& v) : Json() { if (v) value_ = *v; }
-    Json(const std::optional<int>& v) : Json() { if (v) value_ = static_cast<long long>(*v); }
+    template <typename T>
+        requires std::integral<T> && (!std::is_same_v<T, bool>)
+    Json(const std::optional<T>& v) : Json() { if (v) value_ = static_cast<std::int64_t>(*v); }
     Json(const std::optional<std::string>& v) : Json() { if (v) value_ = *v; }
     Json(const std::optional<Fixed>& v) : Json() { if (v) value_ = *v; }
 
     // Named helpers read better than bare constructors at call sites.
-    static Json fixed(double value, int decimals) { return Json(Fixed{.value = value, .decimals = decimals}); }
+    static Json fixed(double value, std::int32_t decimals) { return Json(Fixed{.value = value, .decimals = decimals}); }
     static Json object() { return Json(Object{}); }
     static Json array() { return Json(Array{}); }
 
@@ -147,7 +147,7 @@ private:
     static void write_string(std::string& out, const std::string& s) {
         out.push_back('"');
         for (char c : s) {
-            unsigned char u = static_cast<unsigned char>(c);
+            std::uint8_t u = static_cast<std::uint8_t>(c);
             if (c == '"') {
                 out += "\\\"";
             } else if (c == '\\') {
@@ -172,8 +172,8 @@ private:
             out += "null";
         } else if (std::holds_alternative<bool>(value_)) {
             out += std::get<bool>(value_) ? "true" : "false";
-        } else if (std::holds_alternative<long long>(value_)) {
-            out += std::to_string(std::get<long long>(value_));
+        } else if (std::holds_alternative<std::int64_t>(value_)) {
+            out += std::to_string(std::get<std::int64_t>(value_));
         } else if (std::holds_alternative<Fixed>(value_)) {
             out += std::get<Fixed>(value_).str();
         } else if (std::holds_alternative<std::string>(value_)) {
@@ -202,7 +202,7 @@ private:
         }
     }
 
-    std::variant<std::nullptr_t, bool, long long, Fixed, std::string, Array, Object> value_;
+    std::variant<std::nullptr_t, bool, std::int64_t, Fixed, std::string, Array, Object> value_;
 };
 
 // Free function with the same name as the Python one, for familiarity.

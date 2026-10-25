@@ -71,12 +71,12 @@ namespace aistut {
 //
 // The argument is a Unicode code point so that a stray non-ASCII character
 // is reported the way Python reports it (as one character, not as bytes).
-inline int armor_char_to_value(char32_t ch) {
+inline std::int32_t armor_char_to_value(char32_t ch) {
     std::uint32_t code = ch;
     if (code < 48 || code > 119 || (88 <= code && code <= 95)) {   // outside '0'..'w', or 'X'..'_'
         throw std::invalid_argument("illegal armour character " + py::repr(py::utf8_encode(ch)));
     }
-    int value = static_cast<int>(code) - 48;
+    std::int32_t value = static_cast<std::int32_t>(code) - 48;
     if (value > 40) value -= 8;
     return value;
 }
@@ -88,17 +88,17 @@ inline int armor_char_to_value(char32_t ch) {
 //
 //     payload_to_bits("1", 0)   -> 0 0 0 0 0 1
 //     payload_to_bits("1w", 4)  -> 0 0 0 0 0 1 1 1     (last char 'w' = 111111, drop 4 bits)
-inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, long long fill_bits = 0) {
+inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, std::int64_t fill_bits = 0) {
     if (fill_bits < 0 || fill_bits > 5) {
         throw std::invalid_argument(std::format("fill bits must be 0..5, got {}", fill_bits));
     }
     std::vector<std::uint8_t> bits;
     bits.reserve(payload.size() * 6);
     for (char32_t ch : py::codepoints(payload)) {
-        int value = armor_char_to_value(ch);
+        std::int32_t value = armor_char_to_value(ch);
         // Emit the six bits most-significant first: shift right by 5, 4, … 0
         // and mask with 1 to isolate each bit.
-        for (int shift = 5; shift >= 0; --shift) {
+        for (std::int32_t shift = 5; shift >= 0; --shift) {
             bits.push_back(static_cast<std::uint8_t>((value >> shift) & 1));
         }
     }
@@ -134,7 +134,7 @@ public:
     }
 
     // Build directly from an !AIVDM payload and its fill-bit count.
-    [[nodiscard]] static Bits from_payload(std::string_view payload, long long fill_bits = 0) {
+    [[nodiscard]] static Bits from_payload(std::string_view payload, std::int64_t fill_bits = 0) {
         return Bits(payload_to_bits(payload, fill_bits));
     }
 

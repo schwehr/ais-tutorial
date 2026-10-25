@@ -83,7 +83,7 @@ inline Json decode_dimensions(const Bits& bits, std::size_t start) {
 
 // Decode a message 19. Throws DecodeError if shorter than 312 bits.
 inline Json decode_msg_19(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 312);
     std::uint64_t ship_type = bits.uint(263, 8);
     std::uint64_t epfd = bits.uint(301, 4);
@@ -101,12 +101,12 @@ inline Json decode_msg_19(const Bits& bits) {
         {"spare2", bits.uint(139, 4)},
         {"name", bits.text(143, 120)},
         {"ship_type", ship_type},
-        {"ship_type_text", ship_type_text(static_cast<int>(ship_type))},
+        {"ship_type_text", ship_type_text(static_cast<std::int32_t>(ship_type))},
     });
     out.update(decode_dimensions(bits, 271));
     out.update(Json::Object{
         {"epfd", epfd},
-        {"epfd_text", epfd_text(static_cast<int>(epfd))},
+        {"epfd_text", epfd_text(static_cast<std::int32_t>(epfd))},
         {"raim", bits.flag(305)},
         {"dte", dte},
         {"dte_text", DTE[dte]},

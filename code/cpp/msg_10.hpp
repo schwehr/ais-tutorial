@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 #include "bits.hpp"
 #include "common.hpp"
 #include "jsonout.hpp"
@@ -31,7 +33,7 @@ namespace aistut {
 
 // Decode a message 10. Throws DecodeError if shorter than 72 bits.
 inline Json decode_msg_10(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 72);
     return Json::Object{
         {"msg_type", msg_type},

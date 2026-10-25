@@ -31,6 +31,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <optional>
 
 #include "jsonout.hpp"
@@ -39,21 +40,21 @@
 namespace aistut {
 
 // Annex 2 §3.2.1 Table 10: one 60 s frame has 2 250 slots (26.667 ms each).
-inline constexpr int SLOTS_PER_FRAME = 2250;
+inline constexpr std::int32_t SLOTS_PER_FRAME = 2250;
 inline constexpr double FRAME_DURATION_S = 60.0;
 inline constexpr double SLOT_DURATION_S = FRAME_DURATION_S / SLOTS_PER_FRAME;
 
 // Annex 2 §3.3.4.4 Table 16: a newly allocated SOTDMA slot is assigned a
 // random integer time-out between TMO_MIN (3) and TMO_MAX (7) frames.
-inline constexpr int TMO_MIN = 3;
-inline constexpr int TMO_MAX = 7;
+inline constexpr std::int32_t TMO_MIN = 3;
+inline constexpr std::int32_t TMO_MAX = 7;
 
 // Convert a slot number (`0..2249`) to seconds into the UTC minute.
 //
 // Each TDMA frame is 60 s divided into 2 250 slots, so slot `k` begins at
 // `k * 60 / 2250` seconds past the minute [Annex 2 §3.2.1]. Returns null
 // if `slot_number` is outside `0..2249`.
-inline Json slot_to_seconds(int slot_number) {
+inline Json slot_to_seconds(std::int32_t slot_number) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME) return Json();
     return Json::fixed(slot_number * FRAME_DURATION_S / SLOTS_PER_FRAME, 3);
 }
@@ -67,7 +68,7 @@ inline Json slot_to_seconds(int slot_number) {
 //     transmission (`std::nullopt`);
 //   * any non-zero offset selects `(slot_number + slot_offset) % 2250` in
 //     the next frame.
-inline std::optional<int> next_sotdma_slot(int slot_number, int slot_offset) {
+inline std::optional<std::int32_t> next_sotdma_slot(std::int32_t slot_number, std::int32_t slot_offset) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME || slot_offset <= 0) {
         return std::nullopt;
     }
@@ -81,7 +82,7 @@ inline std::optional<int> next_sotdma_slot(int slot_number, int slot_offset) {
 // is 5, 6, or 7 [Annex 2 §3.3.7.3.2 Table 20]. An offset of `0` means this
 // is the last transmission for the slot (`std::nullopt`); otherwise the next
 // transmission on the same channel lands in `(slot_number + slot_offset) % 2250`.
-inline std::optional<int> next_itdma_slot(int slot_number, int slot_offset) {
+inline std::optional<std::int32_t> next_itdma_slot(std::int32_t slot_number, std::int32_t slot_offset) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME || slot_offset <= 0) {
         return std::nullopt;
     }
@@ -95,20 +96,20 @@ inline std::optional<int> next_itdma_slot(int slot_number, int slot_offset) {
 // 86 400 s UTC day is fixed, resolving logger clock offsets of many minutes
 // or hours. Otherwise we fall back to the nearest minute within 30 s of
 // `unix_time` (the same rule as `time_of_arrival_to_utc` in `uscg.hpp`).
-inline Json slot_to_utc(double unix_time, int slot_number,
-                        std::optional<int> utc_hour = std::nullopt,
-                        std::optional<int> utc_minute = std::nullopt) {
+inline Json slot_to_utc(double unix_time, std::int32_t slot_number,
+                        std::optional<std::int32_t> utc_hour = std::nullopt,
+                        std::optional<std::int32_t> utc_minute = std::nullopt) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME) return Json();
     double slot_sec = slot_number * FRAME_DURATION_S / SLOTS_PER_FRAME;
-    long long whole = static_cast<long long>(unix_time);
+    std::int64_t whole = static_cast<std::int64_t>(unix_time);
 
     if (utc_hour && utc_minute && *utc_hour >= 0 && *utc_hour <= 23 &&
         *utc_minute >= 0 && *utc_minute <= 59) {
-        long long day_start = whole - (((whole % 86400) + 86400) % 86400);
+        std::int64_t day_start = whole - (((whole % 86400) + 86400) % 86400);
         double tod = *utc_hour * 3600.0 + *utc_minute * 60.0 + slot_sec;
         double best = 0.0;
         double best_distance = -1.0;
-        for (long long k : {-1LL, 0LL, 1LL}) {
+        for (std::int64_t k : {-1LL, 0LL, 1LL}) {
             double candidate = static_cast<double>(day_start + k * 86400) + tod;
             double distance = std::abs(candidate - unix_time);
             if (best_distance < 0 || distance < best_distance) {
@@ -120,10 +121,10 @@ inline Json slot_to_utc(double unix_time, int slot_number,
         return Json::fixed(best, 3);
     }
 
-    long long minute_start = whole - (((whole % 60) + 60) % 60);
+    std::int64_t minute_start = whole - (((whole % 60) + 60) % 60);
     double best = 0.0;
     double best_distance = -1.0;
-    for (int k : {-60, 0, 60}) {
+    for (std::int32_t k : {-60, 0, 60}) {
         double candidate = static_cast<double>(minute_start + k) + slot_sec;
         double distance = std::abs(candidate - unix_time);
         if (best_distance < 0 || distance < best_distance) {

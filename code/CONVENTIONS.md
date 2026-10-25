@@ -95,6 +95,9 @@ Rules that make byte-identical output possible:
    64 bits are out of scope: the four decoders may then differ (Python
    prints the big integer, C++/Rust report `invalid literal…`, TypeScript
    rounds), and the tests do not cover them.
+   In C++, always use explicit `<cstdint>` types for integers (e.g.
+   `std::int32_t`, `std::uint32_t`, `std::int64_t`, `std::uint64_t`,
+   `std::uint8_t`, etc.), avoiding primitive/built-in integer types.
 
 ## 3. Field naming
 

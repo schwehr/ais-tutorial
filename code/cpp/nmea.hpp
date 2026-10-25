@@ -47,6 +47,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <map>
 #include <optional>
 #include <stdexcept>
@@ -65,10 +66,10 @@ namespace aistut {
 //
 // Python XORs code points (`ord(ch)`), so a non-ASCII character counts once
 // and with its full value — we do the same rather than XOR raw UTF-8 bytes.
-[[nodiscard]] inline int checksum(std::string_view body) {
-    int value = 0;
+[[nodiscard]] inline std::int32_t checksum(std::string_view body) {
+    std::int32_t value = 0;
     for (char32_t cp : py::codepoints(body)) {
-        value ^= static_cast<int>(cp);
+        value ^= static_cast<std::int32_t>(cp);
     }
     return value;
 }
@@ -79,7 +80,7 @@ struct Sentence {
     std::string talker;                        // "GP", "AI", "P" for proprietary ...
     std::string formatter;                     // "GGA", "VDM", "MTK010" ...
     std::vector<std::string> fields;           // data fields *after* the address field
-    std::optional<int> checksum_given;         // value written in the sentence, or none
+    std::optional<std::int32_t> checksum_given; // value written in the sentence, or none
     bool checksum_ok = false;                  // true only if present and matching
     std::vector<std::string> after_checksum;   // USCG extras
     std::string raw;
@@ -114,13 +115,13 @@ inline Sentence parse_sentence(std::string_view input) {
 
     py::Partition at_star = py::partition(std::string_view(line).substr(1), '*');
     const std::string& body = at_star.head;
-    std::optional<int> given;
+    std::optional<std::int32_t> given;
     bool ok = false;
     std::vector<std::string> extras;
     if (at_star.found) {
         py::Partition at_comma = py::partition(at_star.tail, ',');
-        std::optional<long long> parsed = py::to_int(py::slice(at_comma.head, 0, 2), 16);
-        if (parsed) given = static_cast<int>(*parsed);
+        std::optional<std::int64_t> parsed = py::to_int(py::slice(at_comma.head, 0, 2), 16);
+        if (parsed) given = static_cast<std::int32_t>(*parsed);
         ok = given.has_value() && *given == checksum(body);
         if (at_comma.found && !at_comma.tail.empty()) {
             extras = py::split(at_comma.tail, ',');
@@ -197,11 +198,11 @@ inline std::optional<double> opt_float(const std::string& s) {
 // `optional::transform` (C++23) applies the lambda only when a value is
 // present and yields an empty optional otherwise; `Json` turns that empty
 // optional into `null`. Python: `None if value is None else Fixed(value, d)`.
-inline Json fixed(std::optional<double> value, int decimals) {
+inline Json fixed(std::optional<double> value, std::int32_t decimals) {
     return value.transform([decimals](double v) { return Fixed{.value = v, .decimals = decimals}; });
 }
 
-inline std::optional<long long> opt_int(const std::string& s) {
+inline std::optional<std::int64_t> opt_int(const std::string& s) {
     if (s.empty()) return std::nullopt;
     return py::int_or_throw(s);
 }
@@ -224,7 +225,7 @@ inline std::vector<std::string> padded(const std::vector<std::string>& fields, s
 // Field numbers below are 1-based positions *after* the address field, which
 // is how the NMEA standard numbers them.
 
-inline const std::map<long long, std::string> GGA_FIX_QUALITY = {
+inline const std::map<std::int64_t, std::string> GGA_FIX_QUALITY = {
     {0, "invalid"}, {1, "GPS fix (SPS)"}, {2, "DGPS fix"}, {3, "PPS fix"},
     {4, "RTK fixed"}, {5, "RTK float"}, {6, "estimated (dead reckoning)"},
     {7, "manual input"}, {8, "simulation"},
@@ -240,7 +241,7 @@ inline const std::map<long long, std::string> GGA_FIX_QUALITY = {
 //                                 13 age of DGPS data (s), 14 DGPS station id
 inline Json parse_gga(const Sentence& s) {
     std::vector<std::string> f = padded(s.fields, 14);     // pad short sentences
-    std::optional<long long> quality = opt_int(f[5]);
+    std::optional<std::int64_t> quality = opt_int(f[5]);
     Json quality_text;                                      // null unless known
     if (quality) {
         auto it = GGA_FIX_QUALITY.find(*quality);
@@ -262,7 +263,7 @@ inline Json parse_gga(const Sentence& s) {
     };
 }
 
-inline const std::map<long long, std::string> GSA_MODE2 = {{1, "no fix"}, {2, "2D"}, {3, "3D"}};
+inline const std::map<std::int64_t, std::string> GSA_MODE2 = {{1, "no fix"}, {2, "2D"}, {3, "3D"}};
 
 // GSA — GNSS DOP and active satellites.
 //
@@ -272,7 +273,7 @@ inline const std::map<long long, std::string> GSA_MODE2 = {{1, "no fix"}, {2, "2
 //     15 PDOP  16 HDOP  17 VDOP
 inline Json parse_gsa(const Sentence& s) {
     std::vector<std::string> f = padded(s.fields, 17);
-    std::optional<long long> fix_mode = opt_int(f[1]);
+    std::optional<std::int64_t> fix_mode = opt_int(f[1]);
     Json fix_mode_text;
     if (fix_mode) {
         auto it = GSA_MODE2.find(*fix_mode);

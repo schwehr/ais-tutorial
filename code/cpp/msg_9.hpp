@@ -61,7 +61,7 @@ inline const std::array<const char*, 2> ASSIGNED_MODE = {"autonomous and continu
 // Decode a message 9. Throws DecodeError if shorter than 168 bits.
 inline Json decode_msg_9(const Bits& bits) {
     using namespace msg_9;
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 168);
     std::uint64_t altitude = bits.uint(38, 12);
     std::uint64_t sog = bits.uint(50, 10);

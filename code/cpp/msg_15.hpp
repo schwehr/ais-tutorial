@@ -58,7 +58,7 @@ namespace msg_15 {
 
 // Table 46 message names, used for the `_text` companion of a requested
 // message type. The names are abbreviated from the "Name" column.
-inline const std::map<int, std::string> MESSAGE_NAMES = {
+inline const std::map<std::int32_t, std::string> MESSAGE_NAMES = {
     {0, "none"},
     {1, "position report"},
     {2, "position report (assigned)"},
@@ -89,7 +89,7 @@ inline const std::map<int, std::string> MESSAGE_NAMES = {
     {27, "position report for long-range applications"},
 };
 
-inline std::string message_name(int msg_id) {
+inline std::string message_name(std::int32_t msg_id) {
     auto it = MESSAGE_NAMES.find(msg_id);
     return it == MESSAGE_NAMES.end() ? "undefined" : it->second;
 }
@@ -99,7 +99,7 @@ inline Json request(std::uint64_t mmsi, std::uint64_t msg_id, std::uint64_t slot
     return Json::Object{
         {"mmsi", mmsi},
         {"msg_type", msg_id},
-        {"msg_type_text", message_name(static_cast<int>(msg_id))},
+        {"msg_type_text", message_name(static_cast<std::int32_t>(msg_id))},
         {"slot_offset", slot_offset},
     };
 }
@@ -109,7 +109,7 @@ inline Json request(std::uint64_t mmsi, std::uint64_t msg_id, std::uint64_t slot
 // Decode a message 15. Throws DecodeError below 88 bits.
 inline Json decode_msg_15(const Bits& bits) {
     using namespace msg_15;
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 88);
 
     Json out = Json::Object{

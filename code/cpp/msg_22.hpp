@@ -64,7 +64,7 @@ inline std::string txrx_mode_text_22(std::uint64_t code) {
 
 // RR Appendix 18 channels that are simplex (one frequency, "ship & coast"):
 // 6, 8–17 and 67–77. Everything else in 1–28 / 60–88 is a duplex pair.
-inline const std::set<int> SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+inline const std::set<std::int32_t> SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
                                                67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77};
 
 // Carrier frequency in kHz for an ITU-R M.1084 Annex 4 channel number.
@@ -76,11 +76,11 @@ inline const std::set<int> SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 
 // frequency", a leading 2 "simplex use of the coast frequency" (M.1084
 // Annex 4 §3): 2087 = 161.975 MHz (AIS 1), 2088 = 162.025 MHz (AIS 2).
 // Returns nullopt for numbers outside those ranges.
-inline std::optional<int> channel_frequency_khz(int number) {
-    int prefix = number / 1000;
-    int base = number % 1000;
+inline std::optional<std::int32_t> channel_frequency_khz(std::int32_t number) {
+    std::int32_t prefix = number / 1000;
+    std::int32_t base = number % 1000;
     if (prefix < 0 || prefix > 2) return std::nullopt;
-    int ship;
+    std::int32_t ship;
     if (1 <= base && base <= 28) {
         ship = 156050 + 50 * (base - 1);
     } else if (60 <= base && base <= 88) {
@@ -88,12 +88,12 @@ inline std::optional<int> channel_frequency_khz(int number) {
     } else {
         return std::nullopt;
     }
-    int coast = SIMPLEX_CHANNELS.contains(base) ? ship : ship + 4600;
+    std::int32_t coast = SIMPLEX_CHANNELS.contains(base) ? ship : ship + 4600;
     return prefix == 2 ? coast : ship;
 }
 
-inline Json channel_mhz(int number) {
-    std::optional<int> khz = channel_frequency_khz(number);
+inline Json channel_mhz(std::int32_t number) {
+    std::optional<std::int32_t> khz = channel_frequency_khz(number);
     if (!khz) return Json(nullptr);
     return Json::fixed(static_cast<double>(*khz) / 1000.0, 3);
 }
@@ -101,8 +101,8 @@ inline Json channel_mhz(int number) {
 // Decode a message 22. Throws DecodeError below 168 bits.
 inline Json decode_msg_22(const Bits& bits) {
     require_bits(22, bits.size(), 168);
-    int channel_a = static_cast<int>(bits.uint(40, 12));
-    int channel_b = static_cast<int>(bits.uint(52, 12));
+    std::int32_t channel_a = static_cast<std::int32_t>(bits.uint(40, 12));
+    std::int32_t channel_b = static_cast<std::int32_t>(bits.uint(52, 12));
     std::uint64_t txrx = bits.uint(64, 4);
     std::uint64_t power = bits.uint(68, 1);
     bool addressed = bits.flag(139);

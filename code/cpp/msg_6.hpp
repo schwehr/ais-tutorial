@@ -30,6 +30,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 #include "asm.hpp"
 #include "bits.hpp"
@@ -46,8 +47,8 @@ constexpr std::size_t HEADER_BITS = 88;   // message id .. function identifier
 inline Json decode_msg_6(const Bits& bits) {
     using namespace msg_6;
     require_bits(6, bits.size(), HEADER_BITS);
-    int dac = static_cast<int>(bits.uint(72, 10));
-    int fi = static_cast<int>(bits.uint(82, 6));
+    std::int32_t dac = static_cast<std::int32_t>(bits.uint(72, 10));
+    std::int32_t fi = static_cast<std::int32_t>(bits.uint(82, 6));
     Json out = Json::Object{
         {"msg_type", 6},
         {"repeat_indicator", bits.uint(6, 2)},

@@ -43,13 +43,13 @@ Both compilers build the program without a single warning under
 | `bits.hpp` | armour decoding, `Bits` reader, six-bit ASCII | 2 | `class` with `public`/`private`, `const` methods, static "named constructors", fixed-width integers, bit shifting/masking, `inline constexpr` tables, `std::format` error texts |
 | `vdm.hpp` | `!AIVDM`/`!AIVDO` fields, multi-fragment `Assembler` | 2 | `std::expected<Vdm, std::string>` return, designated initialisers, `std::optional` return values, `std::tuple` as a map key, references into a container, `std::move` |
 | `msg_1_2_3.hpp` | position reports | 3 | `std::array` enumeration tables, integer vs floating division, `std::pow` |
-| `tagblock.hpp` | NMEA 4.10 TAG blocks | 4 | `std::pair` + structured bindings, `std::array<long long, 3>`, string literal escaping, `std::format("{:02X}")` |
+| `tagblock.hpp` | NMEA 4.10 TAG blocks | 4 | `std::pair` + structured bindings, `std::array<std::int64_t, 3>`, string literal escaping, `std::format("{:02X}")` |
 | `uscg.hpp` | USCG N-AIS metadata after the checksum | 5 | optionals instead of exceptions for routine failure, `std::span<const std::string>`, `std::abs`, range-for over an initializer list |
-| `commstate.hpp` | TDMA communication-state schedule and UTC clock helpers | 17 | default `std::optional<int>` parameters, Euclidean modulo normalisation |
+| `commstate.hpp` | TDMA communication-state schedule and UTC clock helpers | 17 | default `std::optional<std::int32_t>` parameters, Euclidean modulo normalisation |
 | `common.hpp` | `DecodeError`, `NotImplemented`, EPFD and ship-type tables | — | exception hierarchies, `std::map::contains`, `std::format` |
 | `msg_4_11.hpp`, `msg_5.hpp` | base station report, static and voyage data | 6, 7 | `std::format` with `{:04}`/`{:02}` zero padding, lambdas |
 | `msg_7_13.hpp`, `msg_20.hpp` | acknowledgements, data link management | 12, 13 | range pipelines: `std::views::iota \| std::views::chunk \| std::views::take` over repeated bit groups |
-| `msg_22.hpp` | channel management | 13 | `std::set::contains`, `std::optional<int>` |
+| `msg_22.hpp` | channel management | 13 | `std::set::contains`, `std::optional<std::int32_t>` |
 | other `msg_*.hpp` | one per message (family) | 6+ | `constexpr` sentinels, `std::array` text tables, helper functions shared between messages |
 | `decode.cpp` | CLI: lines in → JSON lines out | all | `main(argc, argv)`, `std::ifstream` + RAII, binary-safe line reading, `try`/`catch` ordering, `std::expected` at the call site, `std::println` |
 
@@ -100,3 +100,7 @@ decay copies, `if consteval`, concepts and modules.
 * The only known behavioural difference from Python: integers are 64-bit, so
   a USCG field with a 20+ digit number lands in `unparsed` instead of being
   printed as a big integer.
+* All integer types use explicit `<cstdint>` fixed-width types (`std::int32_t`,
+  `std::uint32_t`, `std::int64_t`, `std::uint64_t`, `std::uint8_t`, etc.),
+  avoiding primitive/built-in integer types (`int`, `long`, `unsigned`) except
+  for the standard `int main(int argc, char** argv)` signature.

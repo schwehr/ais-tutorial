@@ -19,6 +19,8 @@ Hard rules:
   committed text; cite external documents by name/URL (Appendix A).
 * Never refer to an "AIS transponder" (or "transponder"). An AIS unit is always
   an "AIS transceiver" (or "transceiver").
+* For C++ code, always use `<cstdint>` types for integers (e.g. `std::int32_t`,
+  `std::uint32_t`, `std::int64_t`, `std::uint64_t`, `std::uint8_t`, etc.).
 * `tests/run_tests.sh` must pass for all four languages before a commit that
   touches `code/`, `data/` or `tests/`.
 * Keep data excerpts small (tens of lines) and name their source file and

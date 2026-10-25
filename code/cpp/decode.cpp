@@ -45,6 +45,7 @@
 // * RAII: the `std::ifstream` closes its file automatically when it goes
 //   out of scope — no `with` block or explicit close() needed.
 
+#include <cstdint>
 #include <cstdio>
 #include <expected>
 #include <format>
@@ -98,7 +99,7 @@ namespace aistut {
 // A pointer to a function taking `const Bits&` and returning `Json`.
 using Decoder = Json (*)(const Bits&);
 
-const std::map<int, Decoder> DECODERS = {
+const std::map<std::int32_t, Decoder> DECODERS = {
     {1, decode_msg_1_2_3}, {2, decode_msg_1_2_3}, {3, decode_msg_1_2_3},
     {4, decode_msg_4_11}, {11, decode_msg_4_11},
     {5, decode_msg_5},
@@ -138,7 +139,7 @@ Json decode_ais(const Message& msg) {
             {"payload_bits", bits->size()},
         };
     }
-    int msg_type = static_cast<int>(bits->uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits->uint(0, 6));
     auto found = DECODERS.find(msg_type);
     Json out = Json::Object{{"payload_bits", bits->size()}};
     if (found == DECODERS.end()) {
@@ -159,7 +160,7 @@ Json decode_ais(const Message& msg) {
 }
 
 // Handle one text line. Returns a JSON object to print, or nothing to stay quiet.
-std::optional<Json> process_line(const std::string& line, long long lineno, Assembler& asm_) {
+std::optional<Json> process_line(const std::string& line, std::int64_t lineno, Assembler& asm_) {
     std::string stripped = py::strip(line);
     if (stripped.empty() || stripped[0] == '#') return std::nullopt;
     Json out = Json::Object{{"line", lineno}};
@@ -236,7 +237,7 @@ std::optional<Json> process_line(const std::string& line, long long lineno, Asse
 bool read_line(std::istream& in, std::string& line) {
     line.clear();
     bool any = false;
-    int c;
+    std::int32_t c;
     while ((c = in.get()) != std::char_traits<char>::eof()) {
         any = true;
         if (c == '\n') return true;
@@ -249,7 +250,7 @@ bool read_line(std::istream& in, std::string& line) {
     return any;
 }
 
-int run(std::istream& in, long long& lineno, Assembler& asm_) {
+std::int32_t run(std::istream& in, std::int64_t& lineno, Assembler& asm_) {
     std::string raw_line;
     while (read_line(in, raw_line)) {
         ++lineno;
@@ -274,9 +275,9 @@ int main(int argc, char** argv) {
     std::ios::sync_with_stdio(false);
 
     aistut::Assembler assembler;
-    long long lineno = 0;
+    std::int64_t lineno = 0;
     try {
-        for (int i = 1; i < argc; ++i) {
+        for (std::int32_t i = 1; i < argc; ++i) {
             std::string name = argv[i];
             if (name == "-") {
                 aistut::run(std::cin, lineno, assembler);

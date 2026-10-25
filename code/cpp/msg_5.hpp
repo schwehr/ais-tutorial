@@ -86,16 +86,16 @@ inline std::string imo_range_text(std::uint64_t imo) {
 inline bool imo_check_digit_ok(std::uint64_t imo) {
     if (imo < 1000000 || imo > 9999999) return false;
     std::string digits = std::to_string(imo);  // exactly 7 characters here
-    int total = 0;
-    for (int i = 0; i < 6; ++i) {
+    std::int32_t total = 0;
+    for (std::int32_t i = 0; i < 6; ++i) {
         total += (digits[i] - '0') * (7 - i);
     }
     return total % 10 == digits[6] - '0';
 }
 
 // 'MM-DD HH:MM' in UTC with '??' for each part that is not available.
-inline std::string eta_text(int month, int day, int hour, int minute) {
-    auto two = [](int v) { return std::format("{:02}", v); };
+inline std::string eta_text(std::int32_t month, std::int32_t day, std::int32_t hour, std::int32_t minute) {
+    auto two = [](std::int32_t v) { return std::format("{:02}", v); };
     std::string mm = (1 <= month && month <= 12) ? two(month) : "??";
     std::string dd = (1 <= day && day <= 31) ? two(day) : "??";
     std::string hh = hour <= 23 ? two(hour) : "??";
@@ -105,7 +105,7 @@ inline std::string eta_text(int month, int day, int hour, int minute) {
 
 // Decode a message 5. Throws DecodeError if shorter than 424 bits.
 inline Json decode_msg_5(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 424);
     std::uint64_t ais_version = bits.uint(38, 2);
     std::uint64_t imo = bits.uint(40, 30);
@@ -115,10 +115,10 @@ inline Json decode_msg_5(const Bits& bits) {
     std::uint64_t dim_c = bits.uint(258, 6);   // to port
     std::uint64_t dim_d = bits.uint(264, 6);   // to starboard
     std::uint64_t epfd = bits.uint(270, 4);
-    int month = static_cast<int>(bits.uint(274, 4));
-    int day = static_cast<int>(bits.uint(278, 5));
-    int hour = static_cast<int>(bits.uint(283, 5));
-    int minute = static_cast<int>(bits.uint(288, 6));
+    std::int32_t month = static_cast<std::int32_t>(bits.uint(274, 4));
+    std::int32_t day = static_cast<std::int32_t>(bits.uint(278, 5));
+    std::int32_t hour = static_cast<std::int32_t>(bits.uint(283, 5));
+    std::int32_t minute = static_cast<std::int32_t>(bits.uint(288, 6));
     std::uint64_t draught_raw = bits.uint(294, 8);
     std::uint64_t dte = bits.uint(422, 1);
 
@@ -135,7 +135,7 @@ inline Json decode_msg_5(const Bits& bits) {
         {"call_sign", bits.text(70, 42)},
         {"name", bits.text(112, 120)},
         {"ship_type", ship_type},
-        {"ship_type_text", ship_type_text(static_cast<int>(ship_type))},
+        {"ship_type_text", ship_type_text(static_cast<std::int32_t>(ship_type))},
         {"dim_bow_m", dim_a},
         {"dim_stern_m", dim_b},
         {"dim_port_m", dim_c},
@@ -147,7 +147,7 @@ inline Json decode_msg_5(const Bits& bits) {
         {"length_m", dim_a + dim_b},
         {"beam_m", dim_c + dim_d},
         {"epfd", epfd},
-        {"epfd_text", epfd_text(static_cast<int>(epfd))},
+        {"epfd_text", epfd_text(static_cast<std::int32_t>(epfd))},
         {"eta_month", month},
         {"eta_day", day},
         {"eta_hour", hour},

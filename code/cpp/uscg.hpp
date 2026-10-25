@@ -45,6 +45,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <optional>
 #include <span>
 #include <string>
@@ -109,14 +110,14 @@ inline Json parse_uscg_fields(std::span<const std::string> extras) {
 // containing `unix_time` and its neighbours and keep the candidate closest
 // to `unix_time` (the log time is a few seconds late, and may have rolled
 // into the next minute). Returns null when `toa_s` is absent or implausible.
-inline Json time_of_arrival_to_utc(long long unix_time, std::optional<double> toa_s) {
+inline Json time_of_arrival_to_utc(std::int64_t unix_time, std::optional<double> toa_s) {
     if (!toa_s) return Json();
     // Python's % is never negative for a positive divisor; C++'s can be, so
     // normalise (only matters for times before 1970).
-    long long minute_start = unix_time - (((unix_time % 60) + 60) % 60);
+    std::int64_t minute_start = unix_time - (((unix_time % 60) + 60) % 60);
     double best = 0.0;
     double best_distance = -1.0;
-    for (int k : {-60, 0, 60}) {
+    for (std::int32_t k : {-60, 0, 60}) {
         double candidate = static_cast<double>(minute_start + k) + *toa_s;
         double distance = std::abs(candidate - static_cast<double>(unix_time));
         if (best_distance < 0 || distance < best_distance) {   // Python's min() keeps the first minimum

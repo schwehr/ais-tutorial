@@ -98,7 +98,7 @@ inline Json decode_common_position(const Bits& bits, std::size_t start) {
 
 // Decode a message 18. Throws DecodeError if shorter than 168 bits.
 inline Json decode_msg_18(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 168);
     std::uint64_t unit = bits.uint(141, 1);
     std::uint64_t display = bits.uint(142, 1);

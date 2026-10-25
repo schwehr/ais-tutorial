@@ -106,7 +106,7 @@ inline Json decode_msg_23(const Bits& bits) {
     std::int64_t sw_lon = bits.sint(75, 18);
     std::int64_t sw_lat = bits.sint(93, 17);
     std::uint64_t station_type = bits.uint(110, 4);
-    int ship_type = static_cast<int>(bits.uint(114, 8));
+    std::int32_t ship_type = static_cast<std::int32_t>(bits.uint(114, 8));
     std::uint64_t txrx = bits.uint(144, 2);
     std::uint64_t interval = bits.uint(146, 4);
     return Json::Object{

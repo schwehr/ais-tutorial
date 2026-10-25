@@ -39,6 +39,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <format>
 #include <map>
 #include <optional>
@@ -60,7 +61,7 @@ struct TagBlock {
     std::string raw;
 
     // Typed views of the common parameters. Missing -> none.
-    std::optional<long long> time() const {
+    std::optional<std::int64_t> time() const {
         auto it = params.find("c");
         if (it == params.end() || !py::isdigit(it->second)) return std::nullopt;
         return py::to_int(it->second);
@@ -73,15 +74,15 @@ struct TagBlock {
     }
 
     // (sentence number, total sentences, group id) from the g: parameter.
-    std::optional<std::array<long long, 3>> group() const {
+    std::optional<std::array<std::int64_t, 3>> group() const {
         auto it = params.find("g");
         if (it == params.end() || it->second.empty()) return std::nullopt;
         std::vector<std::string> parts = py::split(it->second, '-');
         if (parts.size() != 3) return std::nullopt;
-        std::array<long long, 3> out{};
+        std::array<std::int64_t, 3> out{};
         for (std::size_t i = 0; i < 3; ++i) {
             if (!py::isdigit(parts[i])) return std::nullopt;
-            std::optional<long long> v = py::to_int(parts[i]);
+            std::optional<std::int64_t> v = py::to_int(parts[i]);
             if (!v) return std::nullopt;
             out[i] = *v;
         }
@@ -112,7 +113,7 @@ inline std::pair<std::optional<TagBlock>, std::string> split_tag_block(std::stri
     py::Partition at_star = py::partition(inner, '*');
     bool ok = false;
     if (at_star.found && at_star.tail.size() >= 2) {
-        std::optional<long long> given = py::to_int(py::slice(at_star.tail, 0, 2), 16);
+        std::optional<std::int64_t> given = py::to_int(py::slice(at_star.tail, 0, 2), 16);
         ok = given.has_value() && *given == checksum(at_star.head);
     }
     TagBlock tag;

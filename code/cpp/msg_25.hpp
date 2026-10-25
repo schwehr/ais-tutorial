@@ -33,6 +33,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <utility>
 
 #include "bits.hpp"
@@ -44,7 +45,7 @@ namespace aistut {
 // The part of messages 25 and 26 that precedes the application data.
 // Returns the decoded fields and the offset of the first data bit. Throws
 // DecodeError if the optional fields announced by the flags are missing.
-inline std::pair<Json, std::size_t> decode_binary_header(const Bits& bits, int msg_type) {
+inline std::pair<Json, std::size_t> decode_binary_header(const Bits& bits, std::int32_t msg_type) {
     require_bits(msg_type, bits.size(), 40);
     bool addressed = bits.flag(38);
     bool structured = bits.flag(39);

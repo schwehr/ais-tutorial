@@ -72,7 +72,7 @@ inline bool is_auxiliary_craft(std::uint64_t mmsi) {
 
 // Decode a message 24 part A or part B. Throws DecodeError if too short.
 inline Json decode_msg_24(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 40);
     std::uint64_t mmsi = bits.uint(8, 30);
     std::uint64_t part = bits.uint(38, 2);
@@ -96,7 +96,7 @@ inline Json decode_msg_24(const Bits& bits) {
         std::uint64_t epfd = bits.uint(162, 4);
         out.update(Json::Object{
             {"ship_type", ship_type},
-            {"ship_type_text", ship_type_text(static_cast<int>(ship_type))},
+            {"ship_type_text", ship_type_text(static_cast<std::int32_t>(ship_type))},
             {"vendor_id", bits.text(48, 42)},
             {"manufacturer_id", bits.text(48, 18)},
             {"unit_model_code", bits.uint(66, 4)},
@@ -104,7 +104,7 @@ inline Json decode_msg_24(const Bits& bits) {
             {"call_sign", bits.text(90, 42)},
             {"auxiliary_craft", is_auxiliary_craft(mmsi)},
             {"epfd", epfd},
-            {"epfd_text", epfd_text(static_cast<int>(epfd))},
+            {"epfd_text", epfd_text(static_cast<std::int32_t>(epfd))},
             {"spare", bits.uint(166, 2)},
         });
         if (is_auxiliary_craft(mmsi)) {

@@ -41,6 +41,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <expected>
 #include <format>
 #include <map>
@@ -58,12 +59,12 @@ namespace aistut {
 struct Vdm {
     std::string talker;
     bool own_ship = false;            // true for VDO
-    long long total = 0;
-    long long number = 0;
-    std::optional<long long> seq_id;
+    std::int64_t total = 0;
+    std::int64_t number = 0;
+    std::optional<std::int64_t> seq_id;
     std::string channel;
     std::string payload;
-    long long fill_bits = 0;
+    std::int64_t fill_bits = 0;
     Sentence sentence;                // the enclosing NMEA sentence, for metadata
 };
 
@@ -82,13 +83,13 @@ struct Vdm {
     if (!total) return std::unexpected(total.error());
     auto number = py::int_expected(s.fields[1]);
     if (!number) return std::unexpected(number.error());
-    std::optional<long long> seq_id;
+    std::optional<std::int64_t> seq_id;
     if (!s.fields[2].empty()) {
         auto parsed = py::int_expected(s.fields[2]);
         if (!parsed) return std::unexpected(parsed.error());
         seq_id = *parsed;
     }
-    long long fill_bits = 0;
+    std::int64_t fill_bits = 0;
     if (!s.fields[5].empty()) {
         auto parsed = py::int_expected(s.fields[5]);
         if (!parsed) return std::unexpected(parsed.error());
@@ -110,7 +111,7 @@ struct Vdm {
 // A complete AIS message: the concatenated payload of all its fragments.
 struct Message {
     std::string payload;
-    long long fill_bits = 0;
+    std::int64_t fill_bits = 0;
     std::string channel;
     std::string talker;
     bool own_ship = false;
@@ -163,7 +164,7 @@ public:
     }
 
 private:
-    using Key = std::tuple<std::string, std::string, std::optional<long long>>;
+    using Key = std::tuple<std::string, std::string, std::optional<std::int64_t>>;
     std::map<Key, std::vector<Vdm>> pending_;
 };
 

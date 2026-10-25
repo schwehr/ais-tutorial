@@ -37,6 +37,7 @@
 
 #include <cctype>
 #include <cerrno>
+#include <cstdint>
 #include <cstdlib>
 #include <expected>
 #include <limits>
@@ -52,7 +53,7 @@ namespace aistut::py {
 
 // Python's str.isspace() for the ASCII range: besides the six C whitespace
 // characters it also counts the information separators 0x1C–0x1F.
-inline bool is_space(unsigned char c) {
+inline bool is_space(std::uint8_t c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\v' ||
            c == '\f' || (c >= 0x1c && c <= 0x1f);
 }
@@ -61,15 +62,15 @@ inline bool is_space(unsigned char c) {
 inline std::string strip(std::string_view s) {
     std::size_t begin = 0;
     std::size_t end = s.size();
-    while (begin < end && is_space(static_cast<unsigned char>(s[begin]))) ++begin;
-    while (end > begin && is_space(static_cast<unsigned char>(s[end - 1]))) --end;
+    while (begin < end && is_space(static_cast<std::uint8_t>(s[begin]))) ++begin;
+    while (end > begin && is_space(static_cast<std::uint8_t>(s[end - 1]))) --end;
     return std::string(s.substr(begin, end - begin));
 }
 
 // str.rstrip() with no argument.
 inline std::string rstrip(std::string_view s) {
     std::size_t end = s.size();
-    while (end > 0 && is_space(static_cast<unsigned char>(s[end - 1]))) --end;
+    while (end > 0 && is_space(static_cast<std::uint8_t>(s[end - 1]))) --end;
     return std::string(s.substr(0, end));
 }
 
@@ -139,7 +140,7 @@ inline bool isdigit(std::string_view s) {
     return true;
 }
 
-inline int digit_value(char c) {
+inline std::int32_t digit_value(char c) {
     if (c >= '0' && c <= '9') return c - '0';
     if (c >= 'a' && c <= 'z') return c - 'a' + 10;
     if (c >= 'A' && c <= 'Z') return c - 'A' + 10;
@@ -150,8 +151,8 @@ inline int digit_value(char c) {
 // ValueError. Python accepts surrounding whitespace, one sign, an optional
 // "0x" prefix for base 16, and single underscores *between* digits
 // ("1_000"). Python integers are unbounded; we give up (nullopt) if the
-// value does not fit in a `long long`, which never happens with real data.
-[[nodiscard]] inline std::optional<long long> to_int(std::string_view text, int base = 10) {
+// value does not fit in a `std::int64_t`, which never happens with real data.
+[[nodiscard]] inline std::optional<std::int64_t> to_int(std::string_view text, std::int32_t base = 10) {
     std::string s = strip(text);
     std::size_t i = 0;
     bool negative = false;
@@ -164,7 +165,7 @@ inline int digit_value(char c) {
         if (i < s.size() && s[i] == '_') ++i;   // "0x_ff" is legal Python
     }
     if (i >= s.size()) return std::nullopt;
-    long long value = 0;
+    std::int64_t value = 0;
     bool previous_was_digit = false;
     for (; i < s.size(); ++i) {
         char c = s[i];
@@ -173,10 +174,10 @@ inline int digit_value(char c) {
             previous_was_digit = false;
             continue;
         }
-        int d = digit_value(c);
+        std::int32_t d = digit_value(c);
         if (d >= base) return std::nullopt;
         // Overflow check before multiplying: value * base + d must fit.
-        if (value > (std::numeric_limits<long long>::max() - d) / base) return std::nullopt;
+        if (value > (std::numeric_limits<std::int64_t>::max() - d) / base) return std::nullopt;
         value = value * base + d;
         previous_was_digit = true;
     }
@@ -212,7 +213,7 @@ inline int digit_value(char c) {
     std::size_t start = (cleaned[0] == '+' || cleaned[0] == '-') ? 1 : 0;
     std::string body = cleaned.substr(start);
     std::string lower;
-    for (char c : body) lower.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
+    for (char c : body) lower.push_back(static_cast<char>(std::tolower(static_cast<std::uint8_t>(c))));
     bool special = (lower == "inf" || lower == "infinity" || lower == "nan");
     if (!special) {
         for (char c : body) {
@@ -240,7 +241,7 @@ inline std::string repr(std::string_view s) {
     char quote = (has_single && !has_double) ? '"' : '\'';
     std::string out(1, quote);
     for (char c : s) {
-        unsigned char u = static_cast<unsigned char>(c);
+        std::uint8_t u = static_cast<std::uint8_t>(c);
         if (c == quote || c == '\\') {
             out.push_back('\\');
             out.push_back(c);
@@ -265,7 +266,7 @@ inline std::string repr(std::string_view s) {
 
 // Variants that throw with Python's exact wording, for the places where the
 // Python reference lets ValueError propagate.
-inline long long int_or_throw(std::string_view text) {
+inline std::int64_t int_or_throw(std::string_view text) {
     auto v = to_int(text);
     if (!v) throw std::invalid_argument("invalid literal for int() with base 10: " + repr(text));
     return *v;
@@ -278,10 +279,10 @@ inline double float_or_throw(std::string_view text) {
 }
 
 // The same conversion with the error as a *value* instead of an exception:
-// `std::expected<long long, std::string>` holds either the number or
+// `std::expected<std::int64_t, std::string>` holds either the number or
 // Python's ValueError text. Used where the caller wants to return the
 // complaint to its own caller rather than catch it (see vdm.hpp).
-[[nodiscard]] inline std::expected<long long, std::string> int_expected(std::string_view text) {
+[[nodiscard]] inline std::expected<std::int64_t, std::string> int_expected(std::string_view text) {
     auto v = to_int(text);
     if (!v) return std::unexpected("invalid literal for int() with base 10: " + repr(text));
     return *v;
@@ -296,7 +297,7 @@ inline double float_or_throw(std::string_view text) {
 
 // Length of the UTF-8 sequence announced by a lead byte, or 0 if the byte
 // cannot start a sequence.
-inline int utf8_sequence_length(unsigned char lead) {
+inline std::int32_t utf8_sequence_length(std::uint8_t lead) {
     if (lead < 0x80) return 1;
     if (lead >= 0xC2 && lead <= 0xDF) return 2;
     if (lead >= 0xE0 && lead <= 0xEF) return 3;
@@ -307,7 +308,7 @@ inline int utf8_sequence_length(unsigned char lead) {
 // Is `b` a valid continuation byte at position `index` (1-based) after `lead`?
 // The second byte has narrower limits for a few leads (over-long forms and
 // surrogates are illegal).
-inline bool utf8_continuation_ok(unsigned char lead, int index, unsigned char b) {
+inline bool utf8_continuation_ok(std::uint8_t lead, std::int32_t index, std::uint8_t b) {
     if (index == 1) {
         if (lead == 0xE0) return b >= 0xA0 && b <= 0xBF;
         if (lead == 0xED) return b >= 0x80 && b <= 0x9F;
@@ -327,16 +328,16 @@ inline std::string utf8_replace_invalid(std::string_view bytes) {
     out.reserve(bytes.size());
     std::size_t i = 0;
     while (i < bytes.size()) {
-        unsigned char lead = static_cast<unsigned char>(bytes[i]);
-        int length = utf8_sequence_length(lead);
+        std::uint8_t lead = static_cast<std::uint8_t>(bytes[i]);
+        std::int32_t length = utf8_sequence_length(lead);
         if (length == 0) {
             out += kReplacement;
             ++i;
             continue;
         }
-        int have = 1;
+        std::int32_t have = 1;
         while (have < length && i + have < bytes.size() &&
-               utf8_continuation_ok(lead, have, static_cast<unsigned char>(bytes[i + have]))) {
+               utf8_continuation_ok(lead, have, static_cast<std::uint8_t>(bytes[i + have]))) {
             ++have;
         }
         if (have == length) {
@@ -355,16 +356,16 @@ inline std::vector<char32_t> codepoints(std::string_view s) {
     std::vector<char32_t> out;
     std::size_t i = 0;
     while (i < s.size()) {
-        unsigned char lead = static_cast<unsigned char>(s[i]);
-        int length = utf8_sequence_length(lead);
+        std::uint8_t lead = static_cast<std::uint8_t>(s[i]);
+        std::int32_t length = utf8_sequence_length(lead);
         if (length <= 1 || i + length > s.size()) {   // ASCII, or malformed: 1 byte
             out.push_back(lead);
             ++i;
             continue;
         }
         char32_t cp = lead & (0xFF >> (length + 1));
-        for (int k = 1; k < length; ++k) {
-            cp = (cp << 6) | (static_cast<unsigned char>(s[i + k]) & 0x3F);
+        for (std::int32_t k = 1; k < length; ++k) {
+            cp = (cp << 6) | (static_cast<std::uint8_t>(s[i + k]) & 0x3F);
         }
         out.push_back(cp);
         i += length;

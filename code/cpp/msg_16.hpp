@@ -50,19 +50,19 @@ namespace aistut {
 namespace msg_16 {
 
 // Table 67 text under note (1): increment code -> slots between assigned slots.
-inline const std::map<std::uint64_t, long long> SLOT_INCREMENTS = {
+inline const std::map<std::uint64_t, std::int64_t> SLOT_INCREMENTS = {
     {1, 1125}, {2, 375}, {3, 225}, {4, 125}, {5, 75}, {6, 45},
 };
 
 // Interpret one (destination, offset, increment) triple.
 inline Json assignment(std::uint64_t mmsi, std::uint64_t offset, std::uint64_t increment) {
-    std::optional<long long> reports;
-    std::optional<long long> slots;
+    std::optional<std::int64_t> reports;
+    std::optional<std::int64_t> slots;
     std::string text;
     auto it = SLOT_INCREMENTS.find(increment);
     if (increment == 0) {
         text = "reporting rate";
-        reports = static_cast<long long>(offset);
+        reports = static_cast<std::int64_t>(offset);
     } else if (it != SLOT_INCREMENTS.end()) {
         text = "slot assignment";
         slots = it->second;
@@ -86,7 +86,7 @@ inline Json assignment(std::uint64_t mmsi, std::uint64_t offset, std::uint64_t i
 // Decode a message 16. Throws DecodeError below 96 bits.
 inline Json decode_msg_16(const Bits& bits) {
     using namespace msg_16;
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 96);
 
     Json out = Json::Object{

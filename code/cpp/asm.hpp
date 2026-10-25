@@ -49,11 +49,11 @@ namespace asm_detail {
 // `raw` unless it equals the not-available sentinel, in which case null.
 inline Json na(std::uint64_t raw, std::uint64_t sentinel) {
     if (raw == sentinel) return nullptr;
-    return Json(static_cast<long long>(raw));
+    return Json(static_cast<std::int64_t>(raw));
 }
 
 // raw / divisor + offset with `decimals` places, or null if raw == sentinel.
-inline Json scaled(std::int64_t raw, std::int64_t sentinel, double divisor, int decimals,
+inline Json scaled(std::int64_t raw, std::int64_t sentinel, double divisor, std::int32_t decimals,
                    double offset = 0.0) {
     if (raw == sentinel) return nullptr;
     return Json::fixed(static_cast<double>(raw) / divisor + offset, decimals);
@@ -290,8 +290,8 @@ struct AsmEntry {
     AsmDecoder func;
 };
 
-inline const std::map<std::pair<int, int>, AsmEntry>& registry() {
-    static const std::map<std::pair<int, int>, AsmEntry> table = {
+inline const std::map<std::pair<std::int32_t, std::int32_t>, AsmEntry>& registry() {
+    static const std::map<std::pair<std::int32_t, std::int32_t>, AsmEntry> table = {
         {{1, 0}, {"IFM 0 text telegram", 12, decode_text_telegram}},
         {{1, 11}, {"IMO Circ.236 meteorological and hydrological data", MET_HYDRO_236_BITS, decode_met_hydro_236}},
         {{1, 31}, {"IMO Circ.289 meteorological and hydrographic data", MET_HYDRO_289_BITS, decode_met_hydro_289}},
@@ -306,7 +306,7 @@ inline const std::map<std::pair<int, int>, AsmEntry>& registry() {
 // optional when (dac, fi) is unknown. For a known pair the object always
 // carries "application_name"; too few bits yield an "error" text instead of
 // the fields.
-inline std::optional<Json> decode_asm(int dac, int fi, const Bits& bits, std::size_t offset) {
+inline std::optional<Json> decode_asm(std::int32_t dac, std::int32_t fi, const Bits& bits, std::size_t offset) {
     const auto& table = asm_detail::registry();
     auto it = table.find({dac, fi});
     if (it == table.end()) return std::nullopt;
