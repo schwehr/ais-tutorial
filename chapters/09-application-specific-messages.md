@@ -435,10 +435,10 @@ The two helpers return `Json` directly, because a `Json` already has a null stat
 ```cpp
 inline Json na(std::uint64_t raw, std::uint64_t sentinel) {
     if (raw == sentinel) return nullptr;
-    return Json(static_cast<long long>(raw));
+    return Json(static_cast<std::int64_t>(raw));
 }
 
-inline Json scaled(std::int64_t raw, std::int64_t sentinel, double divisor, int decimals,
+inline Json scaled(std::int64_t raw, std::int64_t sentinel, double divisor, std::int32_t decimals,
                    double offset = 0.0) {
     if (raw == sentinel) return nullptr;
     return Json::fixed(static_cast<double>(raw) / divisor + offset, decimals);

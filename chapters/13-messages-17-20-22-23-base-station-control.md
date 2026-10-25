@@ -465,14 +465,14 @@ inline Json decode_msg_20(const Bits& bits) {
 [`code/cpp/msg_22.hpp`](../code/cpp/msg_22.hpp) — the frequency helper:
 
 ```cpp
-inline const std::set<int> SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-                                               67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77};
+inline const std::set<std::int32_t> SIMPLEX_CHANNELS = {6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+                                                        67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77};
 
-inline std::optional<int> channel_frequency_khz(int number) {
-    int prefix = number / 1000;
-    int base = number % 1000;
+inline std::optional<std::int32_t> channel_frequency_khz(std::int32_t number) {
+    std::int32_t prefix = number / 1000;
+    std::int32_t base = number % 1000;
     if (prefix < 0 || prefix > 2) return std::nullopt;
-    int ship;
+    std::int32_t ship;
     if (1 <= base && base <= 28) {
         ship = 156050 + 50 * (base - 1);
     } else if (60 <= base && base <= 88) {
@@ -480,12 +480,12 @@ inline std::optional<int> channel_frequency_khz(int number) {
     } else {
         return std::nullopt;
     }
-    int coast = SIMPLEX_CHANNELS.contains(base) ? ship : ship + 4600;
+    std::int32_t coast = SIMPLEX_CHANNELS.contains(base) ? ship : ship + 4600;
     return prefix == 2 ? coast : ship;
 }
 
-inline Json channel_mhz(int number) {
-    std::optional<int> khz = channel_frequency_khz(number);
+inline Json channel_mhz(std::int32_t number) {
+    std::optional<std::int32_t> khz = channel_frequency_khz(number);
     if (!khz) return Json(nullptr);
     return Json::fixed(static_cast<double>(*khz) / 1000.0, 3);
 }
@@ -505,8 +505,8 @@ inline Json channel_mhz(int number) {
 ```
 
 > **Language notes (C++).**
-> * `std::optional<int>` is the chapter 1 optional: `std::nullopt` empty, `!khz` tests, `*khz` reads. The `Json` class converts an empty optional to `null`, so the value could also have been stored directly.
-> * `std::set<int>::contains(x)` (C++20) is "is x in the set" — before C++20 one wrote `.count(x)`, which returns 0 or 1. `std::set` is an ordered tree; for 22 small integers that is plenty fast.
+> * `std::optional<std::int32_t>` is the chapter 1 optional: `std::nullopt` empty, `!khz` tests, `*khz` reads. The `Json` class converts an empty optional to `null`, so the value could also have been stored directly.
+> * `std::set<std::int32_t>::contains(x)` (C++20) is "is x in the set" — before C++20 one wrote `.count(x)`, which returns 0 or 1. `std::set` is an ordered tree; for 22 small integers that is plenty fast.
 > * The reservation loop is a **range pipeline** (`<ranges>`): `std::views::iota(FIRST_GROUP, bits.size())` is `range(40, len(bits))` over bit positions, `std::views::chunk(RESERVATION_BITS)` (C++23) groups them in thirties, `std::views::take(MAX_RESERVATIONS)` caps the count at four. The stages are glued with `|` and evaluated lazily as the `for` loop iterates; `group.front()` is the first position of a chunk and `group.size()` tells a full group from the trailing spare. It is Python's `while len(...) < 4 and bits.has(...)` expressed as data flow — compare the Rust version below, which keeps the `while`.
 > * Both branches of `?:` must have the same type. `decode_rtcm_header(...)` returns `Json`, so the other branch is written `Json(nullptr)`; `"all types (default)"` is a `const char*`, so it is wrapped in `std::string(...)` to match `ship_type_text`'s return type.
 > * `Json spare2 = nullptr; … spare2 = 0; … spare2 = bits.uint(...)` — a `Json` variable can be reassigned a value of a different JSON type; that is what the `std::variant` inside it is for (chapter 1).
@@ -694,7 +694,7 @@ export function channelMhz(num: number): Fixed | null {
 | Concern | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
 | Set of simplex channels | set literal + `in` | `std::set::count` | `matches!` with range patterns | `Set.has` |
-| Optional frequency | `int \| None`, `None` | `std::optional<int>`, `nullopt` | `Option<u64>`, `None` | `number \| null` |
+| Optional frequency | `int \| None`, `None` | `std::optional<std::int32_t>`, `nullopt` | `Option<u64>`, `None` | `number \| null` |
 | Nested `rtcm` or null | dict or `None` | `Json(…)` vs `Json(nullptr)` | `Option<Obj>` via `From` | `JsonObject \| null` |
 | Leftover bits as number | `bits.uint` of any width | `std::uint64_t` (≤ 32 bits used) | `u64` | `number` (safe ≤ 53 bits) |
 | Enumeration with gaps (txrx 3–15) | `dict.get(code, default)` | `switch` with `default` | `match` with `_` | `code in TABLE ? … : default` |

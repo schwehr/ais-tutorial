@@ -428,7 +428,7 @@ inline std::optional<std::string> utc_iso(std::uint64_t year, std::uint64_t mont
 
 // Decode a message 4 or 11. Throws DecodeError if shorter than 168 bits.
 inline Json decode_msg_4_11(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 168);
     std::uint64_t year = bits.uint(38, 14);
     std::uint64_t month = bits.uint(52, 4);
@@ -464,7 +464,7 @@ inline Json decode_msg_4_11(const Bits& bits) {
         {"lat", Json::fixed(static_cast<double>(lat_raw) / 600000.0, 6)},
         {"position_available", lon_raw != 0x6791AC0 && lat_raw != 0x3412140},
         {"epfd", epfd},
-        {"epfd_text", epfd_text(static_cast<int>(epfd))},
+        {"epfd_text", epfd_text(static_cast<std::int32_t>(epfd))},
         {"transmission_control", tx_control},
         {"transmission_control_text", TRANSMISSION_CONTROL[tx_control]},
         {"spare", bits.uint(139, 9)},
@@ -689,7 +689,7 @@ export function decode(bits: Bits): JsonObject {
 > `{ epfd: epfd }`.
 
 **Where the four differ.** The six UTC integers are plain `int`/`u64`/
-`uint64_t`/`number` everywhere. The only real divergence is the optional
+`std::uint64_t`/`number` everywhere. The only real divergence is the optional
 string: Python returns `None`, C++ `std::optional<std::string>` that is
 unwrapped with `*iso` into a `Json`, Rust `Option<String>` that is
 converted by a blanket `From<Option<T>>`, TypeScript `string | null`. The

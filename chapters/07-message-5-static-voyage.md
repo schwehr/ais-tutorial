@@ -390,15 +390,15 @@ inline std::string imo_range_text(std::uint64_t imo) {
 inline bool imo_check_digit_ok(std::uint64_t imo) {
     if (imo < 1000000 || imo > 9999999) return false;
     std::string digits = std::to_string(imo);  // exactly 7 characters here
-    int total = 0;
-    for (int i = 0; i < 6; ++i) {
+    std::int32_t total = 0;
+    for (std::int32_t i = 0; i < 6; ++i) {
         total += (digits[i] - '0') * (7 - i);
     }
     return total % 10 == digits[6] - '0';
 }
 
-inline std::string eta_text(int month, int day, int hour, int minute) {
-    auto two = [](int v) { return std::format("{:02}", v); };
+inline std::string eta_text(std::int32_t month, std::int32_t day, std::int32_t hour, std::int32_t minute) {
+    auto two = [](std::int32_t v) { return std::format("{:02}", v); };
     std::string mm = (1 <= month && month <= 12) ? two(month) : "??";
     std::string dd = (1 <= day && day <= 31) ? two(day) : "??";
     std::string hh = hour <= 23 ? two(hour) : "??";
@@ -411,7 +411,7 @@ and the start of the decoder:
 
 ```cpp
 inline Json decode_msg_5(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 424);
     std::uint64_t ais_version = bits.uint(38, 2);
     std::uint64_t imo = bits.uint(40, 30);
@@ -436,7 +436,7 @@ inline Json decode_msg_5(const Bits& bits) {
 
 > **Language notes (C++).**
 > * `std::to_string(imo)` is Python's `str(imo)`; a `std::string` can be indexed like an array and `digits[i] - '0'` turns the character `'7'` into the integer 7, because characters are small integers in C++.
-> * `auto two = [](int v) { … };` is a *lambda*: a function defined inside another function. The `[]` is the (empty) capture list — the lambda uses nothing from the enclosing scope.
+> * `auto two = [](std::int32_t v) { … };` is a *lambda*: a function defined inside another function. The `[]` is the (empty) capture list — the lambda uses nothing from the enclosing scope.
 > * `std::format("{:02}", v)` (C++20) is the zero-padded two-digit format, with the same spec as the Python f-string `f"{v:02d}"`. It returns a `std::string`, so there is no stack buffer to size and no `-Wformat-truncation` warning to appease as there was with `snprintf`.
 > * `1 <= month && month <= 12`: a chained `1 <= month <= 12` compiles in C++ but means `(1 <= month) <= 12`, i.e. `true <= 12`, which is always true. Keep the `&&`.
 

@@ -370,7 +370,7 @@ Each assignment carries the raw `offset` and `increment` *and* the interpretatio
 [`code/cpp/msg_15.hpp`](../code/cpp/msg_15.hpp), the parts that differ from Python:
 
 ```cpp
-inline std::string message_name(int msg_id) {
+inline std::string message_name(std::int32_t msg_id) {
     auto it = MESSAGE_NAMES.find(msg_id);
     return it == MESSAGE_NAMES.end() ? "undefined" : it->second;
 }
@@ -379,14 +379,14 @@ inline Json request(std::uint64_t mmsi, std::uint64_t msg_id, std::uint64_t slot
     return Json::Object{
         {"mmsi", mmsi},
         {"msg_type", msg_id},
-        {"msg_type_text", message_name(static_cast<int>(msg_id))},
+        {"msg_type_text", message_name(static_cast<std::int32_t>(msg_id))},
         {"slot_offset", slot_offset},
     };
 }
 
 inline Json decode_msg_15(const Bits& bits) {
     using namespace msg_15;
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 88);
     // ... header fields as in Python ...
     std::uint64_t mmsi1 = bits.uint(40, 30);
@@ -411,18 +411,18 @@ inline Json decode_msg_15(const Bits& bits) {
 [`code/cpp/msg_16.hpp`](../code/cpp/msg_16.hpp), the assignment helper:
 
 ```cpp
-inline const std::map<std::uint64_t, long long> SLOT_INCREMENTS = {
+inline const std::map<std::uint64_t, std::int64_t> SLOT_INCREMENTS = {
     {1, 1125}, {2, 375}, {3, 225}, {4, 125}, {5, 75}, {6, 45},
 };
 
 inline Json assignment(std::uint64_t mmsi, std::uint64_t offset, std::uint64_t increment) {
-    std::optional<long long> reports;
-    std::optional<long long> slots;
+    std::optional<std::int64_t> reports;
+    std::optional<std::int64_t> slots;
     std::string text;
     auto it = SLOT_INCREMENTS.find(increment);
     if (increment == 0) {
         text = "reporting rate";
-        reports = static_cast<long long>(offset);
+        reports = static_cast<std::int64_t>(offset);
     } else if (it != SLOT_INCREMENTS.end()) {
         text = "slot assignment";
         slots = it->second;
@@ -443,7 +443,7 @@ inline Json assignment(std::uint64_t mmsi, std::uint64_t offset, std::uint64_t i
 ```
 
 > **Language notes (C++).**
-> * `std::optional<long long>` (chapter 1) starts empty; assigning a value fills it, and `Json` prints an empty optional as `null` — which is how the Python `None` comes out byte-identical. `std::map::find`/`end()` is the lookup idiom of chapters 1 and 6.
+> * `std::optional<std::int64_t>` (chapter 1) starts empty; assigning a value fills it, and `Json` prints an empty optional as `null` — which is how the Python `None` comes out byte-identical. `std::map::find`/`end()` is the lookup idiom of chapters 1 and 6.
 > * `Json::Array` is `std::vector<Json>`; `push_back` appends. We build the array *before* the object that holds it because the object initialiser list is evaluated in one go.
 
 ### Rust
@@ -569,7 +569,7 @@ function assignment(mmsi: number, offset: number, increment: number): JsonObject
 
 | Concern | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
-| Optional integer → `null` | `int \| None` / `None` | `std::optional<long long>` | `Option<u64>` | `number \| null` |
+| Optional integer → `null` | `int \| None` / `None` | `std::optional<std::int64_t>` | `Option<u64>` | `number \| null` |
 | Table lookup with default | `dict.get(k, d)` | `map.find` / `end()` | `match … _ =>` | `obj[k] ?? d` |
 | Growing array of objects | `list.append` | `Json::Array::push_back` | `Vec::push` | `Array.push` |
 | Variable assigned in branches | plain assignment | plain assignment | `let pos;` + definite initialisation | `let pos: number;` + definite assignment |

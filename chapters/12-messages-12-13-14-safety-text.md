@@ -285,7 +285,7 @@ inline Json decode_ack(const Bits& bits, std::size_t pos) {
 
 inline Json decode_msg_7_13(const Bits& bits) {
     using namespace msg_7_13;
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), HEADER_BITS + GROUP_BITS);
 
     Json::Array acks;

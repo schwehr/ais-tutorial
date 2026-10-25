@@ -971,7 +971,7 @@ inline Json decode_itdma(const Bits& bits, std::size_t start) {
 
 // Decode a message 1, 2 or 3. Throws DecodeError if too short.
 inline Json decode_msg_1_2_3(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 168);
     std::uint64_t nav = bits.uint(38, 4);
     std::uint64_t sog_raw = bits.uint(50, 10);

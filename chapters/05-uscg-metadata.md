@@ -362,14 +362,14 @@ inline Json parse_uscg_fields(std::span<const std::string> extras) {
     return out;
 }
 
-inline Json time_of_arrival_to_utc(long long unix_time, std::optional<double> toa_s) {
+inline Json time_of_arrival_to_utc(std::int64_t unix_time, std::optional<double> toa_s) {
     if (!toa_s) return Json();
     // Python's % is never negative for a positive divisor; C++'s can be, so
     // normalise (only matters for times before 1970).
-    long long minute_start = unix_time - (((unix_time % 60) + 60) % 60);
+    std::int64_t minute_start = unix_time - (((unix_time % 60) + 60) % 60);
     double best = 0.0;
     double best_distance = -1.0;
-    for (int k : {-60, 0, 60}) {
+    for (std::int32_t k : {-60, 0, 60}) {
         double candidate = static_cast<double>(minute_start + k) + *toa_s;
         double distance = std::abs(candidate - static_cast<double>(unix_time));
         if (best_distance < 0 || distance < best_distance) {   // Python's min() keeps the first minimum
@@ -390,15 +390,15 @@ inline Json time_of_arrival_to_utc(long long unix_time, std::optional<double> to
 >   Python's `try/except`: an item is `unparsed` unless some branch
 >   explicitly claimed it. Both designs are fine; optionals are preferred
 >   in C++ when failure is routine rather than exceptional.
-> * **Integer vs float.** `long long` for whole-second times (64-bit;
->   `int` is only guaranteed 16 bits and is 32 on common platforms, which
->   overflows in 2038) and `double` for fractional ones. The two JSON paths
->   `out["time"] = *v` (integer) and `Json::fixed(*v, 2)` (two decimals) are
->   chosen by the presence of a `.`, exactly as in Python.
-> * `%` on a negative `long long` yields a negative remainder in C++; the
+> * **Integer vs float.** `std::int64_t` for whole-second times (64-bit; a
+>   32-bit `std::int32_t` overflows in 2038) and `double` for fractional
+>   ones. The two JSON paths `out["time"] = *v` (integer) and
+>   `Json::fixed(*v, 2)` (two decimals) are chosen by the presence of a
+>   `.`, exactly as in Python.
+> * `%` on a negative `std::int64_t` yields a negative remainder in C++; the
 >   `((x % 60) + 60) % 60` idiom makes it non-negative. Irrelevant for
 >   times after 1970, but the habit is worth having.
-> * `for (int k : {-60, 0, 60})` iterates an initializer list — the C++
+> * `for (std::int32_t k : {-60, 0, 60})` iterates an initializer list — the C++
 >   way to loop over three literal values.
 > * The parameter is a **`std::span<const std::string>`** (C++20): a
 >   non-owning view over a contiguous run of strings, exactly what Rust's

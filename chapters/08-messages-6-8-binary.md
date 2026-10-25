@@ -338,8 +338,8 @@ Three design decisions, all visible in the output:
 inline Json decode_msg_8(const Bits& bits) {
     using namespace msg_8;
     require_bits(8, bits.size(), HEADER_BITS);
-    int dac = static_cast<int>(bits.uint(40, 10));
-    int fi = static_cast<int>(bits.uint(50, 6));
+    std::int32_t dac = static_cast<std::int32_t>(bits.uint(40, 10));
+    std::int32_t fi = static_cast<std::int32_t>(bits.uint(50, 6));
     Json out = Json::Object{
         {"msg_type", 8},
         {"repeat_indicator", bits.uint(6, 2)},
@@ -368,8 +368,8 @@ struct AsmEntry {
     AsmDecoder func;
 };
 
-inline const std::map<std::pair<int, int>, AsmEntry>& registry() {
-    static const std::map<std::pair<int, int>, AsmEntry> table = {
+inline const std::map<std::pair<std::int32_t, std::int32_t>, AsmEntry>& registry() {
+    static const std::map<std::pair<std::int32_t, std::int32_t>, AsmEntry> table = {
         {{1, 0}, {"IFM 0 text telegram", 12, decode_text_telegram}},
         {{1, 11}, {"IMO Circ.236 meteorological and hydrological data", MET_HYDRO_236_BITS, decode_met_hydro_236}},
         {{1, 31}, {"IMO Circ.289 meteorological and hydrographic data", MET_HYDRO_289_BITS, decode_met_hydro_289}},
@@ -378,7 +378,7 @@ inline const std::map<std::pair<int, int>, AsmEntry>& registry() {
     return table;
 }
 
-inline std::optional<Json> decode_asm(int dac, int fi, const Bits& bits, std::size_t offset) {
+inline std::optional<Json> decode_asm(std::int32_t dac, std::int32_t fi, const Bits& bits, std::size_t offset) {
     const auto& table = asm_detail::registry();
     auto it = table.find({dac, fi});
     if (it == table.end()) return std::nullopt;
@@ -397,7 +397,7 @@ inline std::optional<Json> decode_asm(int dac, int fi, const Bits& bits, std::si
 
 > **Language notes (C++).**
 > * `Json (*)(const Bits&, std::size_t, std::size_t)` is a *function pointer type*: "pointer to a function taking these three arguments and returning `Json`". A plain function's name converts to it, so the table can hold `decode_whale_notice` directly.
-> * `std::map<std::pair<int,int>, AsmEntry>` works as a dictionary keyed by two integers because `std::pair` already defines `operator<`; `table.find({dac, fi})` builds the pair from a braced list.
+> * `std::map<std::pair<std::int32_t, std::int32_t>, AsmEntry>` works as a dictionary keyed by two integers because `std::pair` already defines `operator<`; `table.find({dac, fi})` builds the pair from a braced list.
 > * A `static const` local inside `registry()` is initialised exactly once, on first call — a common idiom for a lookup table that lives next to the code using it.
 > * `std::optional<Json>` is the return type for "an object or nothing"; `if (auto app = decode_asm(...))` declares and tests in one go, and `*app` is the contained value.
 
@@ -535,7 +535,7 @@ export function decodeAsm(dac: number, fi: number, bits: Bits, offset: number): 
 
 | Concern | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
-| Dispatch table | `dict[(int,int), tuple]` | `std::map<std::pair<int,int>, AsmEntry>` | `match (dac, fi)` | `Map<string, AsmEntry>` keyed `"dac/fi"` |
+| Dispatch table | `dict[(int,int), tuple]` | `std::map<std::pair<std::int32_t, std::int32_t>, AsmEntry>` | `match (dac, fi)` | `Map<string, AsmEntry>` keyed `"dac/fi"` |
 | Function values | `Callable[...]` | function pointer `Json (*)(…)` | `fn(…) -> Obj` | arrow function type |
 | "No decoder" result | `None` | `std::nullopt` | `None` | `null` |
 | Merging objects | `dict.update` | `Json::update` | `BTreeMap::extend` | `Object.keys` loop |

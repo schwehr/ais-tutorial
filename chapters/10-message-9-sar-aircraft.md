@@ -250,7 +250,7 @@ Two spare fields exist, so the second is `spare2` — the same convention chapte
 ```cpp
 inline Json decode_msg_9(const Bits& bits) {
     using namespace msg_9;
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), 168);
     std::uint64_t altitude = bits.uint(38, 12);
     std::uint64_t sog = bits.uint(50, 10);

@@ -480,27 +480,27 @@ everywhere.
 and 1s. The armouring loop emits one element per bit:
 
 ```cpp
-inline int armor_char_to_value(char32_t ch) {
+inline std::int32_t armor_char_to_value(char32_t ch) {
     std::uint32_t code = ch;
     if (code < 48 || code > 119 || (88 <= code && code <= 95)) {   // outside '0'..'w', or 'X'..'_'
         throw std::invalid_argument("illegal armour character " + py::repr(py::utf8_encode(ch)));
     }
-    int value = static_cast<int>(code) - 48;
+    std::int32_t value = static_cast<std::int32_t>(code) - 48;
     if (value > 40) value -= 8;
     return value;
 }
 
-inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, long long fill_bits = 0) {
+inline std::vector<std::uint8_t> payload_to_bits(std::string_view payload, std::int64_t fill_bits = 0) {
     if (fill_bits < 0 || fill_bits > 5) {
         throw std::invalid_argument(std::format("fill bits must be 0..5, got {}", fill_bits));
     }
     std::vector<std::uint8_t> bits;
     bits.reserve(payload.size() * 6);
     for (char32_t ch : py::codepoints(payload)) {
-        int value = armor_char_to_value(ch);
+        std::int32_t value = armor_char_to_value(ch);
         // Emit the six bits most-significant first: shift right by 5, 4, … 0
         // and mask with 1 to isolate each bit.
-        for (int shift = 5; shift >= 0; --shift) {
+        for (std::int32_t shift = 5; shift >= 0; --shift) {
             bits.push_back(static_cast<std::uint8_t>((value >> shift) & 1));
         }
     }
@@ -528,7 +528,7 @@ and `Bits::uint` rebuilds a number by shifting in one bit at a time:
 
 The `Assembler` in `vdm.hpp` is the Python one with types written out:
 the pending table is `std::map<Key, std::vector<Vdm>>` where `Key` is
-`std::tuple<std::string, std::string, std::optional<long long>>`, and
+`std::tuple<std::string, std::string, std::optional<std::int64_t>>`, and
 `add` returns `std::optional<Message>`. `parse_vdm` returns a
 `std::expected<Vdm, std::string>` — either the parsed fragment or the
 error text that Python would have raised as a `ValueError` — so the
@@ -536,7 +536,7 @@ driver checks `if (!frag)` and reports `frag.error()` instead of catching
 an exception. `decode.cpp` is the only `.cpp`
 file; all modules are headers (`#pragma once`, `inline` functions), so the
 whole program is one translation unit and the `Makefile` has one compile
-line. Its `DECODERS` is a `std::map<int, Decoder>` where `Decoder` is a
+line. Its `DECODERS` is a `std::map<std::int32_t, Decoder>` where `Decoder` is a
 function-pointer type `Json (*)(const Bits&)`. `jsonout.hpp` builds JSON
 from a `Json` class wrapping a `std::variant`; because a `std::map` keeps
 its keys sorted, the sorted-keys rule costs nothing, and `Fixed{value,
@@ -550,7 +550,7 @@ decimals}` is printed with `std::format("{:.{}f}", value, decimals)`.
 > `@classmethod`. `<cstdint>` gives fixed-width integers: `std::uint8_t`
 > holds exactly 8 bits, `std::uint64_t` 64; plain `int` is only guaranteed
 > 16. `std::size_t` is the unsigned type for sizes and indices, and mixing
-> it with `int` provokes warnings, so offsets are `size_t` throughout.
+> it with signed integers provokes warnings, so offsets are `std::size_t` throughout.
 > `(value >> shift) & 1` isolates one bit; `(value << 1) | bit` appends
 > one. `std::tuple` compares element by element, so it can be a `std::map`
 > key with no extra code; `std::optional<T>` is "a T or nothing" and

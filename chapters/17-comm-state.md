@@ -404,6 +404,7 @@ def slot_to_utc(
 #pragma once
 
 #include <cmath>
+#include <cstdint>
 #include <optional>
 
 #include "jsonout.hpp"
@@ -411,46 +412,46 @@ def slot_to_utc(
 
 namespace aistut {
 
-inline constexpr int SLOTS_PER_FRAME = 2250;
+inline constexpr std::int32_t SLOTS_PER_FRAME = 2250;
 inline constexpr double FRAME_DURATION_S = 60.0;
 inline constexpr double SLOT_DURATION_S = FRAME_DURATION_S / SLOTS_PER_FRAME;
 
-inline constexpr int TMO_MIN = 3;
-inline constexpr int TMO_MAX = 7;
+inline constexpr std::int32_t TMO_MIN = 3;
+inline constexpr std::int32_t TMO_MAX = 7;
 
-inline Json slot_to_seconds(int slot_number) {
+inline Json slot_to_seconds(std::int32_t slot_number) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME) return Json();
     return Json::fixed(slot_number * FRAME_DURATION_S / SLOTS_PER_FRAME, 3);
 }
 
-inline std::optional<int> next_sotdma_slot(int slot_number, int slot_offset) {
+inline std::optional<std::int32_t> next_sotdma_slot(std::int32_t slot_number, std::int32_t slot_offset) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME || slot_offset <= 0) {
         return std::nullopt;
     }
     return (slot_number + slot_offset) % SLOTS_PER_FRAME;
 }
 
-inline std::optional<int> next_itdma_slot(int slot_number, int slot_offset) {
+inline std::optional<std::int32_t> next_itdma_slot(std::int32_t slot_number, std::int32_t slot_offset) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME || slot_offset <= 0) {
         return std::nullopt;
     }
     return (slot_number + slot_offset) % SLOTS_PER_FRAME;
 }
 
-inline Json slot_to_utc(double unix_time, int slot_number,
-                        std::optional<int> utc_hour = std::nullopt,
-                        std::optional<int> utc_minute = std::nullopt) {
+inline Json slot_to_utc(double unix_time, std::int32_t slot_number,
+                        std::optional<std::int32_t> utc_hour = std::nullopt,
+                        std::optional<std::int32_t> utc_minute = std::nullopt) {
     if (slot_number < 0 || slot_number >= SLOTS_PER_FRAME) return Json();
     double slot_sec = slot_number * FRAME_DURATION_S / SLOTS_PER_FRAME;
-    long long whole = static_cast<long long>(unix_time);
+    std::int64_t whole = static_cast<std::int64_t>(unix_time);
 
     if (utc_hour && utc_minute && *utc_hour >= 0 && *utc_hour <= 23 &&
         *utc_minute >= 0 && *utc_minute <= 59) {
-        long long day_start = whole - (((whole % 86400) + 86400) % 86400);
+        std::int64_t day_start = whole - (((whole % 86400) + 86400) % 86400);
         double tod = *utc_hour * 3600.0 + *utc_minute * 60.0 + slot_sec;
         double best = 0.0;
         double best_distance = -1.0;
-        for (long long k : {-1LL, 0LL, 1LL}) {
+        for (std::int64_t k : {-1LL, 0LL, 1LL}) {
             double candidate = static_cast<double>(day_start + k * 86400) + tod;
             double distance = std::abs(candidate - unix_time);
             if (best_distance < 0 || distance < best_distance) {
@@ -462,10 +463,10 @@ inline Json slot_to_utc(double unix_time, int slot_number,
         return Json::fixed(best, 3);
     }
 
-    long long minute_start = whole - (((whole % 60) + 60) % 60);
+    std::int64_t minute_start = whole - (((whole % 60) + 60) % 60);
     double best = 0.0;
     double best_distance = -1.0;
-    for (int k : {-60, 0, 60}) {
+    for (std::int32_t k : {-60, 0, 60}) {
         double candidate = static_cast<double>(minute_start + k) + slot_sec;
         double distance = std::abs(candidate - unix_time);
         if (best_distance < 0 || distance < best_distance) {
@@ -482,8 +483,8 @@ inline Json slot_to_utc(double unix_time, int slot_number,
 
 > **Language notes — C++**
 >
-> * Default parameters (`std::optional<int> utc_hour = std::nullopt`) let C++ callers write either `slot_to_utc(t, slot)` (two arguments, nearest-minute fallback) or `slot_to_utc(t, slot, 23, 59)` (four arguments, exact UTC hour/minute resolution), matching Python's `utc_hour: int | None = None`.
-> * In `for (long long k : {-1LL, 0LL, 1LL})`, the `LL` suffix makes the loop variable a 64-bit `long long` so that `k * 86400` cannot overflow if someone later widens the multiplier.
+> * Default parameters (`std::optional<std::int32_t> utc_hour = std::nullopt`) let C++ callers write either `slot_to_utc(t, slot)` (two arguments, nearest-minute fallback) or `slot_to_utc(t, slot, 23, 59)` (four arguments, exact UTC hour/minute resolution), matching Python's `utc_hour: int | None = None`.
+> * In `for (std::int64_t k : {-1LL, 0LL, 1LL})`, the `std::int64_t` loop variable gives 64-bit arithmetic so that `k * 86400` cannot overflow if someone later widens the multiplier.
 
 ### Rust — `code/rust/src/commstate.rs`
 
@@ -670,8 +671,8 @@ export function slotToUtc(
 | Concept | Python | C++ | Rust | TypeScript |
 |---|---|---|---|---|
 | Re-export decoders | `from .msg_1_2_3 import ...` + `__all__` | `#include "msg_1_2_3.hpp"` | `pub use crate::msg_1_2_3::...;` | `export { ... } from "./msg_1_2_3";` |
-| De-allocated / invalid slot return | `int \| None` (`None`) | `std::optional<int>` (`std::nullopt`) | `Option<i64>` (`None`) | `number \| null` (`null`) |
-| Truncate float timestamp to integer seconds | `int(unix_time)` | `static_cast<long long>(unix_time)` | `unix_time as i64` | `Math.trunc(unixTime)` |
+| De-allocated / invalid slot return | `int \| None` (`None`) | `std::optional<std::int32_t>` (`std::nullopt`) | `Option<i64>` (`None`) | `number \| null` (`null`) |
+| Truncate float timestamp to integer seconds | `int(unix_time)` | `static_cast<std::int64_t>(unix_time)` | `unix_time as i64` | `Math.trunc(unixTime)` |
 | Non-negative modulo $x \bmod N$ | `x % N` | `((x % N) + N) % N` | `x.rem_euclid(N)` | `((x % N) + N) % N` |
 
 ---

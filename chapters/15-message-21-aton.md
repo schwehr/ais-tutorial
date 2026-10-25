@@ -514,7 +514,7 @@ inline Json decode_aton_status(std::uint64_t status) {
 }
 
 inline Json decode_msg_21(const Bits& bits) {
-    int msg_type = static_cast<int>(bits.uint(0, 6));
+    std::int32_t msg_type = static_cast<std::int32_t>(bits.uint(0, 6));
     require_bits(msg_type, bits.size(), MSG21_MIN_BITS);
     std::uint64_t aton_type = bits.uint(38, 5);
     std::int64_t lon_raw = bits.sint(164, 28);
@@ -543,7 +543,7 @@ inline Json decode_msg_21(const Bits& bits) {
         {"lat", Json::fixed(static_cast<double>(lat_raw) / 600000.0, 6)},
         {"position_available", lon_raw != 0x6791AC0 && lat_raw != 0x3412140},
         {"epfd", epfd},
-        {"epfd_text", epfd_text(static_cast<int>(epfd))},
+        {"epfd_text", epfd_text(static_cast<std::int32_t>(epfd))},
         {"timestamp", timestamp},
         {"off_position", bits.flag(259)},
         {"off_position_valid", is_floating_aton(aton_type) && timestamp <= 59},

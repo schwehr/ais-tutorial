@@ -96,13 +96,16 @@ The citation keys used, with the specific sections.
   text), "fragment" (one sentence of a multi-sentence message), "field".
   MMSI, SOG, COG, ROT, EPFD, RAIM, SOTDMA/ITDMA/CSTDMA/RATDMA/FATDMA are
   spelled out on first use in each chapter.
+* For C++ code, always use `<cstdint>` types for integers (e.g.
+  `std::int32_t`, `std::uint32_t`, `std::int64_t`, `std::uint64_t`,
+  `std::uint8_t`, etc.).
 
 ## Language notes — what to explain where
 
 | Construct | First explained in |
 |---|---|
 | Python: functions, f-strings, slicing, `int(s, 2)`, dict, list, `dataclass`, type hints, `X | None`, exceptions, modules/packages | ch. 1–2 |
-| C++: `#include`, `std::string`/`string_view`, `std::vector`, `struct`/`class`, `std::optional`, `std::map`, references vs values, `const`, exceptions, header-only design, `std::format`/`std::println`, `std::expected` | ch. 1–2 |
+| C++: `#include`, `<cstdint>` fixed-width integers (`std::int32_t`, `std::int64_t`, `std::uint8_t`, `std::uint64_t`), `std::string`/`string_view`, `std::vector`, `struct`/`class`, `std::optional`, `std::map`, references vs values, `const`, exceptions, header-only design, `std::format`/`std::println`, `std::expected` | ch. 1–2 |
 | Rust: `fn`, ownership and borrowing (`&str` vs `String`), `Option`/`Result` and `?`, `match`, `struct`/`impl`, `enum` with data, `Vec`, `BTreeMap`, `impl Display`, modules | ch. 1–2 |
 | TypeScript: `interface`/`type`, `class`, union types `number | null`, `readonly`, `Map`, arrow functions, template literals, modules/imports, bitwise 32-bit pitfall, `toFixed` | ch. 1–2 |
 | Enumerations as tables, two's complement, bit extraction loops | ch. 2–3 |
