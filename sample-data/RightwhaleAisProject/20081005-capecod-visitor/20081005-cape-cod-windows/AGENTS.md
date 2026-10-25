@@ -3,7 +3,7 @@
 Files copied from the Windows PC running Cornell's **AIS Radio Interface
 (ARI)** at the Provincetown ("Ptown") site. ARI pulls `BMS,…` requests from a
 remote Queue Manager over TCP (`QM_TCPIP_IP = 99.178.167.126`, port 4501) and
-feeds `!VTBBM` sentences to the transponder on COM1 at 38 400 baud.
+feeds `!VTBBM` sentences to the transceiver on COM1 at 38 400 baud.
 
 | File | Size | Contents |
 |---|---|---|

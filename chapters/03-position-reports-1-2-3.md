@@ -17,12 +17,12 @@
 >   tables, two's complement, nested objects and fixed-decimal output.
 > * What fourteen carefully chosen real sentences reveal: stale statuses,
 >   ships going astern, a default MMSI shared by two different boats, a
->   transponder one leap second out of step, and a "message 2" that is
+>   transceiver one leap second out of step, and a "message 2" that is
 >   really a corrupted base-station report.
 
 ## 3.1 Where this fits
 
-Messages 1, 2 and 3 are the heart of AIS. A Class A shipborne transponder —
+Messages 1, 2 and 3 are the heart of AIS. A Class A shipborne transceiver —
 the kind carried by every SOLAS ship over 300 GT on an international voyage
 and, in the United States, by most commercial vessels over 65 feet
 [33 CFR 164.46] — broadcasts one of them between every two seconds and
@@ -187,13 +187,13 @@ them than the designers intended — sometimes legitimately, sometimes not.
     minute. A receiver that timestamps to the millisecond (the USCG `T`
     field, chapter 5) can check it. The same ship that is 2 s behind in
     its time stamp is 2 s behind in its slot numbers: its whole frame is
-    shifted. That is the signature of a transponder whose GNSS applied the
+    shifted. That is the signature of a transceiver whose GNSS applied the
     wrong number of leap seconds, a fault the USCG warned about in 2005
     when one manufacturer's units began transmitting in the middle of
     slots instead of at the start [Safety Alerts, Alert 5-05].
   * *ITDMA promises.* A message 3 says "my next slot is *n* slots from
     now". If nothing arrives in that slot from that MMSI, either the
-    receiver missed it or the sender is not a real transponder. §3.5
+    receiver missed it or the sender is not a real transceiver. §3.5
     checks one promise and finds it kept to the millisecond.
   * *Kinematics.* Successive positions imply a speed; it should match SOG.
     Heading and COG should agree unless the ship is drifting, crabbing or
@@ -204,7 +204,7 @@ them than the designers intended — sometimes legitimately, sometimes not.
     state 0). A ship reporting sync state 3 has lost UTC; a whole harbour
     reporting sync state 1–3 at once suggests GNSS interference.
 * **Slot maps.** The communication state exists so that *other
-  transponders* can build a map of which slots are taken; a shore receiver
+  transceivers* can build a map of which slots are taken; a shore receiver
   can build the same map and measure channel loading, which is how
   authorities decide whether an area needs a base station managing the
   link with messages 20 and 22. This is the "why a decoder bothers" answer:
@@ -222,7 +222,7 @@ them than the designers intended — sometimes legitimately, sometimes not.
 * **Devices that are not ships.** Message 1 is the Class A position
   report and only Class A equipment should send it. In practice anything
   with a VHF transmitter can: the right-whale project's own shore
-  transponders (`003669739`, `003669734` in chapter 2) sent message 1
+  transceivers (`003669739`, `003669734` in chapter 2) sent message 1
   with a coast-station MMSI and a fixed position; the Great Bay receiver
   in `sample-data/tide1` re-encoded its own GPS as a message 1 with MMSI 0;
   aid-to-navigation (AtoN) units configured as mobiles send it instead of
@@ -313,7 +313,7 @@ Three practical consequences:
   identity; an eight-digit value is a nine-digit identity starting with a
   single 0, i.e. the group-call format, which no individual station should
   be transmitting. Always reason about the nine-digit, zero-padded form.
-* **Defaults and placeholders.** Transponders leave the factory with
+* **Defaults and placeholders.** Transceivers leave the factory with
   something in the MMSI field, and not every installer changes it. The
   value 1193046 — which is 0x123456 in hexadecimal, the kind of number a
   firmware engineer types as a placeholder — appears in our recordings
@@ -321,18 +321,18 @@ Three practical consequences:
   tug in Norfolk, Virginia in 2007, both with the same bogus IMO number
   in their message 5. Nauticast units (and clones) are the usual source.
   `0`, `1`, `111111111`, `123456789` and the MMSI of the ship's old
-  transponder are the other common placeholders; the full right-whale log
+  transceiver are the other common placeholders; the full right-whale log
   also contains the six-digit 693559 (5 930 reports) and 80337. USCG
   safety alerts have repeatedly complained about wrong MMSIs and other
   inaccurate data [Safety Alerts, Alerts 05-10, 10-08].
 * **Zero is special.** MMSI 0 is what a receiver's own GPS-as-message-1
-  looks like (`sample-data/misc`), what a transponder with no identity
+  looks like (`sample-data/misc`), what a transceiver with no identity
   programmed sends, and what line 6 of this chapter's data shows. Never
   index a database on it.
 
 ### Navigational status (bits 38–41)
 
-A four-bit field set *by hand* on the transponder's keyboard
+A four-bit field set *by hand* on the transceiver's keyboard
 [M.1371-5 Annex 2 §4.3.1.3]. All sixteen values [M.1371-5 Annex 8
 Table 48]:
 
@@ -366,7 +366,7 @@ stretches — and a crew that never sets it leaves 15. In §3.5: a tug
 
 ### Rate of turn (bits 42–49)
 
-Eight bits, two's complement, but *not* linear. The transponder takes the
+Eight bits, two's complement, but *not* linear. The transceiver takes the
 rate from a turn indicator in degrees per minute (ROT~sensor~), and
 encodes [M.1371-5 Annex 8 Table 48]:
 
@@ -395,7 +395,7 @@ from the data:
 * 708°/min, the top of the range, encodes as 4.733 × √708 = 125.9 → 126,
   which is why ±126 is "708° per min or higher".
 
-±127 means the ship has *no* rate-of-turn indicator and the transponder
+±127 means the ship has *no* rate-of-turn indicator and the transceiver
 is inferring a turn from heading changes: "more than 5° per 30 s" is the
 same threshold as the "changing course" rule for reporting intervals
 [M.1371-5 Annex 2 §4.3.1.2]. Our decoder reports these and −128 as
@@ -494,7 +494,7 @@ ship with no heading sensor connected sends 511 — most small commercial
 vessels in our data do. When both are present and differ by 180°, the
 ship is going astern (lines 5 and 10). When SOG is near zero COG is
 noise; the spec does not require it to be 3600 at rest, and most
-transponders keep sending the last computed value.
+transceivers keep sending the last computed value.
 
 ### Time stamp (bits 137–142)
 
@@ -1442,7 +1442,7 @@ was chosen to show one thing:
 | 7 | same | 12123 | "Moored" at 5.8 kn; RAIM in use |
 | 8 | same | 75842 | Message 3 with a measured ROT (−21 → −19.7°/min); PA 1; ITDMA increment 0 |
 | 9 | same | 214053 | "At anchor" at 3.3 kn; ROT +127 |
-| 10 | `misc/rv-auk-boston-harbor-log.2008-08-20` | 9 | Message 3, keep flag, ROT +127, from the logging vessel's own transponder |
+| 10 | `misc/rv-auk-boston-harbor-log.2008-08-20` | 9 | Message 3, keep flag, ROT +127, from the logging vessel's own transceiver |
 | 11 | `2007hydro/norfolk-log.ais` | 19 | Slot time-out 1: UTC hour/minute sub-message |
 | 12 | `2007hydro/protec-util12007-05-14` | 2637 | A "message 2" that is a corrupted message 4 |
 | 13 | `tide1/ais/ais-2008-11-05` | — | A 56-bit payload beginning with `1` |
@@ -1495,7 +1495,7 @@ The rest of the file, in groups.
   earlier, has time stamp 24 and arrival 25.50, and across the first
   20 000 lines of the log the arrival time minus the slot start is
   0.00 s for most ships, 1.00 s for a handful, and 2.00 s for this one
-  on every one of her 74 slot-number reports. Her transponder's idea of
+  on every one of her 74 slot-number reports. Her transceiver's idea of
   UTC is two seconds behind everyone else's, so she transmits in the
   middle of other people's slots — the Saab leap-second fault of
   [Safety Alerts, Alert 5-05] in all but name, three years later.
@@ -1511,7 +1511,7 @@ The rest of the file, in groups.
   taken.
 * **Line 7** is the tug `FREEDOM` in the Mystic River, Boston, declaring
   herself **moored at 5.8 knots**, 165° COG. The status is stale; the
-  transponder dutifully applies the rule that "at anchor or moored" *and*
+  transceiver dutifully applies the rule that "at anchor or moored" *and*
   under 3 knots means 3-minute reporting [M.1371-5 Annex 2 §4.3.1.3] —
   she is over 3 knots, so she still reports every 10 s, but a display
   that filters "moored" targets would hide a moving tug. `"raim":true`
@@ -1519,7 +1519,7 @@ The rest of the file, in groups.
   available, expected error over 10 m.
 * **Line 9** is `KITTIWAKE`, a Provincetown excursion boat, "at anchor" at
   3.3 kn with ROT +127 at 00:27 UTC. Over 3 knots again, so 10-second
-  reporting; the +127 says the transponder saw the heading change more
+  reporting; the +127 says the transceiver saw the heading change more
   than 5° in 30 s and has no rate sensor to quantify it — a boat swinging
   hard at a mooring, or one that has slipped it and left the status
   behind. Slot 1499 starts at 39.97 s; time stamp 40.
@@ -1535,7 +1535,7 @@ MMSI **1193046** = 0x123456, a seven-digit number that fits no format in
 The same MMSI, with the same nonsense IMO number 303174162 in its message
 5, calls itself `NAUTICAST`, a pilot vessel bound for `CASABLANCA`, in
 this log — and `MISS JEAN`, a tug bound for `NORF VA`, in the Norfolk log
-that supplies line 12. Two transponders of the same make, neither ever
+that supplies line 12. Two transceivers of the same make, neither ever
 configured. The slot time-out is 1, so the sub-message is the UTC hour
 and minute: 12:46, matching the receiver's 12:46:28. (The full
 right-whale log contains 229 reports from 1193046.)
@@ -1590,7 +1590,7 @@ Every sentinel in one message: MMSI 0, SOG 1023 (`102.3`, `false`),
 longitude 181°, latitude 91°, COG 3600 (`360.0`, `false`), heading 511,
 time stamp 60, ROT −128, sync state 3 ("synchronized to another
 station" — it has no UTC of its own). Only the navigational status, 5
-"moored", was ever set by a human. This is a Class A transponder with no
+"moored", was ever set by a human. This is a Class A transceiver with no
 MMSI programmed and no position sensor, powered up alongside a Boston
 pier and transmitting anyway. It is a useful test vector: a decoder that
 prints `"lon":181.000000` with `"position_available":false` and does not
@@ -1715,7 +1715,7 @@ decoder does.
   computed value.
 * **The time stamp is a second, not a time.** Combine it with the
   receiver's clock to reconstruct the fix time, and when the two disagree
-  by more than a couple of seconds, suspect the transponder's GNSS (line
+  by more than a couple of seconds, suspect the transceiver's GNSS (line
   2) or the logger's clock (chapter 6). Values 61–63 mean the position
   was not from a working GNSS.
 * **Placeholder MMSIs are common and shared.** 1193046 (two different
@@ -1725,7 +1725,7 @@ decoder does.
   tracks across one.
 * **Seven- and eight-digit MMSIs are nine-digit identities with leading
   zeros.** 3669717 is 003669717, a coast station. A coast-station or
-  group identity transmitting message 1 is either a shore transponder
+  group identity transmitting message 1 is either a shore transceiver
   configured that way on purpose (the right-whale project's) or a
   misconfiguration.
 * **Message 2 is almost never a message 2.** It requires a base station
@@ -1740,7 +1740,7 @@ decoder does.
 * **Whole-second slot offsets.** When a receiver provides a precise time
   of arrival (the USCG `T` field, or a TAG block `c:` with milliseconds),
   compare it with the SOTDMA slot number. An offset that is a whole
-  number of seconds, constant per ship, is a transponder with a
+  number of seconds, constant per ship, is a transceiver with a
   leap-second error [Safety Alerts, Alert 5-05]; its transmissions
   straddle two slots and collide with its neighbours.
 * **The communication state is only meaningful for the channel heard.**

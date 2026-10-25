@@ -10,6 +10,6 @@ result with a second receiver. Both files are `serial_logger.py` captures.
 | `log.2009-05-01` | 225 KB | `kurt-office`, `/dev/ttyS1` — SR162G receiver | 1 287 `$GPRMC`/`!AIVDO` pairs only; the receiver's own position pseudo-report. Shows that the SR162G's `!AIVDO` is **not** an AIS transmission, just the receiver's GPS re-encoded as message 1 (`13tfD@?P00Js@gVHcVO7P?wN0000`). |
 
 Teaching uses: message 18 and the `$AISSD`/`$AIVSD` sentences used to load
-static data into a transponder (the data that later appears in **message 24**
+static data into a transceiver (the data that later appears in **message 24**
 parts A and B); `@` padding in NMEA text fields; MMSI `000000000` before
 configuration.

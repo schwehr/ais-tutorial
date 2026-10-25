@@ -5,7 +5,7 @@
 # because no valid message 17 or 23, no multi-block message 20 and no
 # addressed or regional message 22 occurs in the recordings; see §13.5.
 #
-# sample-data/2007hydro/norfolk-log.ais line 1: $AIACA channel-assignment status from the transponder
+# sample-data/2007hydro/norfolk-log.ais line 1: $AIACA channel-assignment status from the transceiver
 $AIACA,0,,,,,,,,,5,2087,0,2088,0,0,0,I,1,000000*15,1179170462.74
 # norfolk-log.ais lines 22, 51, 79, 98: USCG base station 003669702 sends message 20 every 10 s, alternating channels
 !AIVDM,1,1,,B,D03OviQsIN9H,0*66,1179170471.01

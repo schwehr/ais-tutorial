@@ -1,7 +1,7 @@
 # 14. Messages 18, 19 and 24: Class B
 
 > **What you will learn**
-> * What a Class B transponder is, why it exists, and what it deliberately
+> * What a Class B transceiver is, why it exists, and what it deliberately
 >   leaves out compared with the Class A equipment of chapters 3 and 7: no
 >   navigational status, no rate of turn, no destination, ETA, draught or IMO
 >   number — and a name that arrives only in a separate message.
@@ -15,7 +15,7 @@
 >   the Recommendation and the 30 bits of part B that hold *either* the
 >   ship's dimensions *or* a mother ship's MMSI.
 > * How static data gets *into* a Class B unit: the `$AISSD` and `$AIVSD`
->   sentences recorded while a UNH research boat's transponder was being
+>   sentences recorded while a UNH research boat's transceiver was being
 >   programmed, and what the unit said about itself before and after.
 > * Code that shares helpers between message modules, decodes one message
 >   that comes in two shapes (`part_number`), and — the first time in this
@@ -27,7 +27,7 @@
 ## 14.1 Where this fits
 
 Everything about AIS that we have met so far was designed for ships that
-*must* carry it — the SOLAS fleet with its Class A transponders
+*must* carry it — the SOLAS fleet with its Class A transceivers
 (12.5 W, 2–10 s position reports, a minimum keyboard and display, a
 password-protected static-data menu [M.1371-5 Annex 1 §2.1.1.1],
 [IALA G1082 §4.1.1.1 Table 3]). That left out almost every vessel on the
@@ -166,7 +166,7 @@ decodes the 19 bits like any ITDMA state and adds `cs_fixed_comm_state:
 true` when they match the constant, so that a consumer can tell "this is a
 CS unit saying nothing" from a SO unit's real slot reservation.
 
-The transponder log used in this chapter shows the algorithm's failure
+The transceiver log used in this chapter shows the algorithm's failure
 modes in plain text. Indoors, with the GPS antenna on a desk, the SRT unit
 in `sample-data/AISmisc/200905-Cocheco-classb-config/transceiver2009-05-01`
 printed `$AITXT,01,01,62,TX attempt failed (msg 18 no pos'n)` (line 293)
@@ -215,7 +215,7 @@ the message set in this chapter is what a machine will see from them.
    [AIVDM "Type 24"]. The standard only promises B "within 1 min following
    Message 24A" [M.1371-5 Annex 8 §3.22]. Every consumer therefore keeps a
    per-MMSI cache of the last part A and the last part B (exercise 5) and
-   should expire it: a name cached for a day will survive a transponder
+   should expire it: a name cached for a day will survive a transceiver
    being moved to another boat.
 2. **Fishing-gear markers and "AIS net buoys".** Low-cost transmitters
    built from Class B CS chipsets are sold to mark nets, long-lines and
@@ -285,7 +285,7 @@ the message set in this chapter is what a machine will see from them.
    each unit. A monitoring system can use them: a message 18 whose flags
    change from report to report, a "SIMRAD" unit that becomes a "COMAR"
    unit under the same MMSI, or a message 24B with an all-`@` vendor ID
-   where yesterday there was one, is a second transponder using the same
+   where yesterday there was one, is a second transceiver using the same
    identity. Likewise the malformed MMSIs in §14.5 — `0`, eight-digit
    numbers, a non-US MID on a New Hampshire launch — are what mis-programmed Class
    B units look like, and a database should quarantine them rather than
@@ -508,7 +508,7 @@ dimensions in part B, name in part A); `VSD` is the *voyage static data*
 that a Class A puts in message 5 — of which a Class B transmits only the
 ship type (message 24B). The DTE flag of `SSD` has no home in message 24
 at all; it would go into message 19 or message 5. The 1 May 2009 log of
-the R/V *Cocheco*'s transponder captured the unit echoing both sentences
+the R/V *Cocheco*'s transceiver captured the unit echoing both sentences
 before and after it was programmed (data file lines 5–8, source lines 64,
 66, 1505, 1507):
 
@@ -537,7 +537,7 @@ the same unit, at sea, broadcast exactly these values in message 24
 
 Lines 23 and 24 of `data/ch14-class-b.nmea` are a message 18 and the
 message 24 part A that followed it four seconds later, both from the
-R/V *Cocheco*'s transponder as heard by the `nhcml` receiver at the UNH
+R/V *Cocheco*'s transceiver as heard by the `nhcml` receiver at the UNH
 pier in New Castle, New Hampshire, on 24 May 2011
 (`sample-data/tide3/ais/ais-2011-05-24` lines 1161 and 1162):
 
@@ -1290,7 +1290,7 @@ to notice:
   amidships, which is what an installer enters when nobody measured.
 * **MMSI 330029917**: 330 is not a US MID (chapter 3 lists them: 303, 338,
   366–369), the call sign is `NONE` and the vendor is COMAR — the *Coastal
-  Surveyor* is a UNH survey launch whose transponder was programmed with
+  Surveyor* is a UNH survey launch whose transceiver was programmed with
   the wrong country code. Nothing in the message is wrong *syntactically*;
   only a registry lookup catches it.
 * **Amy Philbrick** is the one working vessel: a 30 m fishing boat
@@ -1426,7 +1426,7 @@ point of the message, and the reason it is no longer needed.
   162–2205 on, 2206–2483 off, …), where nothing was transmitted at all.
   Whatever the firmware means by the bit in its status output, it is not a
   message 23 assignment, and lines 9 and 11 of the data file show it. A
-  program that reads a transponder's own `!AIVDO` should not infer
+  program that reads a transceiver's own `!AIVDO` should not infer
   base-station control from the flag; one that reads `!AIVDM` from other
   ships has a better chance, but should still want to see the message 23
   (chapter 13). The 2011 units at the pier all report 0.

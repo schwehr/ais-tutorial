@@ -35,9 +35,9 @@ $GPGGA,...*4C,rplane_to_sd,1197072048.14
 | Directory | Years | What it is | Main sentence types |
 |---|---|---|---|
 | [`gps-itrek/`](gps-itrek/AGENTS.md) | 2007-12 | i.Trek Bluetooth GPS logs (MTK chipset). **Start here for plain NMEA.** | `GGA GSA GSV RMC`, `PMTK`, `POLYN` |
-| [`2007hydro/`](2007hydro/AGENTS.md) | 2007-05 | US Hydro 2007 conference, Norfolk VA: SR162 receivers and an L-3 ProTec Class A transponder debug port | `!AIVDM !AIVDO $AIALR $AITXT !AIBRF $AIACA` |
+| [`2007hydro/`](2007hydro/AGENTS.md) | 2007-05 | US Hydro 2007 conference, Norfolk VA: SR162 receivers and an L-3 ProTec Class A transceiver debug port | `!AIVDM !AIVDO $AIALR $AITXT !AIBRF $AIACA` |
 | [`AISmisc/`](AISmisc/AGENTS.md) | 2007–2009 | Grab bag: Class B (SRT) config logs, base-station send tests, lighthouse receivers, N-AIS message 19 sample, TSS shapefiles | `!AIVDM !AIVDO !BSVDO $BSALR $BSADS $PSRT $AIVSD $AISSD` |
-| [`RightwhaleAisProject/`](RightwhaleAisProject/AGENTS.md) | 2008–2009 | Right whale notice broadcasts (binary message 8, DAC 366 FI 34) in the Boston TSS; CNS VDL6000 transponders; a 49 MB N-AIS feed capture | `!AIVDM !VTBBM !AIBBM $AIABK $PCNSS $PCNSR $PFEC` |
+| [`RightwhaleAisProject/`](RightwhaleAisProject/AGENTS.md) | 2008–2009 | Right whale notice broadcasts (binary message 8, DAC 366 FI 34) in the Boston TSS; CNS VDL6000 transceivers; a 49 MB N-AIS feed capture | `!AIVDM !VTBBM !AIBBM $AIABK $PCNSS $PCNSR $PFEC` |
 | [`sbnms/`](sbnms/AGENTS.md) | 2006, 2008 | Stellwagen Bank NMS traffic studies: monthly unique message 5 extracts from N-AIS | `!AIVDM` (type 5, USCG format) |
 | [`misc/`](misc/AGENTS.md) | 2008-08 | One day on the NOAA R/V *Auk* in Boston Harbor (SR162G) | `$GPRMC !AIVDO !AIVDM $AITXT` |
 | [`2010-11-l3-aton/`](2010-11-l3-aton/AGENTS.md) | 2010-09, 2010-11 | L-3 AIS Aid-to-Navigation unit bench tests at CCOM | `!ANVDO $ANZDA $ANADS $ANALR !AIVDM` (type 21, 8) |
@@ -58,7 +58,7 @@ $GPGGA,...*4C,rplane_to_sd,1197072048.14
 * **Binary messages (6, 8) and ASM payloads** → `RightwhaleAisProject/` (whale notices, 8/366/34), `2007hydro/` (8/55/58, 8/366/…), `tide3/ais/ais-2010-12-*` (8/366/56 and 57 encrypted), `tide1/ais/*` (assorted, often corrupt).
 * **Interrogation (15), assignment (16), channel management (22)** → `2007hydro/va-portsmouth-sr162-*`, `2007hydro/protec-util12007-05-14`.
 * **Own-ship `!AIVDO`, alarms `$AIALR`, text `$AITXT`** → `2007hydro/protec-util12007-05-14`, `AISmisc/2008-03-24-sbnms-whale-test/log-rm808.2008-03-24`.
-* **BBM/ABK (sending binary messages from a transponder)** → `RightwhaleAisProject/20081003-AIS/AIS_whale`, `…/whale.txt`, `…/sample message*.txt`.
+* **BBM/ABK (sending binary messages from a transceiver)** → `RightwhaleAisProject/20081003-AIS/AIS_whale`, `…/whale.txt`, `…/sample message*.txt`.
 
 ## Caveats for anyone reusing this data
 
@@ -66,7 +66,7 @@ $GPGGA,...*4C,rplane_to_sd,1197072048.14
   `!AIVDM` lines are truncated or bit-corrupted yet still carry a *valid*
   checksum (the receiver computed the checksum over garbage). Always validate
   payload bit lengths against the message type before trusting a decode.
-* Some logs contain binary junk (`\x00` bytes, transponder boot banners).
+* Some logs contain binary junk (`\x00` bytes, transceiver boot banners).
   Open them in binary-tolerant mode (`errors="replace"` in Python).
 * `.bz2` files in `tide3/ais/` duplicate same-day plain files; prefer the
   plain file.

@@ -9,7 +9,7 @@
 !AIVDM,1,1,,B,=5NANh1Gu2jQ,0*0E,rnhcml,1267918976.91
 !AIVDM,1,1,,B,<5Ol;:1GTGd2=C7P6B?=Pknpqhmhhh0,2*59,rnhcml,1267918980.04
 !AIVDM,1,1,,B,=5NANh1Gu2jP,0*0F,rnhcml,1267918980.27
-# B. sample-data/tide3/ais/ais-2010-01-30 lines 1384, 1428, 1429, 1432, 1433, 1466: an unconfigured transponder (MMSI 0) and 369970179 exchanging "TEST".
+# B. sample-data/tide3/ais/ais-2010-01-30 lines 1384, 1428, 1429, 1432, 1433, 1466: an unconfigured transceiver (MMSI 0) and 369970179 exchanging "TEST".
 !AIVDM,1,1,,A,=000001H=C0<,0*20,rnhcml,1264858920.56
 !AIVDM,1,1,,B,<000001H=C0<D5CD,0*54,rnhcml,1264859970.13
 !AIVDM,1,1,,B,<000001H=C0>D5CD,0*56,rnhcml,1264859975.28

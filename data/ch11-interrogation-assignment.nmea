@@ -11,10 +11,10 @@
 # sample-data/2007hydro/va-portsmouth-sr162-2007-05-15 lines 403 and 407.
 !AIVDM,1,1,,B,?03OviRGavS<000,2*16,1179195496.93
 !AIVDM,1,1,,A,?03OviRGavS<000,2*15,1179195497.6
-# A Class A transponder asking a ship for its message 5:
+# A Class A transceiver asking a ship for its message 5:
 # sample-data/2007hydro/sr162-noaa-norfolk-telcom2007-05-14 line 879.
 !AIVDM,1,1,,A,?52HH<iGMIWpD00,2*69,1179173361.13
-# The same transponder's own interrogations seen on its own port (!AIVDO):
+# The same transceiver's own interrogations seen on its own port (!AIVDO):
 # sample-data/2007hydro/protec-util12007-05-14 lines 496 and 497.
 !AIVDO,1,1,,A,?52HH<hjNM1PD00,2*06,1179172712.85
 !AIVDO,1,1,,A,?52HH<hs@Nh0D00,2*2B,1179172712.91

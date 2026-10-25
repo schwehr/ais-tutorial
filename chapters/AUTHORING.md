@@ -24,6 +24,8 @@ is built, so that the book reads as one voice. Read it together with
   explain how the example was produced.
 * Keep excerpts small. Show at most ~10 sentences per example and at most
   one or two full JSON output objects; otherwise show selected fields.
+* Terminology: Never refer to an "AIS transponder" (or "transponder"). An AIS
+  unit is always an "AIS transceiver" (or "transceiver").
 
 ## Chapter skeleton
 

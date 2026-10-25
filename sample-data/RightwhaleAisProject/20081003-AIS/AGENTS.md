@@ -2,7 +2,7 @@
 
 3 October 2008 bench test (Tampa, FL) of the Cornell **AIS Radio Interface
 (ARI)** and **Queue Manager (QM)** Windows programs talking to a **CNS Systems
-VDL 6000** Class A transponder, before the equipment went to Cape Cod. All
+VDL 6000** Class A transceiver, before the equipment went to Cape Cod. All
 timestamps in the Windows logs are local `MM/DD/YY HH:MM:SS`; line endings
 `\r\r\n`.
 
@@ -12,7 +12,7 @@ timestamps in the Windows logs are local `MM/DD/YY HH:MM:SS`; line endings
 | `ARI-Tampa-2772008.log` | 30 KB | Radio Interface log: connection retries, then the **`!VTBBM` sentences** built from the queue (`!VTBBM,2,1,0,0,8,Fr880KRP5cim…,0*06` / `!VTBBM,2,2,0,0,8,…`) — two-fragment broadcast binary message requests, channel `0` (= no preference), message type `8`. `VT` is the talker id the software chose. |
 | `whale.txt` | 268 B | Four `!VTBBM` lines (two 2-fragment messages) ready to paste into a terminal. |
 | `whale_working.txt` | 46 B | A single short `!VTBBM,1,1,0,0,8,Fr882=7h5cimnAPs=i92h0,2*54` that was confirmed to transmit. |
-| `AIS_whale` | 83 KB | HyperTerminal capture of the transponder port while sending: 1 304 `!AIVDO` (own position `103OvrpP…`, MMSI 003669739), 13 `!VTBBM` echoed, **13 `$AIABK,,,8,0,3`** acknowledgements (type `3` = "requested broadcast of message 8 has been successfully completed", IEC 61162-1 ABK table), 261 `$PCNSR`, 176 `$AIALR`. |
+| `AIS_whale` | 83 KB | HyperTerminal capture of the transceiver port while sending: 1 304 `!AIVDO` (own position `103OvrpP…`, MMSI 003669739), 13 `!VTBBM` echoed, **13 `$AIABK,,,8,0,3`** acknowledgements (type `3` = "requested broadcast of message 8 has been successfully completed", IEC 61162-1 ABK table), 261 `$PCNSR`, 176 `$AIALR`. |
 | `AIS_modes`, `AIS_modes1` | 3 KB, 8 KB | Captures while cycling the `$PCNSS,BFP,…` Blue-Force transmit modes; `$PCNSR` responses, `!AIVDO`, `$AIALR`. |
 | `AIS_ON_OFF` | 4 KB | `!AIVDO` lines around power cycling; the "no position" report `103OvrpP?w<tSF0l4Q@>4?wv0000` (lon 181°, lat 91°). |
 | `standard.txt`, `silent.txt`, `secure.txt` | ≤ 40 B | The three `$PCNSS,BFP,…` mode commands (same as `../cns-*-dos.txt`). |
@@ -20,6 +20,6 @@ timestamps in the Windows logs are local `MM/DD/YY HH:MM:SS`; line endings
 | `ais_error.log`, `que_error.log` | 1 KB, 103 B | ARI/QM error logs (`Can't connect to IP localhost`, `An error occured opening com port`, `Missing EOL while reading`). |
 
 Teaching uses: the complete **send path** for a binary message (application →
-`BBM` sentence → transponder → `ABK` → on-air `VDM` seen by another receiver),
+`BBM` sentence → transceiver → `ABK` → on-air `VDM` seen by another receiver),
 BBM fragmenting and fill bits, and the 6-bit armouring of a payload that
 starts with DAC/FI bits.

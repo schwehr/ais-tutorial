@@ -18,7 +18,7 @@ subdirectory has its own `AGENTS.md`.
 
 | Directory | Date | Summary |
 |---|---|---|
-| `2008-03-24-sbnms-whale-test/` | 24 Mar 2008 | First at-sea test of whale notice reception: R/V *Auk* SR162G log and a Nauticast transponder log (`rm808`). |
+| `2008-03-24-sbnms-whale-test/` | 24 Mar 2008 | First at-sea test of whale notice reception: R/V *Auk* SR162G log and a Nauticast transceiver log (`rm808`). |
 | `2008-03-27-bs-send-test/` | 27 Mar 2008 | Transmitting from an L-3 **base station** in the CCOM office and listening with an SR162: `!BSVDO`, `$BSALR`, `$BSADS`, L-3 `$PL3COMFLASH`. |
 | `2008-03-28-bs-send-test/` | 28 Mar 2008 | Empty (files not preserved). |
 | `200905-Cocheco-classb-config/` | 1 May 2009 | Configuring the Class B unit for UNH's R/V *Cocheco*: `$AISSD`/`$AIVSD` static-data set sentences, `$PSRT`, `!AIVDO` message 18 before and after an MMSI was programmed. |

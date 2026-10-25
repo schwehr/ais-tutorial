@@ -17,6 +17,8 @@ Hard rules:
   AIS/NMEA libraries.
 * No absolute paths and no links to anything outside this repository in
   committed text; cite external documents by name/URL (Appendix A).
+* Never refer to an "AIS transponder" (or "transponder"). An AIS unit is always
+  an "AIS transceiver" (or "transceiver").
 * `tests/run_tests.sh` must pass for all four languages before a commit that
   touches `code/`, `data/` or `tests/`.
 * Keep data excerpts small (tens of lines) and name their source file and

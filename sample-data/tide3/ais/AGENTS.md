@@ -30,7 +30,7 @@ sentences. Finder's guide (file → what is in it):
 | Message 10 UTC inquiry | `ais-2010-03-08`, `ais-2010-03-09` |
 | Message 7 binary ack | `ais-2010-01-15` |
 | Message 8 DAC 366 FI 56/57 (USCG encrypted) | `ais-2010-12-01` and the rest of Dec 2010 |
-| Message 8 DAC 366 FI 34 whale notice | sporadic 2008–2009 (received from Boston-area transponders at long range) |
+| Message 8 DAC 366 FI 34 whale notice | sporadic 2008–2009 (received from Boston-area transceivers at long range) |
 | Message 6 DAC 0 FI 0 (unprogrammed addressed binary) | `ais-2010-12-27` |
 | Message 25 single-slot binary | `ais-2011-05-26` (verify length!) |
 | Long-range message 27 | `ais-2009-06-23` (verify) |

@@ -3,7 +3,7 @@
 > **What you will learn**
 > * What the Automatic Identification System (AIS) is, who transmits on it
 >   and what the radio link looks like.
-> * The layers between a transponder's antenna and the text file on your
+> * The layers between a transceiver's antenna and the text file on your
 >   disk — radio bits, AIS messages, NMEA sentences, metadata, log files —
 >   and which chapter covers each.
 > * What software you need (very little) and how to run the decoders and the
@@ -45,14 +45,14 @@ edition [M.1371-5]. The essentials:
   slot carries one 256-bit transmission — enough for a 168-bit position
   report plus training sequence, flags and a 16-bit frame check sequence.
   Longer messages occupy up to five consecutive slots.
-* **Access scheme.** There is no master station. Each Class A transponder
+* **Access scheme.** There is no master station. Each Class A transceiver
   listens for a minute, builds a map of which slots are in use, and then
   announces in each of its own transmissions which slot it will use next —
   *self-organising time division multiple access*, SOTDMA
   [M.1371-5 Annex 2 §3.3.4.4]. Three other schemes share the link: ITDMA
   (incremental, for announcing changes), RATDMA (random access, for
   unscheduled messages) and FATDMA (fixed, for base stations)
-  [M.1371-5 Annex 2 §3.3.4.1–3.3.4.3]; low-cost Class B "CS" transponders
+  [M.1371-5 Annex 2 §3.3.4.1–3.3.4.3]; low-cost Class B "CS" transceivers
   use carrier-sense CSTDMA instead [M.1371-5 Annex 7]. Chapter 3 decodes the
   SOTDMA and ITDMA "communication state" bits that make this work.
 * **Reporting rate.** A Class A ship under way reports its position every
@@ -66,10 +66,10 @@ IALA G1082 §4]:
 
 | Station | What it is | Chapters |
 |---|---|---|
-| **Class A** shipborne mobile | SOLAS-mandated transponder; 12.5 W; SOTDMA; messages 1/2/3, 5, … | 3, 7 |
+| **Class A** shipborne mobile | SOLAS-mandated transceiver; 12.5 W; SOTDMA; messages 1/2/3, 5, … | 3, 7 |
 | **Class B** shipborne mobile | Voluntary fit for small craft; "SO" (SOTDMA, 5 W) or "CS" (carrier sense, 2 W); messages 18, 19, 24 | 14 |
 | **Base station** | Shore station that can control the link: slot reservation, channel management, DGNSS corrections, interrogation | 6, 11, 13 |
-| **Aid to navigation (AtoN)** | Transponder on (or representing) a buoy or beacon; message 21 | 15 |
+| **Aid to navigation (AtoN)** | Transceiver on (or representing) a buoy or beacon; message 21 | 15 |
 | **SAR aircraft** | Search-and-rescue aircraft; message 9 | 10 |
 | **AIS-SART / MOB / EPIRB-AIS** | Distress beacons that transmit message 1 and 14 bursts with MMSI 970…, 972…, 974… | 3, 12 |
 | **Repeater, limited base station** | Coverage extension; no link control | 13 |
@@ -236,7 +236,7 @@ Bank National Marine Sanctuary and Cornell's Bioacoustics Research Program:
   flights (chapter 1);
 * AIS receivers in lighthouses, on research vessels and in a Norfolk hotel
   room during the US Hydro 2007 conference;
-* Class A and Class B transponders, base stations and AtoN units on the
+* Class A and Class B transceivers, base stations and AtoN units on the
   bench, sending test messages;
 * the US Coast Guard's national AIS network feed;
 * the right-whale notice broadcasts (binary message 8) in the Boston

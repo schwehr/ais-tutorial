@@ -2,7 +2,7 @@
 
 > **What you will learn**
 > * What an AIS aid-to-navigation (AtoN) station is, how it differs from a
->   ship's transponder, and why the same message 21 serves a lighthouse, a
+>   ship's transceiver, and why the same message 21 serves a lighthouse, a
 >   buoy, a wreck marker that does not physically exist, and a NOAA shore
 >   station broadcasting whale notices.
 > * Every field of message 21 [M.1371-5 §3.19 Table 73]: the 32 AtoN types,

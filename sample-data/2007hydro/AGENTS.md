@@ -6,7 +6,7 @@ Virginia, 14–18 May 2007). Two kinds of equipment were on the bench:
 * **Smart Radio SR162** dual-channel AIS receivers (`!AIVDM` plus a periodic
   `$AITXT,01,01,91,FREQ,2087,2088` status line announcing the two tuned
   channels — 2087/2088 are the ITU channel numbers for AIS 1 and AIS 2).
-* An **L-3 Communications ProTec** Class A transponder whose maintenance
+* An **L-3 Communications ProTec** Class A transceiver whose maintenance
   serial ports spit out internal debug text (`Radio: Prog Rx 1, AB Digit = 2…`,
   `TdmaProc:`, `DscMain:`, `VdlExec:` …) in between normal IEC 61162 sentences.
 
@@ -25,7 +25,7 @@ base-station **4** reports, plus many binary **8** messages with DAC 55/366.
 | `va-portsmouth-sr162-2007-05-17` | 3.0 MB | logger | 17 May; ~8 800 message 4 base-station reports and 2 839 message 20. |
 | `va-portsmouth-sr162-2007-05-18` | 3.3 MB | logger | 18 May. |
 | `sr162-noaa-norfolk-telcom2007-05-14` | 771 KB | logger | SR162 on the NOAA side of the conference, 14 May; 10 947 `!AIVDM`, 106 `$AITXT`. Includes **message 8 DAC 117 FI 16** examples. |
-| `protec-util12007-05-14` | 4.5 MB | logger, **binary junk present** | ProTec "utility" port 1: 18 921 `!AIVDM`, 1 276 `!AIVDO` (own ship), 156 `$AIALR` alarms (`AIS: Tx malfunction`, `Antenna VSWR exceeds limit`, `Rx channel 1 malfunction`…), 121 `!AIBRF`, 3 `$AITXT,…,007,AIS: UTC clock lost`, 241 **message 22** channel management, 8 **message 2**. The transponder had no antenna or GPS, hence the alarms. |
+| `protec-util12007-05-14` | 4.5 MB | logger, **binary junk present** | ProTec "utility" port 1: 18 921 `!AIVDM`, 1 276 `!AIVDO` (own ship), 156 `$AIALR` alarms (`AIS: Tx malfunction`, `Antenna VSWR exceeds limit`, `Rx channel 1 malfunction`…), 121 `!AIBRF`, 3 `$AITXT,…,007,AIS: UTC clock lost`, 241 **message 22** channel management, 8 **message 2**. The transceiver had no antenna or GPS, hence the alarms. |
 | `protec-util22007-05-14` | 3 KB | logger | A few seconds of ProTec boot output on the second utility port. |
 | `protec-pi2007-05-14` | 790 KB | logger, binary | ProTec "PI" (presentation interface) port: mostly debug lines (`Proc_RMC: Lat = …`, `NTS_MAP`). Few usable NMEA sentences. |
 

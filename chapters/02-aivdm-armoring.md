@@ -21,8 +21,8 @@
 Chapter 1 ended with a parser that can split any NMEA 0183 sentence into
 talker, formatter, data fields and checksum. For GPS sentences that was the
 whole job: `$GPGGA` carries latitude and longitude as decimal text. AIS is
-different. An AIS transponder is a VHF radio that exchanges *binary*
-packets with other transponders in time slots [M.1371-5 Annex 2 §3.3]. When
+different. An AIS transceiver is a VHF radio that exchanges *binary*
+packets with other transceivers in time slots [M.1371-5 Annex 2 §3.3]. When
 a receiver hands such a packet to a computer it has to fit 168 (or 424, or
 1 008) raw bits into the 82 printable characters that an NMEA sentence
 allows [IEC 61162-1 §7]. The `VDM` ("VHF Data-link Message") and `VDO`
@@ -45,7 +45,7 @@ ECDIS chart, the pilot's portable unit plugged into the pilot plug, and the
 voyage data recorder that logs it [A.1106(29)]. Ashore, vessel traffic
 services (VTS) receive `!AIVDM` streams from coastal receivers; the US Coast
 Guard's national network (chapter 5) forwards tens of millions of these
-sentences a day. `!AIVDO` is the transponder reporting what it *itself*
+sentences a day. `!AIVDO` is the transceiver reporting what it *itself*
 just transmitted, which is how a bridge display knows the own-ship data
 that is going out to the world.
 
@@ -790,7 +790,7 @@ Points worth checking against the sentences:
 * Line 3's MMSI, 3669734, prints with seven digits because it is the
   integer value of 003669734 — a coast-station format identity
   (`00` + MID 366, chapter 3) transmitting a Class A position report. It
-  is the right-whale project's own shore transponder at the Cape Cod
+  is the right-whale project's own shore transceiver at the Cape Cod
   National Seashore visitor centre, configured with a shore-station style
   identity. Do not assume that a message type implies a kind of station.
 * The `uscg` objects differ in shape from line to line because the

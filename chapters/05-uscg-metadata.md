@@ -707,7 +707,7 @@ Things worth noticing:
 * **Transmitters' clocks drift too.** Line 2's two-second lag between `T`
   and the ship's own `timestamp`/`slot_number` (§5.5) is the ship's
   problem, not the receiver's. Sync state 0 ("UTC direct") is what the
-  transponder *claims*; `T` is what the network *measured*.
+  transceiver *claims*; `T` is what the network *measured*.
 * **The stitched type 5 (line 7).** The `sbnms` extraction tool joined the
   two fragments of each message 5 into one `!AIVDM,1,1,1,A,<71 characters>,2*5C`
   sentence — 91 characters, longer than the 82-character limit

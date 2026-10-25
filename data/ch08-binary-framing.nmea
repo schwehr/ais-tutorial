@@ -3,12 +3,12 @@
 # Sources (file: line) are given per group; see chapter 8 §8.5.
 #
 # 1. Message 8, DAC 366 FI 34 (right-whale zone notice), one 112-bit record.
-#    Boston (Mystic River) transponder, CCOM whale_update script, 168 bits.
+#    Boston (Mystic River) transceiver, CCOM whale_update script, 168 bits.
 #    RightwhaleAisProject/20081015-boston-pog/log.2008-10-15 lines 2447, 2453
 !AIVDM,1,1,,A,803OvqQK`PP7fb0Fg7GI63do4T;0,0*51,1224081725.44
 !AIVDM,1,1,,A,803OvqQK`QPGUOT6gGiCV3T`hT;0,0*7D,1224081727.26
 #
-# 2. The same notice type from the Provincetown transponder driven by the
+# 2. The same notice type from the Provincetown transceiver driven by the
 #    Cornell ARI software: 176 bits, i.e. eight extra zero bits (§8.6).
 #    N-AIS feed, RightwhaleAisProject/20081013.log lines 2357, 2359
 !AIVDM,1,1,,A,803OvriK`PP6dj0Fg7GI63do4T;000,4*65,s30644,d-091,T15.76379902,x78753,r003669946,1223902216

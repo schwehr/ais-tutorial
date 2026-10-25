@@ -75,9 +75,9 @@ in this chapter show exactly that.
 ### Operational use
 
 * **Bridge.** Nothing on the bridge displays message 4 directly, but the
-  transponder uses it: a Class A that loses its GNSS fix stays on the air
+  transceiver uses it: a Class A that loses its GNSS fix stays on the air
   by synchronising to a base station (sync state 2) and keeps its slot map
-  coherent with everyone else's. The transponder also uses the position in
+  coherent with everyone else's. The transceiver also uses the position in
   message 4 to decide whether it is inside 120 NM of a base station whose
   message 20/22/23 commands it should obey.
 * **VTS and ports.** A VTS centre usually *is* the base station. Its
@@ -762,7 +762,7 @@ other columns are the decoder's output.) Things to notice:
   (0.27 s into the minute) and says second 59 of the previous minute;
   line 3 in slot 378 (10.08 s) says second 09. Every station in all of our
   recordings behaves this way: the time in message 4 appears to be the
-  time at which the transponder *built* the message, roughly one second
+  time at which the transceiver *built* the message, roughly one second
   before the slot in which it went out.
 
 ### Boston Harbor from the R/V *Auk* (lines 8–9)
@@ -809,7 +809,7 @@ stamp comes from a PC. Trust accordingly.
 ### A base station with no GNSS (lines 15–20)
 
 Lines 15–19 come from the serial port of an L-3 base station on a bench
-at CCOM with no GNSS antenna connected. The transponder's own
+at CCOM with no GNSS antenna connected. The transceiver's own
 transmissions appear as `!BSVDO` — talker `BS` for base station, `VDO`
 for "own vessel" — and the driver marks them `"own_ship":true`,
 `"talker":"BS"`. Line 16 decodes as:
