@@ -45,6 +45,7 @@ Both compilers build the program without a single warning under
 | `msg_1_2_3.hpp` | position reports | 3 | `std::array` enumeration tables, integer vs floating division, `std::pow` |
 | `tagblock.hpp` | NMEA 4.10 TAG blocks | 4 | `std::pair` + structured bindings, `std::array<long long, 3>`, string literal escaping, `std::format("{:02X}")` |
 | `uscg.hpp` | USCG N-AIS metadata after the checksum | 5 | optionals instead of exceptions for routine failure, `std::span<const std::string>`, `std::abs`, range-for over an initializer list |
+| `commstate.hpp` | TDMA communication-state schedule and UTC clock helpers | 17 | default `std::optional<int>` parameters, Euclidean modulo normalisation |
 | `common.hpp` | `DecodeError`, `NotImplemented`, EPFD and ship-type tables | — | exception hierarchies, `std::map::contains`, `std::format` |
 | `msg_4_11.hpp`, `msg_5.hpp` | base station report, static and voyage data | 6, 7 | `std::format` with `{:04}`/`{:02}` zero padding, lambdas |
 | `msg_7_13.hpp`, `msg_20.hpp` | acknowledgements, data link management | 12, 13 | range pipelines: `std::views::iota \| std::views::chunk \| std::views::take` over repeated bit groups |

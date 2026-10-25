@@ -32,6 +32,7 @@ From the repository root: `tests/run_tests.sh typescript`.
 | `msg_1_2_3.ts` | `msg_1_2_3.py` | position reports 1/2/3 | object literals checked against an interface, `Object.assign` as `dict.update` |
 | `tagblock.ts` | `tagblock.py` | NMEA 4.10 TAG blocks | getters, `Object.create(null)` for input-keyed dictionaries, tuple return types |
 | `uscg.ts` | `uscg.py` | USCG metadata after the checksum | `try/catch` without exception filters, string slicing |
+| `commstate.ts` | `commstate.py` | TDMA communication-state schedule and UTC clock helpers | `export { ... } from` re-exports, `Math.trunc`, default nullable parameters |
 | `msg_4_11.ts` … `msg_27.ts` | the stubs | `decode()` throws `NotImplementedError` | a `throw` satisfies a non-`void` return type; type-only imports |
 | `decode.ts` | `decode.py` | CLI: reads whole files as bytes, splits lines like Python, prints JSON lines | `import * as fs`, `Map` of functions, chunked `process.stdout.write`, EPIPE handling |
 | `node-shim.d.ts` | — | minimal ambient typings for `fs`, `process`, `Buffer` | ambient module declarations, `declare const`, `never` |

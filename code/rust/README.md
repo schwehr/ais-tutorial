@@ -35,6 +35,7 @@ Same names as the Python files, one file per module under `src/`:
 | `msg_1_2_3.rs` | position reports, ROT, SOTDMA/ITDMA comm state | 3 | `match` tables returning `&'static str`, `Result` + `?`, `BTreeMap::extend` as `dict.update` |
 | `tagblock.rs` | NMEA 4.10 TAG blocks | 4 | returning a slice of the input (lifetime elision), `strip_prefix`, `BTreeMap<String, String>`, let chains |
 | `uscg.rs` | USCG N-AIS fields after the checksum | 5 | `match` with guards (`"s" if …`), `Option` combinators (`map`, `ok()`), `split_at(len_utf8())` |
+| `commstate.rs` | TDMA communication-state schedule and UTC clock helpers | 17 | `pub use` re-exports, `i64::rem_euclid`, `if let` chains |
 | `common.rs` | `DecodeError` (`TooShort{..}`, `NotImplemented(n)`), `require_bits`, EPFD and ship-type tables | — | error enums with `Display`/`Error`, range patterns (`1..=19`, `200..`) |
 | `msg_*.rs` | one module per message family: `decode(&Bits) -> Result<Json, DecodeError>` | 6+ | `matches!`, range patterns, `if` as an expression (`let pos = if … { 144 } else { 96 }`, msg_16), `u64::from` for lossless widening (msg_5) |
 | `decode.rs` | line loop, dispatch table, output shapes, universal newlines, `-` for stdin | all | `fn` pointers as a dispatch table, `BufWriter`, `from_utf8_lossy`, closures (`FnMut`), broken-pipe handling |

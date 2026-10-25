@@ -25,6 +25,7 @@ The module names are identical in all four:
 | `msg_1_2_3` | position reports | 3 |
 | `tagblock` | NMEA 4.10 TAG blocks | 4 |
 | `uscg` | USCG N-AIS metadata after the checksum | 5 |
+| `commstate` | TDMA communication-state schedule arithmetic and UTC clock recovery | 17 |
 | `common` | `DecodeError`, EPFD and ship-type tables | — |
 | `jsonout` | deterministic JSON writer | — |
 | `msg_4_11`, `msg_5`, `msg_6`, `msg_7_13`, `msg_8`, `msg_9`, `msg_10`, `msg_12`, `msg_14`, `msg_15`, `msg_16`, `msg_17`, `msg_18`, `msg_19`, `msg_20`, `msg_21`, `msg_22`, `msg_23`, `msg_24`, `msg_25`, `msg_26`, `msg_27` | one per message (family) | 6+ |

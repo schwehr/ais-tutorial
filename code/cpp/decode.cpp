@@ -59,6 +59,7 @@
 #include <vector>
 
 #include "bits.hpp"
+#include "commstate.hpp"
 #include "common.hpp"
 #include "jsonout.hpp"
 #include "nmea.hpp"

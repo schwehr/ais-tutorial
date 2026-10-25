@@ -37,6 +37,7 @@ small excerpts live in this repository ([`data/`](data/)); the raw logs
 | 14 | [Messages 18, 19 and 24: Class B](chapters/14-messages-18-19-24-class-b.md) | Class B "CS" versus "SO", the fixed communication state, the two-part static data report, the vendor-ID field across editions, `$AISSD`/`$AIVSD` configuration, pairing part A with part B |
 | 15 | [Message 21: aids to navigation](chapters/15-message-21-aton.md) | Physical and virtual AtoN, off-position, AtoN status bits |
 | 16 | [Messages 25, 26 and 27: short binary messages and the long-range broadcast](chapters/16-messages-25-26-27.md) | Single- and multi-slot binaries with flag-dependent layouts, a communication state at the *end* of the payload, the 96-bit satellite position report, noise versus rare messages |
+| 17 | [Deep dive into the communication state](chapters/17-comm-state.md) | SOTDMA & ITDMA schedules, `TMO_MIN..TMO_MAX` countdowns, network entry, rate transitions, and UTC clock recovery from `ais-2008-06-12` |
 | A | [References and how we cite them](chapters/appendix-a-references.md) | Citation keys |
 | B | [Six-bit tables](chapters/appendix-b-six-bit-tables.md) | Armouring and six-bit ASCII tables |
 
@@ -76,10 +77,11 @@ sample-data/   AGENTS.md guides to the raw recordings (the recordings themselves
 
 ## Status
 
-All seventeen chapters (0–16) and the two appendices are written, and every
-AIS message type 1–27 is decoded by all four implementations. The decoders
-print byte-identical JSON for every file in `data/`; `tests/run_tests.sh`
-checks all four languages against `tests/expected/` and passes.
+All eighteen chapters (0–17) and the two appendices are written, and every
+AIS message type 1–27 (plus TDMA communication-state schedule and timing
+helpers) is decoded by all four implementations. The decoders print
+byte-identical JSON for every file in `data/`; `tests/run_tests.sh` checks
+all four languages against `tests/expected/` and passes.
 
 ## Contributing
 

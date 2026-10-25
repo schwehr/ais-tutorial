@@ -1,0 +1,43 @@
+# Chapter 17 — Deep dive into the communication state.
+# Source: sample-data/tide3/ais/ais-2008-06-12 (UNH Coastal Marine Lab, New Castle, NH).
+# Part 1: SOTDMA countdown, slot migration, and clock recovery (MMSI 000000000, COAST GUARD 909).
+# lines 11, 12, 26, 34, 53, 61, 78, 91, 106, 113, 128
+!AIVDM,1,1,,B,1000000P01Jt;pDHaP>78gvt0<02,0*57,rnhcml,1213228823.96
+!AIVDM,1,1,,A,1000000P01Jt;pPHaP>71Ow@06sd,0*4B,rnhcml,1213228834.26
+!AIVDM,1,1,,B,1000000P01Jt;q:HaP>7EOvD0875,0*49,rnhcml,1213228864.65
+!AIVDM,1,1,,B,1000000P01Jt;qNHaP>o:Ovt08BI,0*23,rnhcml,1213228883.96
+!AIVDM,1,1,,B,1000000P01Jt;q<HaP?W??vD0404,0*2E,rnhcml,1213228924.66
+!AIVDM,1,1,,B,1000000P01Jt;q8HaP?o@gvt0404,0*05,rnhcml,1213228943.96
+!AIVDM,1,1,,B,1000000P01Jt;q@HaP?G9gvD00Ro,0*21,rnhcml,1213228984.65
+!AIVDM,1,1,,B,1000000P01Jt;qDHaP?o2?vt00ST,0*54,rnhcml,1213229003.97
+!AIVDM,1,1,,B,1000000P01Jt;qDHaP?70gvD0D02,0*17,rnhcml,1213229044.15
+!AIVDM,1,1,,B,1000000P01Jt;qBHaP>W4wvt0HBk,0*73,rnhcml,1213229064.66
+!AIVDM,1,1,,B,1000000P01Jt;q<HaP?W4wvD0@6j,0*41,rnhcml,1213229104.15
+# Part 2: Moored 3-minute ITDMA reports with slot_increment = 0, keep_flag = false.
+# lines 62, 63, 137, 8550 (MMSI 308862000 HERON and MMSI 538002408 BALDER, nav_status = 5)
+!AIVDM,1,1,,B,34VSL<5000Jt62lHa`tKIrK80000,0*3A,rnhcml,1213228949.51
+!AIVDM,1,1,,B,38153r5000rsw30Hb?nU`;;@8000,0*1D,rnhcml,1213228954.53
+!AIVDM,1,1,,A,34VSL<5000Jt63:Ha`udKJK80000,0*7A,rnhcml,1213229129.92
+!AIVDM,1,1,,A,38153r5000rsw2dHb?ndK;9>8000,0*2D,rnhcml,1213251456.02
+# Part 3: Data-link network entry — BALDER switches nav_status 5 -> 0 and builds a 10 s schedule.
+# lines 8591, 8592, 8593, 8606, 8607, 8608 (ITDMA keep_flag = true) and 8615, 8632 (SOTDMA next frame)
+!AIVDM,1,1,,A,38153r0000rsw2dHb?ndK;:T82tQ,0*66,rnhcml,1213251553.97
+!AIVDM,1,1,,B,38153r0000rsw2dHb?ndK;:p82tA,0*51,rnhcml,1213251565.17
+!AIVDM,1,1,,A,38153r0000rsw2dHb?ndK;;:82pQ,0*0D,rnhcml,1213251574.08
+!AIVDM,1,1,,B,38153r0000rsw2dHb?ndK;;N82ei,0*57,rnhcml,1213251585.25
+!AIVDM,1,1,,A,38153r0000rsw2dHb?ndK;;l8001,0*79,rnhcml,1213251593.76
+!AIVDM,1,1,,B,38153r0000rsw2dHb?ndK;:>8001,0*29,rnhcml,1213251603.79
+!AIVDM,1,1,,A,18153r0000rsw2dHb?ndK;:R8H<;,0*3A,rnhcml,1213251613.97
+!AIVDM,1,1,,B,18153r0000rsw2HHb?l<K;;P8HNP,0*55,rnhcml,1213251645.25
+# Part 4: Turning at 4.9 kn — ITDMA temporarily complements SOTDMA at a 3 1/3 s reporting rate.
+# lines 9842, 9843, 9845, 9853 (BALDER rot_raw = 127)
+!AIVDM,1,1,,A,38153r0Ohirt5JPHang5`4ml80vA,0*40,rnhcml,1213254714.56
+!AIVDM,1,1,,A,38153r0Ohirt5LHHanRUUTn880rh,0*24,rnhcml,1213254721.2
+!AIVDM,1,1,,A,38153r0Ohirt5MtHan>U`4pD8000,0*58,rnhcml,1213254727.47
+!AIVDM,1,1,,A,18153r000irt5OlHamp5bTrT88<=,0*33,rnhcml,1213254734.11
+# Part 5: Crossing 14 kn — SOTDMA slot de-allocation (slot_offset = 0) and 6 s rescheduling.
+# lines 11368, 11369, 11370, 11371 (BALDER sog_knots = 14.0 -> 14.1)
+!AIVDM,1,1,,A,38153r002<rtbc<HWqsSm32V81S0,0*43,rnhcml,1213258035.43
+!AIVDM,1,1,,B,18153r002<rtbnhHWqiSm32n8000,0*5B,rnhcml,1213258044.52
+!AIVDM,1,1,,A,38153r002<rtbr<HWqg3m32r83Pi,0*5A,rnhcml,1213258045.99
+!AIVDM,1,1,,A,18153r002<rtc7DHWqRSm3388000,0*40,rnhcml,1213258054.07

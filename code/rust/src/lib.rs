@@ -33,6 +33,7 @@
 
 pub mod asm;
 pub mod bits;
+pub mod commstate;
 pub mod common;
 pub mod decode;
 pub mod jsonout;
